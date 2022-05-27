@@ -2,21 +2,36 @@ module App exposing (main)
 
 import Platform.Cmd as Cmd
 import Html
--- import Html.Attributes exposing (value, src, height, enctype, value, type_, multiple)
+import Html.Attributes exposing (href)
 import Html.Events exposing (onClick)
 import Http
 import Browser
 
 import Json.Decode as D
--- import Json.Encode as E
 import Json.Decode.Extra exposing (andMap)
 
--- import Html exposing (Attribute)
--- import Html.Attributes exposing (name)
+import Time exposing (Posix, utc)
+import Iso8601 exposing (decoder)
+import Time.Format exposing (format)
+import Time.Format.Config.Config_ru_ru exposing (config)
+
+import Maybe exposing (withDefault, map)
+import Html exposing (Attribute)
 
 type alias Lead = {
-    id   : Int
-  , name : String
+    id           : Int
+  , name         : String
+  , href         : String -- Ссылка на заявку
+  , responsible  : Int -- Ответственный
+  , address      : String -- Адрес
+  , dateVisit    : Maybe Posix -- Дата выезда
+  , ltype        : String
+  , sellCost     : Float -- Цена клиенту
+  , partsCost    : Float -- Стоимость материалов, Затраты на материал, Затрачено
+  , worksCost    : Float -- Стоимость работ для клиента
+  , officeIncome : Float -- Перевод в офис, Заработал Офис
+  , closedDate   : Maybe Posix -- Дата закрытия
+  , statusId     : Int
   }
 
 decodeLeads : D.Decoder (List Lead)
@@ -24,6 +39,17 @@ decodeLeads  =
   D.succeed Lead
     |> andMap (D.field "_lid" D.int)
     |> andMap (D.field "_lname" D.string)
+    |> andMap (D.field "_href" D.string)
+    |> andMap (D.field "_lresponsible" D.int)
+    |> andMap (D.field "_laddress" D.string)
+    |> andMap (D.maybe (D.field "_ldateVisit" decoder))
+    |> andMap (D.field "_ltype" D.string)
+    |> andMap (D.field "_lsellCost" D.float)
+    |> andMap (D.field "_lpartsCost" D.float)
+    |> andMap (D.field "_lworksCost" D.float)
+    |> andMap (D.field "_lofficeIncome" D.float)
+    |> andMap (D.maybe (D.field "_lclosedDate" decoder))
+    |> andMap (D.field "_lstatusId" D.int)
     |> D.list
 
 
@@ -88,20 +114,36 @@ tableView : List Lead -> Html.Html Msg
 tableView leads =
   Html.div [] 
   <| [Html.table [] [
-        Html.thead [] [Html.th [] [Html.text "id"], Html.td [] [Html.text "name"]]
+        Html.thead [] [
+            Html.th [] [Html.text "Номер заявки"]
+          , Html.th [] [Html.text "Ссылка на заявку"]
+          , Html.th [] [Html.text "Дата выезда"]
+          , Html.th [] [Html.text "Адрес заявки"]
+          , Html.th [] [Html.text "Тип заявки"]
+          , Html.th [] [Html.text "Цена клиенту"]
+          , Html.th [] [Html.text "Затраты на матерал"]
+          , Html.th [] [Html.text "Стоимость работ для клиента"]
+          , Html.th [] [Html.text "Перевод в офис"]
+          , Html.th [] [Html.text "Дата закрытия"]
+          , Html.th [] [Html.text "Статус заявки"]
+        ]
       , Html.tbody [] <| List.map rowView leads]
      ]
      
-
-avitoTable : List Lead -> Html.Html Msg
-avitoTable leads =
-    Html.table [] [
-        Html.thead [] [Html.th [] [Html.text "id"], Html.td [] [Html.text "name"]]
-      , Html.tbody [] <| List.map rowView leads
-      ]
-
 rowView : Lead -> Html.Html Msg
-rowView lead = Html.tr [] [Html.td [] [Html.text (String.fromInt lead.id)], Html.td [] [Html.text lead.name]]
+rowView lead = Html.tr [] [
+    Html.td [] [Html.text (String.fromInt lead.id)]
+  , Html.td [] [Html.a [href lead.href] [Html.text lead.href]]
+  , Html.td [] [Html.text <| withDefault "" <| Maybe.map (format config "%d.%m.%Y %I:%M:%S" utc) <| lead.dateVisit]
+  , Html.td [] [Html.text lead.address]
+  , Html.td [] [Html.text lead.ltype]
+  , Html.td [] [Html.text (String.fromFloat lead.sellCost)]
+  , Html.td [] [Html.text (String.fromFloat lead.partsCost)]
+  , Html.td [] [Html.text (String.fromFloat lead.worksCost)]
+  , Html.td [] [Html.text (String.fromFloat lead.officeIncome)]
+  , Html.td [] [Html.text <| withDefault "" <| Maybe.map (format config "%d.%m.%Y %I:%M:%S" utc) <| lead.closedDate]
+  , Html.td [] [Html.text (String.fromInt lead.statusId)]
+  ]
 
 viewHttpStatus : HttpStatus -> List (Html.Html Msg)
 viewHttpStatus status = 
