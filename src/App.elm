@@ -4,6 +4,11 @@ import Platform.Cmd as Cmd
 import Html
 import Html.Attributes exposing (href)
 import Html.Events exposing (onClick)
+import Element as E
+import Element.Input as EI
+import Element.Border as EB
+import Element.Background as EBg
+import Element.Font as EF
 import Http
 import Browser
 
@@ -17,6 +22,7 @@ import Time.Format.Config.Config_ru_ru exposing (config)
 
 import Maybe exposing (withDefault, map)
 import Html exposing (Attribute)
+import Html.Attributes as Html
 
 type alias Lead = {
     id           : Int
@@ -102,33 +108,96 @@ main =  Browser.element { init = \_ -> (initModel, getLeads), update = update, v
 
 view : Model -> Html.Html Msg
 view model = 
-    Html.div [] <| viewHttpStatus model.httpStatus ++ viewLeads model 
+    E.layout [] <| E.column [] <| [viewHttpStatus model.httpStatus, viewLeads model]
  
-viewLeads : Model -> List (Html.Html Msg)
+viewLeads : Model -> E.Element Msg
 viewLeads model = 
   case model.leads of
-     Nothing -> [Html.div [] [Html.text "Грузится..."]]
-     Just leads -> [tableView leads]
+     Nothing -> E.el [E.padding 10] <| E.text "Грузится"
+     Just leads -> E.el [E.padding 10] <| tableView leads
 
-tableView : List Lead -> Html.Html Msg
+headerCellStyle : List (E.Attribute Msg)
+headerCellStyle = [EB.solid, EB.width 1, EF.bold, E.padding 5]
+
+dataCellStyle : List (E.Attribute Msg)
+dataCellStyle = [EB.width 1, E.padding 5, E.height E.fill]
+
+statusColor : Int -> E.Color
+statusColor status = 
+  case status of
+    143 -> E.rgb255 255 0 0
+    45242701 {-142-} -> E.rgb255 0 255 0
+    _   -> E.rgb255 255 255 255
+
+tableView : List Lead -> E.Element Msg
 tableView leads =
-  Html.div [] 
-  <| [Html.table [] [
-        Html.thead [] [
-            Html.th [] [Html.text "Номер заявки"]
-          , Html.th [] [Html.text "Ссылка на заявку"]
-          , Html.th [] [Html.text "Дата выезда"]
-          , Html.th [] [Html.text "Адрес заявки"]
-          , Html.th [] [Html.text "Тип заявки"]
-          , Html.th [] [Html.text "Цена клиенту"]
-          , Html.th [] [Html.text "Затраты на матерал"]
-          , Html.th [] [Html.text "Стоимость работ для клиента"]
-          , Html.th [] [Html.text "Перевод в офис"]
-          , Html.th [] [Html.text "Дата закрытия"]
-          , Html.th [] [Html.text "Статус заявки"]
-        ]
-      , Html.tbody [] <| List.map rowView leads]
-     ]
+  E.table [] {
+    data = leads
+  , columns =  [
+      {
+        header = E.el headerCellStyle <| E.text "Номер заявки"
+      , width = E.fill
+      , view = \l -> E.el (EBg.color (statusColor l.statusId) :: dataCellStyle) <| E.text (String.fromInt l.id)
+      }
+    , {
+        header = E.el headerCellStyle <| E.text "Ссылка на заявку"
+      , width = E.fill
+      , view = \l -> E.link (EBg.color (statusColor l.statusId) :: EF.underline :: EF.color (E.rgb 0 0 1) :: dataCellStyle) { url = l.href, label = E.text "..."}
+      }
+    , {
+        header = E.el headerCellStyle <| E.text "Дата выезда"
+      , width = E.fill
+      , view = \l -> E.el (EBg.color (statusColor l.statusId) :: dataCellStyle) <| E.text (withDefault "" <| Maybe.map (format config "%d.%m.%Y %I:%M:%S" utc) <| l.dateVisit)
+      }
+    , {
+        header = E.el headerCellStyle <| E.text "Адрес заявки"
+      , width = E.fill |> E.maximum 200
+      , view = \l -> E.paragraph (EBg.color (statusColor l.statusId) :: dataCellStyle ++ [E.width <| E.maximum 500 E.fill]) <| [E.text l.address]
+      
+      
+      -- E.el (dataCellStyle ++ [E.width <| E.maximum 200 E.fill, E.clip]) <| E.text l.address
+      }
+    , {
+        header = E.el headerCellStyle <| E.text "Тип заявки"
+      , width = E.fill
+      , view = \l -> E.el (EBg.color (statusColor l.statusId) :: dataCellStyle) <| E.text l.ltype
+      }
+    , {
+        header = E.el headerCellStyle <| E.text "Цена клиенту"
+      , width = E.fill
+      , view = \l -> E.el (EBg.color (statusColor l.statusId) :: dataCellStyle) <| E.text (String.fromFloat l.sellCost)
+      }
+    , {
+        header = E.el headerCellStyle <| E.text "Затраты на матерал"
+      , width = E.fill
+      , view = \l -> E.el (EBg.color (statusColor l.statusId) :: dataCellStyle) <| E.text (String.fromFloat l.partsCost)
+      }
+    , {
+        header = E.el headerCellStyle <| E.text "Стоимость работ для клиента"
+      , width = E.fill
+      , view = \l -> E.el (EBg.color (statusColor l.statusId) :: dataCellStyle) <| E.text (String.fromFloat l.worksCost)
+      }
+    , {
+        header = E.el headerCellStyle <| E.text "Перевод в офис"
+      , width = E.fill
+      , view = \l -> E.el (EBg.color (statusColor l.statusId) :: dataCellStyle) <| E.text (String.fromFloat l.officeIncome)
+      }
+    , {
+        header = E.el headerCellStyle <| E.text "Дата закрытия"
+      , width = E.fill
+      , view = \l -> E.el (EBg.color (statusColor l.statusId) :: dataCellStyle) <| E.text (withDefault "" <| Maybe.map (format config "%d.%m.%Y %I:%M:%S" utc) <| l.closedDate)
+      }
+    , {
+        header = E.el headerCellStyle <| E.text "Статус заявки"
+      , width = E.fill
+      , view = \l -> E.el (EBg.color (statusColor l.statusId) :: dataCellStyle) <| E.text (String.fromInt l.statusId)
+      }
+    ]
+  }
+
+
+
+
      
 rowView : Lead -> Html.Html Msg
 rowView lead = Html.tr [] [
@@ -145,13 +214,16 @@ rowView lead = Html.tr [] [
   , Html.td [] [Html.text (String.fromInt lead.statusId)]
   ]
 
-viewHttpStatus : HttpStatus -> List (Html.Html Msg)
+buttonBorder : List (E.Attribute Msg)
+buttonBorder = [EB.solid, EB.width 1]
+
+viewHttpStatus : HttpStatus -> E.Element Msg
 viewHttpStatus status = 
   case status of 
-    Success -> [Html.text "Норм", refreshButton]
-    Loading s -> [Html.text s]
-    Failure s -> [Html.text s, refreshButton]
+    Success -> E.wrappedRow [] [E.el [E.padding 10] <| E.text "Норм", E.el (E.padding 5 :: buttonBorder) refreshButton]
+    Loading s -> E.wrappedRow [] [E.el [E.padding 10] <| E.text s]
+    Failure s -> E.wrappedRow [] [E.el [E.padding 10] <| E.text s, E.el (E.padding 5 :: buttonBorder) refreshButton]
 
-refreshButton : Html.Html Msg
-refreshButton = Html.button [onClick RefreshLeads] [Html.text "Обновить"]    
+refreshButton : E.Element Msg
+refreshButton = EI.button [] {onPress = Just RefreshLeads, label = E.text "Обновить"}    
 
