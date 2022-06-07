@@ -2,8 +2,6 @@ module App exposing (main)
 
 import Platform.Cmd as Cmd
 import Html
-import Html.Attributes exposing (href)
-import Html.Events exposing (onClick)
 import Element as E
 import Element.Input as EI
 import Element.Border as EB
@@ -20,8 +18,7 @@ import Iso8601 exposing (decoder)
 import Time.Format exposing (format)
 import Time.Format.Config.Config_ru_ru exposing (config)
 
-import Maybe exposing (withDefault, map)
-import Html exposing (Attribute)
+import Maybe exposing (withDefault)
 import Html.Attributes as Html
 
 type alias Lead = {
@@ -196,23 +193,6 @@ tableView leads =
   }
 
 
-
-
-     
-rowView : Lead -> Html.Html Msg
-rowView lead = Html.tr [] [
-    Html.td [] [Html.text (String.fromInt lead.id)]
-  , Html.td [] [Html.a [href lead.href] [Html.text lead.href]]
-  , Html.td [] [Html.text <| withDefault "" <| Maybe.map (format config "%d.%m.%Y %I:%M:%S" utc) <| lead.dateVisit]
-  , Html.td [] [Html.text lead.address]
-  , Html.td [] [Html.text lead.ltype]
-  , Html.td [] [Html.text (String.fromFloat lead.sellCost)]
-  , Html.td [] [Html.text (String.fromFloat lead.partsCost)]
-  , Html.td [] [Html.text (String.fromFloat lead.worksCost)]
-  , Html.td [] [Html.text (String.fromFloat lead.officeIncome)]
-  , Html.td [] [Html.text <| withDefault "" <| Maybe.map (format config "%d.%m.%Y %I:%M:%S" utc) <| lead.closedDate]
-  , Html.td [] [Html.text (String.fromInt lead.statusId)]
-  ]
 
 buttonBorder : List (E.Attribute Msg)
 buttonBorder = [EB.solid, EB.width 1]
