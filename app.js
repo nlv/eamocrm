@@ -80,87 +80,6 @@ function A9(fun, a, b, c, d, e, f, g, h, i) {
 console.warn('Compiled in DEV mode. Follow the advice at https://elm-lang.org/0.19.1/optimize for better performance and smaller assets.');
 
 
-var _List_Nil_UNUSED = { $: 0 };
-var _List_Nil = { $: '[]' };
-
-function _List_Cons_UNUSED(hd, tl) { return { $: 1, a: hd, b: tl }; }
-function _List_Cons(hd, tl) { return { $: '::', a: hd, b: tl }; }
-
-
-var _List_cons = F2(_List_Cons);
-
-function _List_fromArray(arr)
-{
-	var out = _List_Nil;
-	for (var i = arr.length; i--; )
-	{
-		out = _List_Cons(arr[i], out);
-	}
-	return out;
-}
-
-function _List_toArray(xs)
-{
-	for (var out = []; xs.b; xs = xs.b) // WHILE_CONS
-	{
-		out.push(xs.a);
-	}
-	return out;
-}
-
-var _List_map2 = F3(function(f, xs, ys)
-{
-	for (var arr = []; xs.b && ys.b; xs = xs.b, ys = ys.b) // WHILE_CONSES
-	{
-		arr.push(A2(f, xs.a, ys.a));
-	}
-	return _List_fromArray(arr);
-});
-
-var _List_map3 = F4(function(f, xs, ys, zs)
-{
-	for (var arr = []; xs.b && ys.b && zs.b; xs = xs.b, ys = ys.b, zs = zs.b) // WHILE_CONSES
-	{
-		arr.push(A3(f, xs.a, ys.a, zs.a));
-	}
-	return _List_fromArray(arr);
-});
-
-var _List_map4 = F5(function(f, ws, xs, ys, zs)
-{
-	for (var arr = []; ws.b && xs.b && ys.b && zs.b; ws = ws.b, xs = xs.b, ys = ys.b, zs = zs.b) // WHILE_CONSES
-	{
-		arr.push(A4(f, ws.a, xs.a, ys.a, zs.a));
-	}
-	return _List_fromArray(arr);
-});
-
-var _List_map5 = F6(function(f, vs, ws, xs, ys, zs)
-{
-	for (var arr = []; vs.b && ws.b && xs.b && ys.b && zs.b; vs = vs.b, ws = ws.b, xs = xs.b, ys = ys.b, zs = zs.b) // WHILE_CONSES
-	{
-		arr.push(A5(f, vs.a, ws.a, xs.a, ys.a, zs.a));
-	}
-	return _List_fromArray(arr);
-});
-
-var _List_sortBy = F2(function(f, xs)
-{
-	return _List_fromArray(_List_toArray(xs).sort(function(a, b) {
-		return _Utils_cmp(f(a), f(b));
-	}));
-});
-
-var _List_sortWith = F2(function(f, xs)
-{
-	return _List_fromArray(_List_toArray(xs).sort(function(a, b) {
-		var ord = A2(f, a, b);
-		return ord === $elm$core$Basics$EQ ? 0 : ord === $elm$core$Basics$LT ? -1 : 1;
-	}));
-});
-
-
-
 var _JsArray_empty = [];
 
 function _JsArray_singleton(value)
@@ -790,6 +709,87 @@ function _Utils_ap(xs, ys)
 	}
 	return root;
 }
+
+
+
+var _List_Nil_UNUSED = { $: 0 };
+var _List_Nil = { $: '[]' };
+
+function _List_Cons_UNUSED(hd, tl) { return { $: 1, a: hd, b: tl }; }
+function _List_Cons(hd, tl) { return { $: '::', a: hd, b: tl }; }
+
+
+var _List_cons = F2(_List_Cons);
+
+function _List_fromArray(arr)
+{
+	var out = _List_Nil;
+	for (var i = arr.length; i--; )
+	{
+		out = _List_Cons(arr[i], out);
+	}
+	return out;
+}
+
+function _List_toArray(xs)
+{
+	for (var out = []; xs.b; xs = xs.b) // WHILE_CONS
+	{
+		out.push(xs.a);
+	}
+	return out;
+}
+
+var _List_map2 = F3(function(f, xs, ys)
+{
+	for (var arr = []; xs.b && ys.b; xs = xs.b, ys = ys.b) // WHILE_CONSES
+	{
+		arr.push(A2(f, xs.a, ys.a));
+	}
+	return _List_fromArray(arr);
+});
+
+var _List_map3 = F4(function(f, xs, ys, zs)
+{
+	for (var arr = []; xs.b && ys.b && zs.b; xs = xs.b, ys = ys.b, zs = zs.b) // WHILE_CONSES
+	{
+		arr.push(A3(f, xs.a, ys.a, zs.a));
+	}
+	return _List_fromArray(arr);
+});
+
+var _List_map4 = F5(function(f, ws, xs, ys, zs)
+{
+	for (var arr = []; ws.b && xs.b && ys.b && zs.b; ws = ws.b, xs = xs.b, ys = ys.b, zs = zs.b) // WHILE_CONSES
+	{
+		arr.push(A4(f, ws.a, xs.a, ys.a, zs.a));
+	}
+	return _List_fromArray(arr);
+});
+
+var _List_map5 = F6(function(f, vs, ws, xs, ys, zs)
+{
+	for (var arr = []; vs.b && ws.b && xs.b && ys.b && zs.b; vs = vs.b, ws = ws.b, xs = xs.b, ys = ys.b, zs = zs.b) // WHILE_CONSES
+	{
+		arr.push(A5(f, vs.a, ws.a, xs.a, ys.a, zs.a));
+	}
+	return _List_fromArray(arr);
+});
+
+var _List_sortBy = F2(function(f, xs)
+{
+	return _List_fromArray(_List_toArray(xs).sort(function(a, b) {
+		return _Utils_cmp(f(a), f(b));
+	}));
+});
+
+var _List_sortWith = F2(function(f, xs)
+{
+	return _List_fromArray(_List_toArray(xs).sort(function(a, b) {
+		var ord = A2(f, a, b);
+		return ord === $elm$core$Basics$EQ ? 0 : ord === $elm$core$Basics$LT ? -1 : 1;
+	}));
+});
 
 
 
@@ -4813,8 +4813,6 @@ var _Regex_splitAtMost = F3(function(n, re, str)
 });
 
 var _Regex_infinity = Infinity;
-var $elm$core$Basics$EQ = {$: 'EQ'};
-var $elm$core$Basics$LT = {$: 'LT'};
 var $elm$core$List$cons = _List_cons;
 var $elm$core$Elm$JsArray$foldr = _JsArray_foldr;
 var $elm$core$Array$foldr = F3(
@@ -4892,7 +4890,9 @@ var $elm$core$Set$toList = function (_v0) {
 	var dict = _v0.a;
 	return $elm$core$Dict$keys(dict);
 };
+var $elm$core$Basics$EQ = {$: 'EQ'};
 var $elm$core$Basics$GT = {$: 'GT'};
+var $elm$core$Basics$LT = {$: 'LT'};
 var $elm$core$Result$Err = function (a) {
 	return {$: 'Err', a: a};
 };
@@ -5288,6 +5288,7 @@ var $elm$core$Result$isOk = function (result) {
 		return false;
 	}
 };
+var $elm$core$Platform$Cmd$batch = _Platform_batch;
 var $elm$json$Json$Decode$map = _Json_map1;
 var $elm$json$Json$Decode$map2 = _Json_map2;
 var $elm$json$Json$Decode$succeed = _Json_succeed;
@@ -7333,53 +7334,118 @@ var $author$project$App$getLeads = $elm$http$Http$get(
 		expect: A2($elm$http$Http$expectJson, $author$project$App$GotLeads, $author$project$App$decodeLeads),
 		url: 'api/leads'
 	});
+var $author$project$App$GotStatuses = function (a) {
+	return {$: 'GotStatuses', a: a};
+};
+var $author$project$App$Status = F2(
+	function (id, name) {
+		return {id: id, name: name};
+	});
+var $author$project$App$decodeStatuses = $elm$json$Json$Decode$list(
+	A2(
+		$elm_community$json_extra$Json$Decode$Extra$andMap,
+		A2($elm$json$Json$Decode$field, '_sname', $elm$json$Json$Decode$string),
+		A2(
+			$elm_community$json_extra$Json$Decode$Extra$andMap,
+			A2($elm$json$Json$Decode$field, '_sid', $elm$json$Json$Decode$int),
+			$elm$json$Json$Decode$succeed($author$project$App$Status))));
+var $author$project$App$getStatuses = $elm$http$Http$get(
+	{
+		expect: A2($elm$http$Http$expectJson, $author$project$App$GotStatuses, $author$project$App$decodeStatuses),
+		url: 'api/pipelines/statuses'
+	});
 var $author$project$App$Loading = function (a) {
 	return {$: 'Loading', a: a};
 };
 var $author$project$App$initModel = {
 	httpStatus: $author$project$App$Loading('Получаем данные'),
-	leads: $elm$core$Maybe$Nothing
+	leads: $elm$core$Maybe$Nothing,
+	statuses: $elm$core$Maybe$Nothing
 };
 var $elm$core$Platform$Sub$batch = _Platform_batch;
 var $elm$core$Platform$Sub$none = $elm$core$Platform$Sub$batch(_List_Nil);
-var $author$project$App$Failure = function (a) {
-	return {$: 'Failure', a: a};
+var $author$project$App$LastFailure = function (a) {
+	return {$: 'LastFailure', a: a};
 };
 var $author$project$App$Success = {$: 'Success'};
-var $elm$core$Platform$Cmd$batch = _Platform_batch;
+var $elm$core$Dict$fromList = function (assocs) {
+	return A3(
+		$elm$core$List$foldl,
+		F2(
+			function (_v0, dict) {
+				var key = _v0.a;
+				var value = _v0.b;
+				return A3($elm$core$Dict$insert, key, value, dict);
+			}),
+		$elm$core$Dict$empty,
+		assocs);
+};
 var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
 var $author$project$App$update = F2(
 	function (action, model) {
-		if (action.$ === 'GotLeads') {
-			var result = action.a;
-			if (result.$ === 'Ok') {
-				var leads = result.a;
+		var indexedStatuses = function (statuses) {
+			return A2(
+				$elm$core$List$map,
+				function (s) {
+					return _Utils_Tuple2(
+						$elm$core$String$fromInt(s.id),
+						s);
+				},
+				statuses);
+		};
+		switch (action.$) {
+			case 'GotLeads':
+				var result = action.a;
+				if (result.$ === 'Ok') {
+					var leads = result.a;
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{
+								httpStatus: $author$project$App$Success,
+								leads: $elm$core$Maybe$Just(leads)
+							}),
+						$elm$core$Platform$Cmd$none);
+				} else {
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{
+								httpStatus: $author$project$App$LastFailure('Ошибка запроса заявок')
+							}),
+						$elm$core$Platform$Cmd$none);
+				}
+			case 'GotStatuses':
+				var result = action.a;
+				if (result.$ === 'Ok') {
+					var statuses = result.a;
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{
+								httpStatus: $author$project$App$Success,
+								statuses: $elm$core$Maybe$Just(
+									$elm$core$Dict$fromList(
+										indexedStatuses(statuses)))
+							}),
+						$elm$core$Platform$Cmd$none);
+				} else {
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{
+								httpStatus: $author$project$App$LastFailure('Ошибка запроса статусов')
+							}),
+						$elm$core$Platform$Cmd$none);
+				}
+			default:
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
 						{
-							httpStatus: $author$project$App$Success,
-							leads: $elm$core$Maybe$Just(leads)
+							httpStatus: $author$project$App$Loading('Получаем данные')
 						}),
-					$elm$core$Platform$Cmd$none);
-			} else {
-				var err = result.a;
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{
-							httpStatus: $author$project$App$Failure('Ошибка запроса заявок')
-						}),
-					$elm$core$Platform$Cmd$none);
-			}
-		} else {
-			return _Utils_Tuple2(
-				_Utils_update(
-					model,
-					{
-						httpStatus: $author$project$App$Loading('Получаем данные')
-					}),
-				$author$project$App$getLeads);
+					$author$project$App$getLeads);
 		}
 	});
 var $mdgriffith$elm_ui$Internal$Model$Unkeyed = function (a) {
@@ -14555,246 +14621,263 @@ var $elm$time$Time$Zone = F2(
 		return {$: 'Zone', a: a, b: b};
 	});
 var $elm$time$Time$utc = A2($elm$time$Time$Zone, 0, _List_Nil);
-var $author$project$App$tableView = function (leads) {
-	return A2(
-		$mdgriffith$elm_ui$Element$table,
-		_List_Nil,
-		{
-			columns: _List_fromArray(
-				[
-					{
-					header: A2(
-						$mdgriffith$elm_ui$Element$el,
-						$author$project$App$headerCellStyle,
-						$mdgriffith$elm_ui$Element$text('Номер заявки')),
-					view: function (l) {
-						return A2(
-							$mdgriffith$elm_ui$Element$el,
-							A2(
-								$elm$core$List$cons,
-								$mdgriffith$elm_ui$Element$Background$color(
-									$author$project$App$statusColor(l.statusId)),
-								$author$project$App$dataCellStyle),
-							$mdgriffith$elm_ui$Element$text(
-								$elm$core$String$fromInt(l.id)));
-					},
-					width: $mdgriffith$elm_ui$Element$fill
-				},
-					{
-					header: A2(
-						$mdgriffith$elm_ui$Element$el,
-						$author$project$App$headerCellStyle,
-						$mdgriffith$elm_ui$Element$text('Ссылка на заявку')),
-					view: function (l) {
-						return A2(
-							$mdgriffith$elm_ui$Element$link,
-							A2(
-								$elm$core$List$cons,
-								$mdgriffith$elm_ui$Element$Background$color(
-									$author$project$App$statusColor(l.statusId)),
-								A2(
-									$elm$core$List$cons,
-									$mdgriffith$elm_ui$Element$Font$underline,
-									A2(
-										$elm$core$List$cons,
-										$mdgriffith$elm_ui$Element$Font$color(
-											A3($mdgriffith$elm_ui$Element$rgb, 0, 0, 1)),
-										$author$project$App$dataCellStyle))),
-							{
-								label: $mdgriffith$elm_ui$Element$text('...'),
-								url: l.href
-							});
-					},
-					width: $mdgriffith$elm_ui$Element$fill
-				},
-					{
-					header: A2(
-						$mdgriffith$elm_ui$Element$el,
-						$author$project$App$headerCellStyle,
-						$mdgriffith$elm_ui$Element$text('Дата выезда')),
-					view: function (l) {
-						return A2(
-							$mdgriffith$elm_ui$Element$el,
-							A2(
-								$elm$core$List$cons,
-								$mdgriffith$elm_ui$Element$Background$color(
-									$author$project$App$statusColor(l.statusId)),
-								$author$project$App$dataCellStyle),
-							$mdgriffith$elm_ui$Element$text(
-								A2(
-									$elm$core$Maybe$withDefault,
-									'',
-									A2(
-										$elm$core$Maybe$map,
-										A3($CoderDennis$elm_time_format$Time$Format$format, $CoderDennis$elm_time_format$Time$Format$Config$Config_ru_ru$config, '%d.%m.%Y %I:%M:%S', $elm$time$Time$utc),
-										l.dateVisit))));
-					},
-					width: $mdgriffith$elm_ui$Element$fill
-				},
-					{
-					header: A2(
-						$mdgriffith$elm_ui$Element$el,
-						$author$project$App$headerCellStyle,
-						$mdgriffith$elm_ui$Element$text('Адрес заявки')),
-					view: function (l) {
-						return A2(
-							$mdgriffith$elm_ui$Element$paragraph,
-							A2(
-								$elm$core$List$cons,
-								$mdgriffith$elm_ui$Element$Background$color(
-									$author$project$App$statusColor(l.statusId)),
-								_Utils_ap(
-									$author$project$App$dataCellStyle,
-									_List_fromArray(
-										[
-											$mdgriffith$elm_ui$Element$width(
-											A2($mdgriffith$elm_ui$Element$maximum, 500, $mdgriffith$elm_ui$Element$fill))
-										]))),
-							_List_fromArray(
-								[
-									$mdgriffith$elm_ui$Element$text(l.address)
-								]));
-					},
-					width: A2($mdgriffith$elm_ui$Element$maximum, 200, $mdgriffith$elm_ui$Element$fill)
-				},
-					{
-					header: A2(
-						$mdgriffith$elm_ui$Element$el,
-						$author$project$App$headerCellStyle,
-						$mdgriffith$elm_ui$Element$text('Тип заявки')),
-					view: function (l) {
-						return A2(
-							$mdgriffith$elm_ui$Element$el,
-							A2(
-								$elm$core$List$cons,
-								$mdgriffith$elm_ui$Element$Background$color(
-									$author$project$App$statusColor(l.statusId)),
-								$author$project$App$dataCellStyle),
-							$mdgriffith$elm_ui$Element$text(l.ltype));
-					},
-					width: $mdgriffith$elm_ui$Element$fill
-				},
-					{
-					header: A2(
-						$mdgriffith$elm_ui$Element$el,
-						$author$project$App$headerCellStyle,
-						$mdgriffith$elm_ui$Element$text('Цена клиенту')),
-					view: function (l) {
-						return A2(
-							$mdgriffith$elm_ui$Element$el,
-							A2(
-								$elm$core$List$cons,
-								$mdgriffith$elm_ui$Element$Background$color(
-									$author$project$App$statusColor(l.statusId)),
-								$author$project$App$dataCellStyle),
-							$mdgriffith$elm_ui$Element$text(
-								$elm$core$String$fromFloat(l.sellCost)));
-					},
-					width: $mdgriffith$elm_ui$Element$fill
-				},
-					{
-					header: A2(
-						$mdgriffith$elm_ui$Element$el,
-						$author$project$App$headerCellStyle,
-						$mdgriffith$elm_ui$Element$text('Затраты на матерал')),
-					view: function (l) {
-						return A2(
-							$mdgriffith$elm_ui$Element$el,
-							A2(
-								$elm$core$List$cons,
-								$mdgriffith$elm_ui$Element$Background$color(
-									$author$project$App$statusColor(l.statusId)),
-								$author$project$App$dataCellStyle),
-							$mdgriffith$elm_ui$Element$text(
-								$elm$core$String$fromFloat(l.partsCost)));
-					},
-					width: $mdgriffith$elm_ui$Element$fill
-				},
-					{
-					header: A2(
-						$mdgriffith$elm_ui$Element$el,
-						$author$project$App$headerCellStyle,
-						$mdgriffith$elm_ui$Element$text('Стоимость работ для клиента')),
-					view: function (l) {
-						return A2(
-							$mdgriffith$elm_ui$Element$el,
-							A2(
-								$elm$core$List$cons,
-								$mdgriffith$elm_ui$Element$Background$color(
-									$author$project$App$statusColor(l.statusId)),
-								$author$project$App$dataCellStyle),
-							$mdgriffith$elm_ui$Element$text(
-								$elm$core$String$fromFloat(l.worksCost)));
-					},
-					width: $mdgriffith$elm_ui$Element$fill
-				},
-					{
-					header: A2(
-						$mdgriffith$elm_ui$Element$el,
-						$author$project$App$headerCellStyle,
-						$mdgriffith$elm_ui$Element$text('Перевод в офис')),
-					view: function (l) {
-						return A2(
-							$mdgriffith$elm_ui$Element$el,
-							A2(
-								$elm$core$List$cons,
-								$mdgriffith$elm_ui$Element$Background$color(
-									$author$project$App$statusColor(l.statusId)),
-								$author$project$App$dataCellStyle),
-							$mdgriffith$elm_ui$Element$text(
-								$elm$core$String$fromFloat(l.officeIncome)));
-					},
-					width: $mdgriffith$elm_ui$Element$fill
-				},
-					{
-					header: A2(
-						$mdgriffith$elm_ui$Element$el,
-						$author$project$App$headerCellStyle,
-						$mdgriffith$elm_ui$Element$text('Дата закрытия')),
-					view: function (l) {
-						return A2(
-							$mdgriffith$elm_ui$Element$el,
-							A2(
-								$elm$core$List$cons,
-								$mdgriffith$elm_ui$Element$Background$color(
-									$author$project$App$statusColor(l.statusId)),
-								$author$project$App$dataCellStyle),
-							$mdgriffith$elm_ui$Element$text(
-								A2(
-									$elm$core$Maybe$withDefault,
-									'',
-									A2(
-										$elm$core$Maybe$map,
-										A3($CoderDennis$elm_time_format$Time$Format$format, $CoderDennis$elm_time_format$Time$Format$Config$Config_ru_ru$config, '%d.%m.%Y %I:%M:%S', $elm$time$Time$utc),
-										l.closedDate))));
-					},
-					width: $mdgriffith$elm_ui$Element$fill
-				},
-					{
-					header: A2(
-						$mdgriffith$elm_ui$Element$el,
-						$author$project$App$headerCellStyle,
-						$mdgriffith$elm_ui$Element$text('Статус заявки')),
-					view: function (l) {
-						return A2(
-							$mdgriffith$elm_ui$Element$el,
-							A2(
-								$elm$core$List$cons,
-								$mdgriffith$elm_ui$Element$Background$color(
-									$author$project$App$statusColor(l.statusId)),
-								$author$project$App$dataCellStyle),
-							$mdgriffith$elm_ui$Element$text(
-								$elm$core$String$fromInt(l.statusId)));
-					},
-					width: $mdgriffith$elm_ui$Element$fill
-				}
-				]),
-			data: leads
-		});
-};
 var $author$project$App$viewLeads = function (model) {
 	var _v0 = model.leads;
-	if (_v0.$ === 'Nothing') {
+	if (_v0.$ === 'Just') {
+		var leads = _v0.a;
+		return A2(
+			$mdgriffith$elm_ui$Element$table,
+			_List_Nil,
+			{
+				columns: _List_fromArray(
+					[
+						{
+						header: A2(
+							$mdgriffith$elm_ui$Element$el,
+							$author$project$App$headerCellStyle,
+							$mdgriffith$elm_ui$Element$text('Номер заявки')),
+						view: function (l) {
+							return A2(
+								$mdgriffith$elm_ui$Element$el,
+								A2(
+									$elm$core$List$cons,
+									$mdgriffith$elm_ui$Element$Background$color(
+										$author$project$App$statusColor(l.statusId)),
+									$author$project$App$dataCellStyle),
+								$mdgriffith$elm_ui$Element$text(
+									$elm$core$String$fromInt(l.id)));
+						},
+						width: $mdgriffith$elm_ui$Element$fill
+					},
+						{
+						header: A2(
+							$mdgriffith$elm_ui$Element$el,
+							$author$project$App$headerCellStyle,
+							$mdgriffith$elm_ui$Element$text('Ссылка на заявку')),
+						view: function (l) {
+							return A2(
+								$mdgriffith$elm_ui$Element$link,
+								A2(
+									$elm$core$List$cons,
+									$mdgriffith$elm_ui$Element$Background$color(
+										$author$project$App$statusColor(l.statusId)),
+									A2(
+										$elm$core$List$cons,
+										$mdgriffith$elm_ui$Element$Font$underline,
+										A2(
+											$elm$core$List$cons,
+											$mdgriffith$elm_ui$Element$Font$color(
+												A3($mdgriffith$elm_ui$Element$rgb, 0, 0, 1)),
+											$author$project$App$dataCellStyle))),
+								{
+									label: $mdgriffith$elm_ui$Element$text('...'),
+									url: l.href
+								});
+						},
+						width: $mdgriffith$elm_ui$Element$fill
+					},
+						{
+						header: A2(
+							$mdgriffith$elm_ui$Element$el,
+							$author$project$App$headerCellStyle,
+							$mdgriffith$elm_ui$Element$text('Дата выезда')),
+						view: function (l) {
+							return A2(
+								$mdgriffith$elm_ui$Element$el,
+								A2(
+									$elm$core$List$cons,
+									$mdgriffith$elm_ui$Element$Background$color(
+										$author$project$App$statusColor(l.statusId)),
+									$author$project$App$dataCellStyle),
+								$mdgriffith$elm_ui$Element$text(
+									A2(
+										$elm$core$Maybe$withDefault,
+										'',
+										A2(
+											$elm$core$Maybe$map,
+											A3($CoderDennis$elm_time_format$Time$Format$format, $CoderDennis$elm_time_format$Time$Format$Config$Config_ru_ru$config, '%d.%m.%Y %I:%M:%S', $elm$time$Time$utc),
+											l.dateVisit))));
+						},
+						width: $mdgriffith$elm_ui$Element$fill
+					},
+						{
+						header: A2(
+							$mdgriffith$elm_ui$Element$el,
+							$author$project$App$headerCellStyle,
+							$mdgriffith$elm_ui$Element$text('Адрес заявки')),
+						view: function (l) {
+							return A2(
+								$mdgriffith$elm_ui$Element$paragraph,
+								A2(
+									$elm$core$List$cons,
+									$mdgriffith$elm_ui$Element$Background$color(
+										$author$project$App$statusColor(l.statusId)),
+									_Utils_ap(
+										$author$project$App$dataCellStyle,
+										_List_fromArray(
+											[
+												$mdgriffith$elm_ui$Element$width(
+												A2($mdgriffith$elm_ui$Element$maximum, 500, $mdgriffith$elm_ui$Element$fill))
+											]))),
+								_List_fromArray(
+									[
+										$mdgriffith$elm_ui$Element$text(l.address)
+									]));
+						},
+						width: A2($mdgriffith$elm_ui$Element$maximum, 200, $mdgriffith$elm_ui$Element$fill)
+					},
+						{
+						header: A2(
+							$mdgriffith$elm_ui$Element$el,
+							$author$project$App$headerCellStyle,
+							$mdgriffith$elm_ui$Element$text('Тип заявки')),
+						view: function (l) {
+							return A2(
+								$mdgriffith$elm_ui$Element$el,
+								A2(
+									$elm$core$List$cons,
+									$mdgriffith$elm_ui$Element$Background$color(
+										$author$project$App$statusColor(l.statusId)),
+									$author$project$App$dataCellStyle),
+								$mdgriffith$elm_ui$Element$text(l.ltype));
+						},
+						width: $mdgriffith$elm_ui$Element$fill
+					},
+						{
+						header: A2(
+							$mdgriffith$elm_ui$Element$el,
+							$author$project$App$headerCellStyle,
+							$mdgriffith$elm_ui$Element$text('Цена клиенту')),
+						view: function (l) {
+							return A2(
+								$mdgriffith$elm_ui$Element$el,
+								A2(
+									$elm$core$List$cons,
+									$mdgriffith$elm_ui$Element$Background$color(
+										$author$project$App$statusColor(l.statusId)),
+									$author$project$App$dataCellStyle),
+								$mdgriffith$elm_ui$Element$text(
+									$elm$core$String$fromFloat(l.sellCost)));
+						},
+						width: $mdgriffith$elm_ui$Element$fill
+					},
+						{
+						header: A2(
+							$mdgriffith$elm_ui$Element$el,
+							$author$project$App$headerCellStyle,
+							$mdgriffith$elm_ui$Element$text('Затраты на матерал')),
+						view: function (l) {
+							return A2(
+								$mdgriffith$elm_ui$Element$el,
+								A2(
+									$elm$core$List$cons,
+									$mdgriffith$elm_ui$Element$Background$color(
+										$author$project$App$statusColor(l.statusId)),
+									$author$project$App$dataCellStyle),
+								$mdgriffith$elm_ui$Element$text(
+									$elm$core$String$fromFloat(l.partsCost)));
+						},
+						width: $mdgriffith$elm_ui$Element$fill
+					},
+						{
+						header: A2(
+							$mdgriffith$elm_ui$Element$el,
+							$author$project$App$headerCellStyle,
+							$mdgriffith$elm_ui$Element$text('Стоимость работ для клиента')),
+						view: function (l) {
+							return A2(
+								$mdgriffith$elm_ui$Element$el,
+								A2(
+									$elm$core$List$cons,
+									$mdgriffith$elm_ui$Element$Background$color(
+										$author$project$App$statusColor(l.statusId)),
+									$author$project$App$dataCellStyle),
+								$mdgriffith$elm_ui$Element$text(
+									$elm$core$String$fromFloat(l.worksCost)));
+						},
+						width: $mdgriffith$elm_ui$Element$fill
+					},
+						{
+						header: A2(
+							$mdgriffith$elm_ui$Element$el,
+							$author$project$App$headerCellStyle,
+							$mdgriffith$elm_ui$Element$text('Перевод в офис')),
+						view: function (l) {
+							return A2(
+								$mdgriffith$elm_ui$Element$el,
+								A2(
+									$elm$core$List$cons,
+									$mdgriffith$elm_ui$Element$Background$color(
+										$author$project$App$statusColor(l.statusId)),
+									$author$project$App$dataCellStyle),
+								$mdgriffith$elm_ui$Element$text(
+									$elm$core$String$fromFloat(l.officeIncome)));
+						},
+						width: $mdgriffith$elm_ui$Element$fill
+					},
+						{
+						header: A2(
+							$mdgriffith$elm_ui$Element$el,
+							$author$project$App$headerCellStyle,
+							$mdgriffith$elm_ui$Element$text('Дата закрытия')),
+						view: function (l) {
+							return A2(
+								$mdgriffith$elm_ui$Element$el,
+								A2(
+									$elm$core$List$cons,
+									$mdgriffith$elm_ui$Element$Background$color(
+										$author$project$App$statusColor(l.statusId)),
+									$author$project$App$dataCellStyle),
+								$mdgriffith$elm_ui$Element$text(
+									A2(
+										$elm$core$Maybe$withDefault,
+										'',
+										A2(
+											$elm$core$Maybe$map,
+											A3($CoderDennis$elm_time_format$Time$Format$format, $CoderDennis$elm_time_format$Time$Format$Config$Config_ru_ru$config, '%d.%m.%Y %I:%M:%S', $elm$time$Time$utc),
+											l.closedDate))));
+						},
+						width: $mdgriffith$elm_ui$Element$fill
+					},
+						{
+						header: A2(
+							$mdgriffith$elm_ui$Element$el,
+							$author$project$App$headerCellStyle,
+							$mdgriffith$elm_ui$Element$text('Статус заявки')),
+						view: function (l) {
+							var statusId = $elm$core$String$fromInt(l.statusId);
+							var status = function () {
+								var _v1 = model.statuses;
+								if (_v1.$ === 'Just') {
+									var statuses = _v1.a;
+									return A2(
+										$elm$core$Maybe$withDefault,
+										statusId,
+										A2(
+											$elm$core$Maybe$map,
+											function ($) {
+												return $.name;
+											},
+											A2($elm$core$Dict$get, statusId, statuses)));
+								} else {
+									return $elm$core$String$fromInt(l.statusId);
+								}
+							}();
+							return A2(
+								$mdgriffith$elm_ui$Element$el,
+								A2(
+									$elm$core$List$cons,
+									$mdgriffith$elm_ui$Element$Background$color(
+										$author$project$App$statusColor(l.statusId)),
+									$author$project$App$dataCellStyle),
+								$mdgriffith$elm_ui$Element$text(status));
+						},
+						width: $mdgriffith$elm_ui$Element$fill
+					}
+					]),
+				data: leads
+			});
+	} else {
 		return A2(
 			$mdgriffith$elm_ui$Element$el,
 			_List_fromArray(
@@ -14802,16 +14885,45 @@ var $author$project$App$viewLeads = function (model) {
 					$mdgriffith$elm_ui$Element$padding(10)
 				]),
 			$mdgriffith$elm_ui$Element$text('Грузится'));
-	} else {
-		var leads = _v0.a;
-		return A2(
-			$mdgriffith$elm_ui$Element$el,
-			_List_fromArray(
-				[
-					$mdgriffith$elm_ui$Element$padding(10)
-				]),
-			$author$project$App$tableView(leads));
 	}
+};
+var $author$project$App$viewModelStatus = function (model) {
+	var statusesStatus = function () {
+		var _v1 = model.statuses;
+		if (_v1.$ === 'Just') {
+			return 'Список статусов обновлен';
+		} else {
+			return 'Список статусов не обновлен';
+		}
+	}();
+	var leadsStatus = function () {
+		var _v0 = model.leads;
+		if (_v0.$ === 'Just') {
+			return 'Список сделок обновлен';
+		} else {
+			return 'Список сделок не обновлен';
+		}
+	}();
+	return A2(
+		$mdgriffith$elm_ui$Element$wrappedRow,
+		_List_Nil,
+		_List_fromArray(
+			[
+				A2(
+				$mdgriffith$elm_ui$Element$el,
+				_List_fromArray(
+					[
+						$mdgriffith$elm_ui$Element$padding(10)
+					]),
+				$mdgriffith$elm_ui$Element$text(leadsStatus)),
+				A2(
+				$mdgriffith$elm_ui$Element$el,
+				_List_fromArray(
+					[
+						$mdgriffith$elm_ui$Element$padding(10)
+					]),
+				$mdgriffith$elm_ui$Element$text(statusesStatus))
+			]));
 };
 var $author$project$App$view = function (model) {
 	return A2(
@@ -14823,13 +14935,18 @@ var $author$project$App$view = function (model) {
 			_List_fromArray(
 				[
 					$author$project$App$viewHttpStatus(model.httpStatus),
+					$author$project$App$viewModelStatus(model),
 					$author$project$App$viewLeads(model)
 				])));
 };
 var $author$project$App$main = $elm$browser$Browser$element(
 	{
 		init: function (_v0) {
-			return _Utils_Tuple2($author$project$App$initModel, $author$project$App$getLeads);
+			return _Utils_Tuple2(
+				$author$project$App$initModel,
+				$elm$core$Platform$Cmd$batch(
+					_List_fromArray(
+						[$author$project$App$getStatuses, $author$project$App$getLeads])));
 		},
 		subscriptions: function (_v1) {
 			return $elm$core$Platform$Sub$none;
