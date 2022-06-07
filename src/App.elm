@@ -28,12 +28,28 @@ type alias Status = {
   , name : String
   }
 
+type alias Filter = {
+  user : Maybe String
+  }
+
 decodeStatuses : D.Decoder (List Status)
 decodeStatuses  =
   D.succeed Status
     |> andMap (D.field "_sid" D.int)
     |> andMap (D.field "_sname" D.string)
     |> D.list  
+
+type alias User = {
+    id   : Int
+  , name : String
+  }
+
+decodeUsers : D.Decoder (List User)
+decodeUsers  =
+  D.succeed Status
+    |> andMap (D.field "_uid" D.int)
+    |> andMap (D.field "_uname" D.string)
+    |> D.list      
 
 type alias Lead = {
     id           : Int
@@ -76,6 +92,10 @@ type Msg =
 
   | GotStatuses (Result Http.Error (List Status)) 
 
+  | GotUsers (Result Http.Error (List User))   
+
+  | UserSelected String
+
   | RefreshLeads
   
 
@@ -84,21 +104,26 @@ type HttpStatus = LastFailure String | Loading String | Success
 type alias Model = {
     httpStatus : HttpStatus 
 
+  , filter : Filter  
+
   , leads : Maybe (List Lead)
   , statuses : Maybe (Dict.Dict String Status)
+  , users : Maybe (Dict.Dict String User)
   }
 
 initModel : Model
 initModel = 
   {
-    httpStatus = Loading "Получаем данные"
+    httpStatus = Success
+  , filter = {user = Nothing}
   , leads = Nothing
   , statuses = Nothing
+  , users = Nothing
   }
 
-getLeads : Cmd Msg
-getLeads = Http.get
-      { url = "api/leads"
+getLeads : String -> Cmd Msg
+getLeads user = Http.get
+      { url = "api/leads/?user=" ++ user
       , expect = Http.expectJson GotLeads decodeLeads
       }
 
@@ -108,10 +133,18 @@ getStatuses = Http.get
       , expect = Http.expectJson GotStatuses decodeStatuses
       }      
 
+getUsers : Cmd Msg
+getUsers = Http.get
+      { url = "api/users"
+      , expect = Http.expectJson GotUsers decodeUsers
+      }      
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update action model =
+
+-- !! объединить по типам statuses и users {id : Int, name : String}
   let indexedStatuses statuses = List.map (\s -> (String.fromInt s.id, s)) statuses
+      indexedUsers users = List.map (\s -> (String.fromInt s.id, s)) users
   in
   case action of
 
@@ -123,19 +156,26 @@ update action model =
     GotStatuses result ->
       case result of
          Ok statuses -> ({model | statuses = Just (indexedStatuses statuses |> Dict.fromList), httpStatus = Success}, Cmd.none)
-         Err _ -> ({model | httpStatus = LastFailure "Ошибка запроса статусов"}, Cmd.none)         
+         Err _ -> ({model | httpStatus = LastFailure "Ошибка запроса статусов"}, Cmd.none)
 
-    RefreshLeads -> ({ model | httpStatus = Loading "Получаем данные"}, getLeads)
+    GotUsers result ->
+      case result of
+         Ok users -> ({model | users = Just (indexedUsers users |> Dict.fromList), httpStatus = Success}, Cmd.none)
+         Err _ -> ({model | httpStatus = LastFailure "Ошибка запроса пользователей"}, Cmd.none)
 
+    RefreshLeads -> 
+      case model.filter.user of
+          Just user -> ({ model | httpStatus = Loading "Получаем данные"}, getLeads user)
+          Nothing -> ({model | httpStatus = LastFailure "Укажите пользователя"}, Cmd.none)
 
-
+    UserSelected user -> ({ model | filter = { user = Just user}, leads = Nothing, httpStatus = Loading "Загружаем заявки..."}, getLeads user)
 
 main : Program () Model Msg
-main =  Browser.element { init = \_ -> (initModel, Cmd.batch [getStatuses, getLeads]), update = update, view = view, subscriptions = \_ -> Sub.none}
+main =  Browser.element { init = \_ -> (initModel, Cmd.batch [getUsers, getStatuses]), update = update, view = view, subscriptions = \_ -> Sub.none}
 
 view : Model -> Html.Html Msg
 view model = 
-    E.layout [] <| E.column [] <| [viewHttpStatus model.httpStatus, viewModelStatus model, viewLeads model]
+    E.layout [] <| E.column [] <| [viewHttpStatus model.httpStatus, viewModelStatus model, viewFilters model, viewLeads model]
  
 headerCellStyle : List (E.Attribute Msg)
 headerCellStyle = [EB.solid, EB.width 1, EF.bold, E.padding 5]
@@ -149,6 +189,24 @@ statusColor status =
     143 -> E.rgb255 255 0 0
     45242701 {-142-} -> E.rgb255 0 255 0
     _   -> E.rgb255 255 255 255
+
+viewFilters : Model -> E.Element Msg
+viewFilters model = 
+  case model.users of
+      Just users -> 
+        let
+          options = List.map (\(_, u) -> EI.option (String.fromInt u.id) (E.text u.name)) (Dict.toList users)
+          selected =
+            case model.filter.user of
+                Just user -> (Maybe.map (\u -> String.fromInt u.id) (Dict.get user users) |> Maybe.withDefault user) |> Just
+                Nothing -> Nothing
+          in
+          E.wrappedRow [] [
+              E.el [E.padding 10] <| EI.radio [] {onChange = UserSelected, options = options, selected = selected, label = EI.labelAbove [] <| E.text "Укажите пользователя"}
+            ]   
+
+      Nothing -> E.wrappedRow [] []
+
 
 viewLeads : Model -> E.Element Msg
 viewLeads model = 
@@ -177,8 +235,7 @@ viewLeads model =
           , width = E.fill |> E.maximum 200
           , view = \l -> E.paragraph (EBg.color (statusColor l.statusId) :: dataCellStyle ++ [E.width <| E.maximum 500 E.fill]) <| [E.text l.address]
       
-      
-          -- E.el (dataCellStyle ++ [E.width <| E.maximum 200 E.fill, E.clip]) <| E.text l.address
+               -- E.el (dataCellStyle ++ [E.width <| E.maximum 200 E.fill, E.clip]) <| E.text l.address
           }
         , {
             header = E.el headerCellStyle <| E.text "Тип заявки"
@@ -225,7 +282,7 @@ viewLeads model =
           }
         ]
       }
-    Nothing -> E.el [E.padding 10] <| E.text "Грузится"
+    Nothing -> E.el [E.padding 10] <| E.text ""
 
 
 buttonBorder : List (E.Attribute Msg)
@@ -251,4 +308,8 @@ viewModelStatus model =
         case model.statuses of
             Just _ -> "Список статусов обновлен"
             Nothing -> "Список статусов не обновлен"            
-  in E.wrappedRow [] [E.el [E.padding 10] <| E.text leadsStatus, E.el [E.padding 10] <| E.text statusesStatus]
+      usersStatus = 
+        case model.users of
+            Just _ -> "Список пользователей обновлен"
+            Nothing -> "Список пользователей не обновлен"   
+  in E.wrappedRow [] [E.el [E.padding 10] <| E.text leadsStatus, E.el [E.padding 10] <| E.text statusesStatus, E.el [E.padding 10] <| E.text usersStatus]
