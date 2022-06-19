@@ -20,6 +20,7 @@ import Time.Format.Config.Config_ru_ru exposing (config)
 
 import Maybe exposing (withDefault)
 import Html.Attributes as Html
+import Html.Events as Html
 
 import Dict
 
@@ -28,9 +29,25 @@ type alias Status = {
   , name : String
   }
 
+type alias Pipeline = {
+    id   : Int
+  , name : String
+  , statuses : List Status
+  }  
+
 type alias Filter = {
-  user : Maybe String
+    user     : Maybe String
+  , pipeline : Maybe String
+  , status   : Maybe String
   }
+
+decodePipelines : D.Decoder (List Pipeline)
+decodePipelines  =
+  D.succeed Pipeline
+    |> andMap (D.field "_pid" D.int)
+    |> andMap (D.field "_pname" D.string)
+    |> andMap (D.field "_pstatuses" decodeStatuses)
+    |> D.list  
 
 decodeStatuses : D.Decoder (List Status)
 decodeStatuses  =
@@ -90,11 +107,12 @@ type Msg =
     
     GotLeads (Result Http.Error (List Lead)) 
 
-  | GotStatuses (Result Http.Error (List Status)) 
+  | GotPipelines (Result Http.Error (List Pipeline)) 
 
   | GotUsers (Result Http.Error (List User))   
 
   | UserSelected String
+  | StatusSelected String
 
   | RefreshLeads
   
@@ -105,32 +123,40 @@ type alias Model = {
     httpStatus : HttpStatus 
 
   , filter : Filter  
+  , pipelines : Maybe (Dict.Dict String Pipeline)  
+  , users : Maybe (Dict.Dict String User)
+  , statuses : Maybe (Dict.Dict String Status)  
 
   , leads : Maybe (List Lead)
-  , statuses : Maybe (Dict.Dict String Status)
-  , users : Maybe (Dict.Dict String User)
   }
 
 initModel : Model
 initModel = 
   {
     httpStatus = Success
-  , filter = {user = Nothing}
-  , leads = Nothing
+
+  , filter = {user = Nothing, pipeline = Nothing, status = Nothing}
+  , pipelines = Nothing
   , statuses = Nothing
   , users = Nothing
+
+  , leads = Nothing
+
   }
 
-getLeads : String -> Cmd Msg
-getLeads user = Http.get
-      { url = "api/leads/?user=" ++ user
+getLeads : String -> Maybe String -> Cmd Msg
+getLeads user status = 
+    let status2 = Maybe.map (\s -> "&status=" ++ s) status |> Maybe.withDefault ""
+    in
+    Http.get
+      { url = "api/leads/?user=" ++ user ++ status2
       , expect = Http.expectJson GotLeads decodeLeads
       }
 
-getStatuses : Cmd Msg
-getStatuses = Http.get
-      { url = "api/pipelines/statuses"
-      , expect = Http.expectJson GotStatuses decodeStatuses
+getPipelines : Cmd Msg
+getPipelines = Http.get
+      { url = "api/pipelines"
+      , expect = Http.expectJson GotPipelines decodePipelines
       }      
 
 getUsers : Cmd Msg
@@ -139,11 +165,15 @@ getUsers = Http.get
       , expect = Http.expectJson GotUsers decodeUsers
       }      
 
+pipeline_id : Int
+pipeline_id = 5023048
+
 update : Msg -> Model -> (Model, Cmd Msg)
 update action model =
 
 -- !! объединить по типам statuses и users {id : Int, name : String}
-  let indexedStatuses statuses = List.map (\s -> (String.fromInt s.id, s)) statuses
+  let indexedPipelines pipelines = List.map (\p -> (String.fromInt p.id, p)) pipelines
+      indexedStatuses statuses = List.map (\s -> (String.fromInt s.id, s)) statuses
       indexedUsers users = List.map (\s -> (String.fromInt s.id, s)) users
   in
   case action of
@@ -153,9 +183,20 @@ update action model =
          Ok leads -> ({model | leads = Just leads, httpStatus = Success}, Cmd.none)
          Err _ -> ({model | httpStatus = LastFailure "Ошибка запроса заявок"}, Cmd.none)
 
-    GotStatuses result ->
+    GotPipelines result ->
       case result of
-         Ok statuses -> ({model | statuses = Just (indexedStatuses statuses |> Dict.fromList), httpStatus = Success}, Cmd.none)
+         Ok pipelines -> 
+              let fixedPipeline = List.filter (\p -> p.id == pipeline_id) pipelines |> List.head
+                  mfilter = model.filter
+              in
+              case fixedPipeline of
+                  Just pipeline ->
+                    ({model | 
+                          pipelines = Just (indexedPipelines pipelines |> Dict.fromList)
+                        , statuses = Just (indexedStatuses pipeline.statuses |> Dict.fromList)
+                        , filter = { mfilter | pipeline = Just (String.fromInt pipeline.id), status = Nothing }
+                        , httpStatus = Success}, Cmd.none)
+                  Nothing ->  ({model | httpStatus = LastFailure ("Ошибка запроса воронок: воронка " ++ (String.fromInt pipeline_id) ++ " не найдена")}, Cmd.none)
          Err _ -> ({model | httpStatus = LastFailure "Ошибка запроса статусов"}, Cmd.none)
 
     GotUsers result ->
@@ -165,13 +206,26 @@ update action model =
 
     RefreshLeads -> 
       case model.filter.user of
-          Just user -> ({ model | httpStatus = Loading "Получаем данные"}, getLeads user)
+          Just user -> ({ model | httpStatus = Loading "Получаем данные"}, getLeads user (model.filter.status))
           Nothing -> ({model | httpStatus = LastFailure "Укажите пользователя"}, Cmd.none)
 
-    UserSelected user -> ({ model | filter = { user = Just user}, leads = Nothing, httpStatus = Loading "Загружаем заявки..."}, getLeads user)
+    UserSelected user -> 
+      let mfilter = model.filter
+      in
+      ({ model | filter = { mfilter | user = Just user}, leads = Nothing, httpStatus = Loading "Загружаем заявки..."}, getLeads user (model.filter.status))
+
+    StatusSelected status -> 
+      let mfilter = model.filter
+          status0 = if status == "" then Nothing else Just status
+          cmd = 
+            case model.filter.user of
+                Just user -> getLeads user status0
+                _         -> Cmd.none
+      in
+      ({ model | filter = { mfilter | status = status0}, leads = Nothing, httpStatus = Loading "Загружаем заявки..."}, cmd)      
 
 main : Program () Model Msg
-main =  Browser.element { init = \_ -> (initModel, Cmd.batch [getUsers, getStatuses]), update = update, view = view, subscriptions = \_ -> Sub.none}
+main =  Browser.element { init = \_ -> (initModel, Cmd.batch [getUsers, getPipelines]), update = update, view = view, subscriptions = \_ -> Sub.none}
 
 view : Model -> Html.Html Msg
 view model = 
@@ -192,20 +246,37 @@ statusColor status =
 
 viewFilters : Model -> E.Element Msg
 viewFilters model = 
-  case model.users of
-      Just users -> 
-        let
-          options = List.map (\(_, u) -> EI.option (String.fromInt u.id) (E.text u.name)) (Dict.toList users)
-          selected =
-            case model.filter.user of
-                Just user -> (Maybe.map (\u -> String.fromInt u.id) (Dict.get user users) |> Maybe.withDefault user) |> Just
-                Nothing -> Nothing
-          in
-          E.wrappedRow [] [
-              E.el [E.padding 10] <| EI.radio [] {onChange = UserSelected, options = options, selected = selected, label = EI.labelAbove [] <| E.text "Укажите пользователя"}
-            ]   
+  let
+    usersFilter = 
+      case model.users of
+        Just users -> 
+          let
+            selected user = 
+              case model.filter.user of
+                  Just userF -> Html.selected (user == userF)
+                  _            -> Html.selected (user == "")
+            options = List.map (\(_, u) -> Html.option [selected (String.fromInt u.id), Html.value (String.fromInt u.id)] [Html.text u.name]) (Dict.toList users)
+            in
+                E.el [E.padding 10] <| E.html (Html.select [Html.onInput UserSelected, Html.style "font-size" "1.5rem", Html.style "height" "1.8rem"] options)
 
-      Nothing -> E.wrappedRow [] []
+        Nothing -> E.el [E.padding 10] (E.text "Фильтр пользователей не доступен")
+
+    statusesFilter = 
+      case model.statuses of
+        Just statuses -> 
+          let
+            selected status = 
+              case model.filter.status of
+                  Just statusF -> Html.selected (status == statusF)
+                  _            -> Html.selected (status == "")
+            options0 = List.map (\(_, u) -> Html.option [selected (String.fromInt u.id), Html.value (String.fromInt u.id)] [Html.text u.name]) (Dict.toList statuses)
+            options = Html.option [selected "", Html.value ""] [Html.text ""] :: options0
+            in
+                E.el [E.padding 10] <| E.html (Html.select [Html.onInput StatusSelected, Html.style "font-size" "1.5rem", Html.style "height" "1.8rem"] options)
+
+        Nothing -> E.el [E.padding 10] (E.text "Фильтр статусов не доступен")        
+  in
+    E.wrappedRow [] [usersFilter, statusesFilter]
 
 
 viewLeads : Model -> E.Element Msg
