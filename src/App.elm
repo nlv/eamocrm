@@ -72,13 +72,17 @@ type alias Lead = {
     id           : Int
   , name         : String
   , href         : String -- Ссылка на заявку
-  , responsible  : Int -- Ответственный
+  , responsible  : Int -- Ответственный (менеджер)
+  , master       : Maybe Int -- Мастер (исполнитель)
+  , masterSalary : Float -- зп мастера
   , address      : String -- Адрес
+  , city         : String -- Город
   , dateVisit    : Maybe Posix -- Дата выезда
   , ltype        : String
   , sellCost     : Float -- Цена клиенту
   , partsCost    : Float -- Стоимость материалов, Затраты на материал, Затрачено
   , worksCost    : Float -- Стоимость работ для клиента
+  , netWorksCost : Float -- Стоимость работ
   , officeIncome : Float -- Перевод в офис, Заработал Офис
   , closedDate   : Maybe Posix -- Дата закрытия
   , statusId     : Int
@@ -91,12 +95,16 @@ decodeLeads  =
     |> andMap (D.field "_lname" D.string)
     |> andMap (D.field "_href" D.string)
     |> andMap (D.field "_lresponsible" D.int)
+    |> andMap (D.maybe <| D.field "_lmaster" D.int)
+    |> andMap (D.field "_lmasterSalary" D.float)
     |> andMap (D.field "_laddress" D.string)
+    |> andMap (D.field "_lcity" D.string)
     |> andMap (D.maybe (D.field "_ldateVisit" decoder))
     |> andMap (D.field "_ltype" D.string)
     |> andMap (D.field "_lsellCost" D.float)
     |> andMap (D.field "_lpartsCost" D.float)
     |> andMap (D.field "_lworksCost" D.float)
+    |> andMap (D.field "_lnetWorksCost" D.float)
     |> andMap (D.field "_lofficeIncome" D.float)
     |> andMap (D.maybe (D.field "_lclosedDate" decoder))
     |> andMap (D.field "_lstatusId" D.int)
@@ -302,12 +310,27 @@ viewLeads model =
           , view = \l -> E.el (EBg.color (statusColor l.statusId) :: dataCellStyle) <| E.text (withDefault "" <| Maybe.map (format config "%d.%m.%Y %I:%M:%S" utc) <| l.dateVisit)
           }
         , {
+            header = E.el headerCellStyle <| E.text "Мастер"
+          , width = E.fill
+          , view = \l -> E.el (EBg.color (statusColor l.statusId) :: dataCellStyle) <| E.text (Maybe.map String.fromInt l.master |> Maybe.withDefault "")
+          }          
+        , {
+            header = E.el headerCellStyle <| E.text "ЗП мастера"
+          , width = E.fill
+          , view = \l -> E.el (EBg.color (statusColor l.statusId) :: dataCellStyle) <| E.text (String.fromFloat l.masterSalary)
+          }
+        , {
             header = E.el headerCellStyle <| E.text "Адрес заявки"
           , width = E.fill |> E.maximum 200
           , view = \l -> E.paragraph (EBg.color (statusColor l.statusId) :: dataCellStyle ++ [E.width <| E.maximum 500 E.fill]) <| [E.text l.address]
       
                -- E.el (dataCellStyle ++ [E.width <| E.maximum 200 E.fill, E.clip]) <| E.text l.address
           }
+        , {
+            header = E.el headerCellStyle <| E.text "Город"
+          , width = E.fill
+          , view = \l -> E.el (EBg.color (statusColor l.statusId) :: dataCellStyle) <| E.text l.city
+          }          
         , {
             header = E.el headerCellStyle <| E.text "Тип заявки"
           , width = E.fill
@@ -328,6 +351,11 @@ viewLeads model =
           , width = E.fill
           , view = \l -> E.el (EBg.color (statusColor l.statusId) :: dataCellStyle) <| E.text (String.fromFloat l.worksCost)
           }
+        , {
+            header = E.el headerCellStyle <| E.text "Стоимость работ"
+          , width = E.fill
+          , view = \l -> E.el (EBg.color (statusColor l.statusId) :: dataCellStyle) <| E.text (String.fromFloat l.netWorksCost)
+          }          
         , {
             header = E.el headerCellStyle <| E.text "Перевод в офис"
           , width = E.fill

@@ -6493,16 +6493,24 @@ var $author$project$App$Lead = function (id) {
 	return function (name) {
 		return function (href) {
 			return function (responsible) {
-				return function (address) {
-					return function (dateVisit) {
-						return function (ltype) {
-							return function (sellCost) {
-								return function (partsCost) {
-									return function (worksCost) {
-										return function (officeIncome) {
-											return function (closedDate) {
-												return function (statusId) {
-													return {address: address, closedDate: closedDate, dateVisit: dateVisit, href: href, id: id, ltype: ltype, name: name, officeIncome: officeIncome, partsCost: partsCost, responsible: responsible, sellCost: sellCost, statusId: statusId, worksCost: worksCost};
+				return function (master) {
+					return function (masterSalary) {
+						return function (address) {
+							return function (city) {
+								return function (dateVisit) {
+									return function (ltype) {
+										return function (sellCost) {
+											return function (partsCost) {
+												return function (worksCost) {
+													return function (netWorksCost) {
+														return function (officeIncome) {
+															return function (closedDate) {
+																return function (statusId) {
+																	return {address: address, city: city, closedDate: closedDate, dateVisit: dateVisit, href: href, id: id, ltype: ltype, master: master, masterSalary: masterSalary, name: name, netWorksCost: netWorksCost, officeIncome: officeIncome, partsCost: partsCost, responsible: responsible, sellCost: sellCost, statusId: statusId, worksCost: worksCost};
+																};
+															};
+														};
+													};
 												};
 											};
 										};
@@ -7390,36 +7398,49 @@ var $author$project$App$decodeLeads = $elm$json$Json$Decode$list(
 				A2($elm$json$Json$Decode$field, '_lofficeIncome', $elm$json$Json$Decode$float),
 				A2(
 					$elm_community$json_extra$Json$Decode$Extra$andMap,
-					A2($elm$json$Json$Decode$field, '_lworksCost', $elm$json$Json$Decode$float),
+					A2($elm$json$Json$Decode$field, '_lnetWorksCost', $elm$json$Json$Decode$float),
 					A2(
 						$elm_community$json_extra$Json$Decode$Extra$andMap,
-						A2($elm$json$Json$Decode$field, '_lpartsCost', $elm$json$Json$Decode$float),
+						A2($elm$json$Json$Decode$field, '_lworksCost', $elm$json$Json$Decode$float),
 						A2(
 							$elm_community$json_extra$Json$Decode$Extra$andMap,
-							A2($elm$json$Json$Decode$field, '_lsellCost', $elm$json$Json$Decode$float),
+							A2($elm$json$Json$Decode$field, '_lpartsCost', $elm$json$Json$Decode$float),
 							A2(
 								$elm_community$json_extra$Json$Decode$Extra$andMap,
-								A2($elm$json$Json$Decode$field, '_ltype', $elm$json$Json$Decode$string),
+								A2($elm$json$Json$Decode$field, '_lsellCost', $elm$json$Json$Decode$float),
 								A2(
 									$elm_community$json_extra$Json$Decode$Extra$andMap,
-									$elm$json$Json$Decode$maybe(
-										A2($elm$json$Json$Decode$field, '_ldateVisit', $rtfeldman$elm_iso8601_date_strings$Iso8601$decoder)),
+									A2($elm$json$Json$Decode$field, '_ltype', $elm$json$Json$Decode$string),
 									A2(
 										$elm_community$json_extra$Json$Decode$Extra$andMap,
-										A2($elm$json$Json$Decode$field, '_laddress', $elm$json$Json$Decode$string),
+										$elm$json$Json$Decode$maybe(
+											A2($elm$json$Json$Decode$field, '_ldateVisit', $rtfeldman$elm_iso8601_date_strings$Iso8601$decoder)),
 										A2(
 											$elm_community$json_extra$Json$Decode$Extra$andMap,
-											A2($elm$json$Json$Decode$field, '_lresponsible', $elm$json$Json$Decode$int),
+											A2($elm$json$Json$Decode$field, '_lcity', $elm$json$Json$Decode$string),
 											A2(
 												$elm_community$json_extra$Json$Decode$Extra$andMap,
-												A2($elm$json$Json$Decode$field, '_href', $elm$json$Json$Decode$string),
+												A2($elm$json$Json$Decode$field, '_laddress', $elm$json$Json$Decode$string),
 												A2(
 													$elm_community$json_extra$Json$Decode$Extra$andMap,
-													A2($elm$json$Json$Decode$field, '_lname', $elm$json$Json$Decode$string),
+													A2($elm$json$Json$Decode$field, '_lmasterSalary', $elm$json$Json$Decode$float),
 													A2(
 														$elm_community$json_extra$Json$Decode$Extra$andMap,
-														A2($elm$json$Json$Decode$field, '_lid', $elm$json$Json$Decode$int),
-														$elm$json$Json$Decode$succeed($author$project$App$Lead)))))))))))))));
+														$elm$json$Json$Decode$maybe(
+															A2($elm$json$Json$Decode$field, '_lmaster', $elm$json$Json$Decode$int)),
+														A2(
+															$elm_community$json_extra$Json$Decode$Extra$andMap,
+															A2($elm$json$Json$Decode$field, '_lresponsible', $elm$json$Json$Decode$int),
+															A2(
+																$elm_community$json_extra$Json$Decode$Extra$andMap,
+																A2($elm$json$Json$Decode$field, '_href', $elm$json$Json$Decode$string),
+																A2(
+																	$elm_community$json_extra$Json$Decode$Extra$andMap,
+																	A2($elm$json$Json$Decode$field, '_lname', $elm$json$Json$Decode$string),
+																	A2(
+																		$elm_community$json_extra$Json$Decode$Extra$andMap,
+																		A2($elm$json$Json$Decode$field, '_lid', $elm$json$Json$Decode$int),
+																		$elm$json$Json$Decode$succeed($author$project$App$Lead)))))))))))))))))));
 var $elm$core$Maybe$map = F2(
 	function (f, maybe) {
 		if (maybe.$ === 'Just') {
@@ -15058,6 +15079,45 @@ var $author$project$App$viewLeads = function (model) {
 						header: A2(
 							$mdgriffith$elm_ui$Element$el,
 							$author$project$App$headerCellStyle,
+							$mdgriffith$elm_ui$Element$text('Мастер')),
+						view: function (l) {
+							return A2(
+								$mdgriffith$elm_ui$Element$el,
+								A2(
+									$elm$core$List$cons,
+									$mdgriffith$elm_ui$Element$Background$color(
+										$author$project$App$statusColor(l.statusId)),
+									$author$project$App$dataCellStyle),
+								$mdgriffith$elm_ui$Element$text(
+									A2(
+										$elm$core$Maybe$withDefault,
+										'',
+										A2($elm$core$Maybe$map, $elm$core$String$fromInt, l.master))));
+						},
+						width: $mdgriffith$elm_ui$Element$fill
+					},
+						{
+						header: A2(
+							$mdgriffith$elm_ui$Element$el,
+							$author$project$App$headerCellStyle,
+							$mdgriffith$elm_ui$Element$text('ЗП мастера')),
+						view: function (l) {
+							return A2(
+								$mdgriffith$elm_ui$Element$el,
+								A2(
+									$elm$core$List$cons,
+									$mdgriffith$elm_ui$Element$Background$color(
+										$author$project$App$statusColor(l.statusId)),
+									$author$project$App$dataCellStyle),
+								$mdgriffith$elm_ui$Element$text(
+									$elm$core$String$fromFloat(l.masterSalary)));
+						},
+						width: $mdgriffith$elm_ui$Element$fill
+					},
+						{
+						header: A2(
+							$mdgriffith$elm_ui$Element$el,
+							$author$project$App$headerCellStyle,
 							$mdgriffith$elm_ui$Element$text('Адрес заявки')),
 						view: function (l) {
 							return A2(
@@ -15079,6 +15139,23 @@ var $author$project$App$viewLeads = function (model) {
 									]));
 						},
 						width: A2($mdgriffith$elm_ui$Element$maximum, 200, $mdgriffith$elm_ui$Element$fill)
+					},
+						{
+						header: A2(
+							$mdgriffith$elm_ui$Element$el,
+							$author$project$App$headerCellStyle,
+							$mdgriffith$elm_ui$Element$text('Город')),
+						view: function (l) {
+							return A2(
+								$mdgriffith$elm_ui$Element$el,
+								A2(
+									$elm$core$List$cons,
+									$mdgriffith$elm_ui$Element$Background$color(
+										$author$project$App$statusColor(l.statusId)),
+									$author$project$App$dataCellStyle),
+								$mdgriffith$elm_ui$Element$text(l.city));
+						},
+						width: $mdgriffith$elm_ui$Element$fill
 					},
 						{
 						header: A2(
@@ -15148,6 +15225,24 @@ var $author$project$App$viewLeads = function (model) {
 									$author$project$App$dataCellStyle),
 								$mdgriffith$elm_ui$Element$text(
 									$elm$core$String$fromFloat(l.worksCost)));
+						},
+						width: $mdgriffith$elm_ui$Element$fill
+					},
+						{
+						header: A2(
+							$mdgriffith$elm_ui$Element$el,
+							$author$project$App$headerCellStyle,
+							$mdgriffith$elm_ui$Element$text('Стоимость работ')),
+						view: function (l) {
+							return A2(
+								$mdgriffith$elm_ui$Element$el,
+								A2(
+									$elm$core$List$cons,
+									$mdgriffith$elm_ui$Element$Background$color(
+										$author$project$App$statusColor(l.statusId)),
+									$author$project$App$dataCellStyle),
+								$mdgriffith$elm_ui$Element$text(
+									$elm$core$String$fromFloat(l.netWorksCost)));
 						},
 						width: $mdgriffith$elm_ui$Element$fill
 					},
