@@ -35,10 +35,17 @@ type alias Pipeline = {
   , statuses : List Status
   }  
 
+type alias Enum = {
+    id    : Int
+  , value : String
+  , sort  : Int
+  }    
+
 type alias Filter = {
     user     : Maybe String
   , pipeline : Maybe String
   , status   : Maybe String
+  , master   : Maybe String
   }
 
 decodePipelines : D.Decoder (List Pipeline)
@@ -55,6 +62,14 @@ decodeStatuses  =
     |> andMap (D.field "_sid" D.int)
     |> andMap (D.field "_sname" D.string)
     |> D.list  
+
+decodeEnums : D.Decoder (List Enum)
+decodeEnums  =
+  D.succeed Enum
+    |> andMap (D.field "_feid" D.int)
+    |> andMap (D.field "_feval" D.string)
+    |> andMap (D.field "_fesort" D.int)
+    |> D.list
 
 type alias User = {
     id   : Int
@@ -117,10 +132,13 @@ type Msg =
 
   | GotPipelines (Result Http.Error (List Pipeline)) 
 
-  | GotUsers (Result Http.Error (List User))   
+  | GotUsers (Result Http.Error (List User)) 
+
+  | GotMasters (Result Http.Error (List Enum)) 
 
   | UserSelected String
   | StatusSelected String
+  | MasterSelected String
 
   | RefreshLeads
   
@@ -134,6 +152,7 @@ type alias Model = {
   , pipelines : Maybe (Dict.Dict String Pipeline)  
   , users : Maybe (Dict.Dict String User)
   , statuses : Maybe (Dict.Dict String Status)  
+  , masters : Maybe (Dict.Dict String Enum)  
 
   , leads : Maybe (List Lead)
   }
@@ -143,21 +162,24 @@ initModel =
   {
     httpStatus = Success
 
-  , filter = {user = Nothing, pipeline = Nothing, status = Nothing}
+  , filter = {user = Nothing, pipeline = Nothing, status = Nothing, master = Nothing}
   , pipelines = Nothing
   , statuses = Nothing
   , users = Nothing
+  , masters = Nothing
 
   , leads = Nothing
 
   }
 
-getLeads : String -> Maybe String -> Cmd Msg
-getLeads user status = 
+-- !! Сделать сразу передачу Filter 
+getLeads : String -> Maybe String -> Maybe String -> Cmd Msg
+getLeads user status master = 
     let status2 = Maybe.map (\s -> "&status=" ++ s) status |> Maybe.withDefault ""
+        master2 = Maybe.map (\s -> "&master=" ++ s) master |> Maybe.withDefault ""
     in
     Http.get
-      { url = "api/leads/?user=" ++ user ++ status2
+      { url = "api/leads/?user=" ++ user ++ status2 ++ master2
       , expect = Http.expectJson GotLeads decodeLeads
       }
 
@@ -173,6 +195,14 @@ getUsers = Http.get
       , expect = Http.expectJson GotUsers decodeUsers
       }      
 
+mastersEnumId = 1143523 -- !! "зашить" на стороне сервера (настройки)
+
+getMasters :  Cmd Msg
+getMasters = Http.get
+      { url = "api/enums/" ++ String.fromInt mastersEnumId
+      , expect = Http.expectJson GotMasters decodeEnums
+      }      
+
 pipeline_id : Int
 pipeline_id = 5023048
 
@@ -183,6 +213,7 @@ update action model =
   let indexedPipelines pipelines = List.map (\p -> (String.fromInt p.id, p)) pipelines
       indexedStatuses statuses = List.map (\s -> (String.fromInt s.id, s)) statuses
       indexedUsers users = List.map (\s -> (String.fromInt s.id, s)) users
+      indexedMasters masters = List.map (\s -> (String.fromInt s.id, s)) masters
   in
   case action of
 
@@ -212,28 +243,43 @@ update action model =
          Ok users -> ({model | users = Just (indexedUsers users |> Dict.fromList), httpStatus = Success}, Cmd.none)
          Err _ -> ({model | httpStatus = LastFailure "Ошибка запроса пользователей"}, Cmd.none)
 
+    GotMasters result ->
+      case result of
+         Ok masters -> ({model | masters = Just (indexedMasters masters |> Dict.fromList), httpStatus = Success}, Cmd.none)
+         Err _ -> ({model | httpStatus = LastFailure "Ошибка запроса мастеров"}, Cmd.none)
+
     RefreshLeads -> 
       case model.filter.user of
-          Just user -> ({ model | httpStatus = Loading "Получаем данные"}, getLeads user (model.filter.status))
+          Just user -> ({ model | httpStatus = Loading "Получаем данные"}, getLeads user model.filter.status model.filter.master)
           Nothing -> ({model | httpStatus = LastFailure "Укажите пользователя"}, Cmd.none)
 
     UserSelected user -> 
       let mfilter = model.filter
       in
-      ({ model | filter = { mfilter | user = Just user}, leads = Nothing, httpStatus = Loading "Загружаем заявки..."}, getLeads user (model.filter.status))
+      ({ model | filter = { mfilter | user = Just user}, leads = Nothing, httpStatus = Loading "Загружаем заявки..."}, getLeads user model.filter.status model.filter.status)
 
     StatusSelected status -> 
       let mfilter = model.filter
           status0 = if status == "" then Nothing else Just status
           cmd = 
             case model.filter.user of
-                Just user -> getLeads user status0
+                Just user -> getLeads user status0 model.filter.master
                 _         -> Cmd.none
       in
       ({ model | filter = { mfilter | status = status0}, leads = Nothing, httpStatus = Loading "Загружаем заявки..."}, cmd)      
 
+    MasterSelected master -> 
+      let mfilter = model.filter
+          master0 = if master == "" then Nothing else Just master
+          cmd = 
+            case model.filter.user of
+                Just user -> getLeads user model.filter.status master0
+                _         -> Cmd.none
+      in
+      ({ model | filter = { mfilter | master = master0}, leads = Nothing, httpStatus = Loading "Загружаем заявки..."}, cmd)
+
 main : Program () Model Msg
-main =  Browser.element { init = \_ -> (initModel, Cmd.batch [getUsers, getPipelines]), update = update, view = view, subscriptions = \_ -> Sub.none}
+main =  Browser.element { init = \_ -> (initModel, Cmd.batch [getUsers, getPipelines, getMasters]), update = update, view = view, subscriptions = \_ -> Sub.none}
 
 view : Model -> Html.Html Msg
 view model = 
@@ -282,9 +328,24 @@ viewFilters model =
             in
                 E.el [E.padding 10] <| E.html (Html.select [Html.onInput StatusSelected, Html.style "font-size" "1.5rem", Html.style "height" "1.8rem"] options)
 
-        Nothing -> E.el [E.padding 10] (E.text "Фильтр статусов не доступен")        
+        Nothing -> E.el [E.padding 10] (E.text "Фильтр статусов не доступен")
+
+    mastersFilter = 
+      case model.masters of
+        Just masters -> 
+          let
+            selected master = 
+              case model.filter.master of
+                  Just masterF -> Html.selected (master == masterF)
+                  _            -> Html.selected (master == "")
+            options0 = List.map (\(_, u) -> Html.option [selected (String.fromInt u.id), Html.value (String.fromInt u.id)] [Html.text u.value]) (Dict.toList masters)
+            options = Html.option [selected "", Html.value ""] [Html.text ""] :: options0
+            in
+                E.el [E.padding 10] <| E.html (Html.select [Html.onInput MasterSelected, Html.style "font-size" "1.5rem", Html.style "height" "1.8rem"] options)
+
+        Nothing -> E.el [E.padding 10] (E.text "Фильтр мастеров не доступен")
   in
-    E.wrappedRow [] [usersFilter, statusesFilter]
+    E.wrappedRow [] [usersFilter, statusesFilter, mastersFilter]
 
 
 viewLeads : Model -> E.Element Msg
@@ -309,11 +370,27 @@ viewLeads model =
           , width = E.fill
           , view = \l -> E.el (EBg.color (statusColor l.statusId) :: dataCellStyle) <| E.text (withDefault "" <| Maybe.map (format config "%d.%m.%Y %I:%M:%S" utc) <| l.dateVisit)
           }
+        -- , {
+        --     header = E.el headerCellStyle <| E.text "Мастер"
+        --   , width = E.fill
+        --   , view = \l -> E.el (EBg.color (statusColor l.statusId) :: dataCellStyle) <| E.text (Maybe.map String.fromInt l.master |> Maybe.withDefault "")
+        --   }
         , {
             header = E.el headerCellStyle <| E.text "Мастер"
           , width = E.fill
-          , view = \l -> E.el (EBg.color (statusColor l.statusId) :: dataCellStyle) <| E.text (Maybe.map String.fromInt l.master |> Maybe.withDefault "")
-          }          
+          , view = 
+              \l -> 
+                let 
+                    master = 
+                      case model.masters of
+                        Just masters -> 
+                              case l.master of
+                                Just masterId -> Dict.get (String.fromInt masterId) masters |> Maybe.map (.value) |> Maybe.withDefault (String.fromInt masterId)
+                                Nothing -> ""
+                        Nothing -> Maybe.map String.fromInt l.master |> Maybe.withDefault ""
+                in 
+                E.el (EBg.color (statusColor l.statusId) :: dataCellStyle) <| E.text master
+          }
         , {
             header = E.el headerCellStyle <| E.text "ЗП мастера"
           , width = E.fill
@@ -411,4 +488,9 @@ viewModelStatus model =
         case model.users of
             Just _ -> "Список пользователей обновлен"
             Nothing -> "Список пользователей не обновлен"   
-  in E.wrappedRow [] [E.el [E.padding 10] <| E.text leadsStatus, E.el [E.padding 10] <| E.text statusesStatus, E.el [E.padding 10] <| E.text usersStatus]
+
+      mastersStatus = 
+        case model.masters of
+            Just _ -> "Список мастеров обновлен"
+            Nothing -> "Список мастеров не обновлен"               
+  in E.wrappedRow [] [E.el [E.padding 10] <| E.text leadsStatus, E.el [E.padding 10] <| E.text statusesStatus, E.el [E.padding 10] <| E.text usersStatus, E.el [E.padding 10] <| E.text mastersStatus]

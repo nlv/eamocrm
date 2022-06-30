@@ -5603,41 +5603,29 @@ var $elm$core$Task$perform = F2(
 				A2($elm$core$Task$map, toMessage, task)));
 	});
 var $elm$browser$Browser$element = _Browser_element;
-var $author$project$App$GotPipelines = function (a) {
-	return {$: 'GotPipelines', a: a};
+var $author$project$App$GotMasters = function (a) {
+	return {$: 'GotMasters', a: a};
 };
-var $author$project$App$Pipeline = F3(
-	function (id, name, statuses) {
-		return {id: id, name: name, statuses: statuses};
+var $author$project$App$Enum = F3(
+	function (id, value, sort) {
+		return {id: id, sort: sort, value: value};
 	});
 var $elm_community$json_extra$Json$Decode$Extra$andMap = $elm$json$Json$Decode$map2($elm$core$Basics$apR);
-var $author$project$App$Status = F2(
-	function (id, name) {
-		return {id: id, name: name};
-	});
 var $elm$json$Json$Decode$field = _Json_decodeField;
 var $elm$json$Json$Decode$int = _Json_decodeInt;
 var $elm$json$Json$Decode$list = _Json_decodeList;
 var $elm$json$Json$Decode$string = _Json_decodeString;
-var $author$project$App$decodeStatuses = $elm$json$Json$Decode$list(
+var $author$project$App$decodeEnums = $elm$json$Json$Decode$list(
 	A2(
 		$elm_community$json_extra$Json$Decode$Extra$andMap,
-		A2($elm$json$Json$Decode$field, '_sname', $elm$json$Json$Decode$string),
+		A2($elm$json$Json$Decode$field, '_fesort', $elm$json$Json$Decode$int),
 		A2(
 			$elm_community$json_extra$Json$Decode$Extra$andMap,
-			A2($elm$json$Json$Decode$field, '_sid', $elm$json$Json$Decode$int),
-			$elm$json$Json$Decode$succeed($author$project$App$Status))));
-var $author$project$App$decodePipelines = $elm$json$Json$Decode$list(
-	A2(
-		$elm_community$json_extra$Json$Decode$Extra$andMap,
-		A2($elm$json$Json$Decode$field, '_pstatuses', $author$project$App$decodeStatuses),
-		A2(
-			$elm_community$json_extra$Json$Decode$Extra$andMap,
-			A2($elm$json$Json$Decode$field, '_pname', $elm$json$Json$Decode$string),
+			A2($elm$json$Json$Decode$field, '_feval', $elm$json$Json$Decode$string),
 			A2(
 				$elm_community$json_extra$Json$Decode$Extra$andMap,
-				A2($elm$json$Json$Decode$field, '_pid', $elm$json$Json$Decode$int),
-				$elm$json$Json$Decode$succeed($author$project$App$Pipeline)))));
+				A2($elm$json$Json$Decode$field, '_feid', $elm$json$Json$Decode$int),
+				$elm$json$Json$Decode$succeed($author$project$App$Enum)))));
 var $elm$json$Json$Decode$decodeString = _Json_runOnString;
 var $elm$http$Http$BadStatus_ = F2(
 	function (a, b) {
@@ -6425,6 +6413,42 @@ var $elm$http$Http$get = function (r) {
 	return $elm$http$Http$request(
 		{body: $elm$http$Http$emptyBody, expect: r.expect, headers: _List_Nil, method: 'GET', timeout: $elm$core$Maybe$Nothing, tracker: $elm$core$Maybe$Nothing, url: r.url});
 };
+var $author$project$App$mastersEnumId = 1143523;
+var $author$project$App$getMasters = $elm$http$Http$get(
+	{
+		expect: A2($elm$http$Http$expectJson, $author$project$App$GotMasters, $author$project$App$decodeEnums),
+		url: 'api/enums/' + $elm$core$String$fromInt($author$project$App$mastersEnumId)
+	});
+var $author$project$App$GotPipelines = function (a) {
+	return {$: 'GotPipelines', a: a};
+};
+var $author$project$App$Pipeline = F3(
+	function (id, name, statuses) {
+		return {id: id, name: name, statuses: statuses};
+	});
+var $author$project$App$Status = F2(
+	function (id, name) {
+		return {id: id, name: name};
+	});
+var $author$project$App$decodeStatuses = $elm$json$Json$Decode$list(
+	A2(
+		$elm_community$json_extra$Json$Decode$Extra$andMap,
+		A2($elm$json$Json$Decode$field, '_sname', $elm$json$Json$Decode$string),
+		A2(
+			$elm_community$json_extra$Json$Decode$Extra$andMap,
+			A2($elm$json$Json$Decode$field, '_sid', $elm$json$Json$Decode$int),
+			$elm$json$Json$Decode$succeed($author$project$App$Status))));
+var $author$project$App$decodePipelines = $elm$json$Json$Decode$list(
+	A2(
+		$elm_community$json_extra$Json$Decode$Extra$andMap,
+		A2($elm$json$Json$Decode$field, '_pstatuses', $author$project$App$decodeStatuses),
+		A2(
+			$elm_community$json_extra$Json$Decode$Extra$andMap,
+			A2($elm$json$Json$Decode$field, '_pname', $elm$json$Json$Decode$string),
+			A2(
+				$elm_community$json_extra$Json$Decode$Extra$andMap,
+				A2($elm$json$Json$Decode$field, '_pid', $elm$json$Json$Decode$int),
+				$elm$json$Json$Decode$succeed($author$project$App$Pipeline)))));
 var $author$project$App$getPipelines = $elm$http$Http$get(
 	{
 		expect: A2($elm$http$Http$expectJson, $author$project$App$GotPipelines, $author$project$App$decodePipelines),
@@ -6448,9 +6472,10 @@ var $author$project$App$getUsers = $elm$http$Http$get(
 	});
 var $author$project$App$Success = {$: 'Success'};
 var $author$project$App$initModel = {
-	filter: {pipeline: $elm$core$Maybe$Nothing, status: $elm$core$Maybe$Nothing, user: $elm$core$Maybe$Nothing},
+	filter: {master: $elm$core$Maybe$Nothing, pipeline: $elm$core$Maybe$Nothing, status: $elm$core$Maybe$Nothing, user: $elm$core$Maybe$Nothing},
 	httpStatus: $author$project$App$Success,
 	leads: $elm$core$Maybe$Nothing,
+	masters: $elm$core$Maybe$Nothing,
 	pipelines: $elm$core$Maybe$Nothing,
 	statuses: $elm$core$Maybe$Nothing,
 	users: $elm$core$Maybe$Nothing
@@ -7460,8 +7485,8 @@ var $elm$core$Maybe$withDefault = F2(
 			return _default;
 		}
 	});
-var $author$project$App$getLeads = F2(
-	function (user, status) {
+var $author$project$App$getLeads = F3(
+	function (user, status, master) {
 		var status2 = A2(
 			$elm$core$Maybe$withDefault,
 			'',
@@ -7471,10 +7496,19 @@ var $author$project$App$getLeads = F2(
 					return '&status=' + s;
 				},
 				status));
+		var master2 = A2(
+			$elm$core$Maybe$withDefault,
+			'',
+			A2(
+				$elm$core$Maybe$map,
+				function (s) {
+					return '&master=' + s;
+				},
+				master));
 		return $elm$http$Http$get(
 			{
 				expect: A2($elm$http$Http$expectJson, $author$project$App$GotLeads, $author$project$App$decodeLeads),
-				url: 'api/leads/?user=' + (user + status2)
+				url: 'api/leads/?user=' + (user + (status2 + master2))
 			});
 	});
 var $elm$core$List$head = function (list) {
@@ -7519,6 +7553,16 @@ var $author$project$App$update = F2(
 						p);
 				},
 				pipelines);
+		};
+		var indexedMasters = function (masters) {
+			return A2(
+				$elm$core$List$map,
+				function (s) {
+					return _Utils_Tuple2(
+						$elm$core$String$fromInt(s.id),
+						s);
+				},
+				masters);
 		};
 		switch (action.$) {
 			case 'GotLeads':
@@ -7618,17 +7662,40 @@ var $author$project$App$update = F2(
 							}),
 						$elm$core$Platform$Cmd$none);
 				}
+			case 'GotMasters':
+				var result = action.a;
+				if (result.$ === 'Ok') {
+					var masters = result.a;
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{
+								httpStatus: $author$project$App$Success,
+								masters: $elm$core$Maybe$Just(
+									$elm$core$Dict$fromList(
+										indexedMasters(masters)))
+							}),
+						$elm$core$Platform$Cmd$none);
+				} else {
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{
+								httpStatus: $author$project$App$LastFailure('Ошибка запроса мастеров')
+							}),
+						$elm$core$Platform$Cmd$none);
+				}
 			case 'RefreshLeads':
-				var _v5 = model.filter.user;
-				if (_v5.$ === 'Just') {
-					var user = _v5.a;
+				var _v6 = model.filter.user;
+				if (_v6.$ === 'Just') {
+					var user = _v6.a;
 					return _Utils_Tuple2(
 						_Utils_update(
 							model,
 							{
 								httpStatus: $author$project$App$Loading('Получаем данные')
 							}),
-						A2($author$project$App$getLeads, user, model.filter.status));
+						A3($author$project$App$getLeads, user, model.filter.status, model.filter.master));
 				} else {
 					return _Utils_Tuple2(
 						_Utils_update(
@@ -7653,16 +7720,16 @@ var $author$project$App$update = F2(
 							httpStatus: $author$project$App$Loading('Загружаем заявки...'),
 							leads: $elm$core$Maybe$Nothing
 						}),
-					A2($author$project$App$getLeads, user, model.filter.status));
-			default:
+					A3($author$project$App$getLeads, user, model.filter.status, model.filter.status));
+			case 'StatusSelected':
 				var status = action.a;
 				var status0 = (status === '') ? $elm$core$Maybe$Nothing : $elm$core$Maybe$Just(status);
 				var mfilter = model.filter;
 				var cmd = function () {
-					var _v6 = model.filter.user;
-					if (_v6.$ === 'Just') {
-						var user = _v6.a;
-						return A2($author$project$App$getLeads, user, status0);
+					var _v7 = model.filter.user;
+					if (_v7.$ === 'Just') {
+						var user = _v7.a;
+						return A3($author$project$App$getLeads, user, status0, model.filter.master);
 					} else {
 						return $elm$core$Platform$Cmd$none;
 					}
@@ -7674,6 +7741,30 @@ var $author$project$App$update = F2(
 							filter: _Utils_update(
 								mfilter,
 								{status: status0}),
+							httpStatus: $author$project$App$Loading('Загружаем заявки...'),
+							leads: $elm$core$Maybe$Nothing
+						}),
+					cmd);
+			default:
+				var master = action.a;
+				var mfilter = model.filter;
+				var master0 = (master === '') ? $elm$core$Maybe$Nothing : $elm$core$Maybe$Just(master);
+				var cmd = function () {
+					var _v8 = model.filter.user;
+					if (_v8.$ === 'Just') {
+						var user = _v8.a;
+						return A3($author$project$App$getLeads, user, model.filter.status, master0);
+					} else {
+						return $elm$core$Platform$Cmd$none;
+					}
+				}();
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							filter: _Utils_update(
+								mfilter,
+								{master: master0}),
 							httpStatus: $author$project$App$Loading('Загружаем заявки...'),
 							leads: $elm$core$Maybe$Nothing
 						}),
@@ -13405,6 +13496,9 @@ var $mdgriffith$elm_ui$Element$layoutWith = F3(
 	});
 var $mdgriffith$elm_ui$Element$layout = $mdgriffith$elm_ui$Element$layoutWith(
 	{options: _List_Nil});
+var $author$project$App$MasterSelected = function (a) {
+	return {$: 'MasterSelected', a: a};
+};
 var $author$project$App$StatusSelected = function (a) {
 	return {$: 'StatusSelected', a: a};
 };
@@ -13702,13 +13796,13 @@ var $mdgriffith$elm_ui$Element$wrappedRow = F2(
 	});
 var $author$project$App$viewFilters = function (model) {
 	var usersFilter = function () {
-		var _v3 = model.users;
-		if (_v3.$ === 'Just') {
-			var users = _v3.a;
+		var _v6 = model.users;
+		if (_v6.$ === 'Just') {
+			var users = _v6.a;
 			var selected = function (user) {
-				var _v5 = model.filter.user;
-				if (_v5.$ === 'Just') {
-					var userF = _v5.a;
+				var _v8 = model.filter.user;
+				if (_v8.$ === 'Just') {
+					var userF = _v8.a;
 					return $elm$html$Html$Attributes$selected(
 						_Utils_eq(user, userF));
 				} else {
@@ -13717,8 +13811,8 @@ var $author$project$App$viewFilters = function (model) {
 			};
 			var options = A2(
 				$elm$core$List$map,
-				function (_v4) {
-					var u = _v4.b;
+				function (_v7) {
+					var u = _v7.b;
 					return A2(
 						$elm$html$Html$option,
 						_List_fromArray(
@@ -13761,13 +13855,13 @@ var $author$project$App$viewFilters = function (model) {
 		}
 	}();
 	var statusesFilter = function () {
-		var _v0 = model.statuses;
-		if (_v0.$ === 'Just') {
-			var statuses = _v0.a;
+		var _v3 = model.statuses;
+		if (_v3.$ === 'Just') {
+			var statuses = _v3.a;
 			var selected = function (status) {
-				var _v2 = model.filter.status;
-				if (_v2.$ === 'Just') {
-					var statusF = _v2.a;
+				var _v5 = model.filter.status;
+				if (_v5.$ === 'Just') {
+					var statusF = _v5.a;
 					return $elm$html$Html$Attributes$selected(
 						_Utils_eq(status, statusF));
 				} else {
@@ -13776,8 +13870,8 @@ var $author$project$App$viewFilters = function (model) {
 			};
 			var options0 = A2(
 				$elm$core$List$map,
-				function (_v1) {
-					var u = _v1.b;
+				function (_v4) {
+					var u = _v4.b;
 					return A2(
 						$elm$html$Html$option,
 						_List_fromArray(
@@ -13833,11 +13927,84 @@ var $author$project$App$viewFilters = function (model) {
 				$mdgriffith$elm_ui$Element$text('Фильтр статусов не доступен'));
 		}
 	}();
+	var mastersFilter = function () {
+		var _v0 = model.masters;
+		if (_v0.$ === 'Just') {
+			var masters = _v0.a;
+			var selected = function (master) {
+				var _v2 = model.filter.master;
+				if (_v2.$ === 'Just') {
+					var masterF = _v2.a;
+					return $elm$html$Html$Attributes$selected(
+						_Utils_eq(master, masterF));
+				} else {
+					return $elm$html$Html$Attributes$selected(master === '');
+				}
+			};
+			var options0 = A2(
+				$elm$core$List$map,
+				function (_v1) {
+					var u = _v1.b;
+					return A2(
+						$elm$html$Html$option,
+						_List_fromArray(
+							[
+								selected(
+								$elm$core$String$fromInt(u.id)),
+								$elm$html$Html$Attributes$value(
+								$elm$core$String$fromInt(u.id))
+							]),
+						_List_fromArray(
+							[
+								$elm$html$Html$text(u.value)
+							]));
+				},
+				$elm$core$Dict$toList(masters));
+			var options = A2(
+				$elm$core$List$cons,
+				A2(
+					$elm$html$Html$option,
+					_List_fromArray(
+						[
+							selected(''),
+							$elm$html$Html$Attributes$value('')
+						]),
+					_List_fromArray(
+						[
+							$elm$html$Html$text('')
+						])),
+				options0);
+			return A2(
+				$mdgriffith$elm_ui$Element$el,
+				_List_fromArray(
+					[
+						$mdgriffith$elm_ui$Element$padding(10)
+					]),
+				$mdgriffith$elm_ui$Element$html(
+					A2(
+						$elm$html$Html$select,
+						_List_fromArray(
+							[
+								$elm$html$Html$Events$onInput($author$project$App$MasterSelected),
+								A2($elm$html$Html$Attributes$style, 'font-size', '1.5rem'),
+								A2($elm$html$Html$Attributes$style, 'height', '1.8rem')
+							]),
+						options)));
+		} else {
+			return A2(
+				$mdgriffith$elm_ui$Element$el,
+				_List_fromArray(
+					[
+						$mdgriffith$elm_ui$Element$padding(10)
+					]),
+				$mdgriffith$elm_ui$Element$text('Фильтр мастеров не доступен'));
+		}
+	}();
 	return A2(
 		$mdgriffith$elm_ui$Element$wrappedRow,
 		_List_Nil,
 		_List_fromArray(
-			[usersFilter, statusesFilter]));
+			[usersFilter, statusesFilter, mastersFilter]));
 };
 var $mdgriffith$elm_ui$Internal$Model$Class = F2(
 	function (a, b) {
@@ -15081,6 +15248,35 @@ var $author$project$App$viewLeads = function (model) {
 							$author$project$App$headerCellStyle,
 							$mdgriffith$elm_ui$Element$text('Мастер')),
 						view: function (l) {
+							var master = function () {
+								var _v1 = model.masters;
+								if (_v1.$ === 'Just') {
+									var masters = _v1.a;
+									var _v2 = l.master;
+									if (_v2.$ === 'Just') {
+										var masterId = _v2.a;
+										return A2(
+											$elm$core$Maybe$withDefault,
+											$elm$core$String$fromInt(masterId),
+											A2(
+												$elm$core$Maybe$map,
+												function ($) {
+													return $.value;
+												},
+												A2(
+													$elm$core$Dict$get,
+													$elm$core$String$fromInt(masterId),
+													masters)));
+									} else {
+										return '';
+									}
+								} else {
+									return A2(
+										$elm$core$Maybe$withDefault,
+										'',
+										A2($elm$core$Maybe$map, $elm$core$String$fromInt, l.master));
+								}
+							}();
 							return A2(
 								$mdgriffith$elm_ui$Element$el,
 								A2(
@@ -15088,11 +15284,7 @@ var $author$project$App$viewLeads = function (model) {
 									$mdgriffith$elm_ui$Element$Background$color(
 										$author$project$App$statusColor(l.statusId)),
 									$author$project$App$dataCellStyle),
-								$mdgriffith$elm_ui$Element$text(
-									A2(
-										$elm$core$Maybe$withDefault,
-										'',
-										A2($elm$core$Maybe$map, $elm$core$String$fromInt, l.master))));
+								$mdgriffith$elm_ui$Element$text(master));
 						},
 						width: $mdgriffith$elm_ui$Element$fill
 					},
@@ -15296,9 +15488,9 @@ var $author$project$App$viewLeads = function (model) {
 						view: function (l) {
 							var statusId = $elm$core$String$fromInt(l.statusId);
 							var status = function () {
-								var _v1 = model.statuses;
-								if (_v1.$ === 'Just') {
-									var statuses = _v1.a;
+								var _v3 = model.statuses;
+								if (_v3.$ === 'Just') {
+									var statuses = _v3.a;
 									return A2(
 										$elm$core$Maybe$withDefault,
 										statusId,
@@ -15338,19 +15530,27 @@ var $author$project$App$viewLeads = function (model) {
 };
 var $author$project$App$viewModelStatus = function (model) {
 	var usersStatus = function () {
-		var _v2 = model.users;
-		if (_v2.$ === 'Just') {
+		var _v3 = model.users;
+		if (_v3.$ === 'Just') {
 			return 'Список пользователей обновлен';
 		} else {
 			return 'Список пользователей не обновлен';
 		}
 	}();
 	var statusesStatus = function () {
-		var _v1 = model.statuses;
-		if (_v1.$ === 'Just') {
+		var _v2 = model.statuses;
+		if (_v2.$ === 'Just') {
 			return 'Список статусов обновлен';
 		} else {
 			return 'Список статусов не обновлен';
+		}
+	}();
+	var mastersStatus = function () {
+		var _v1 = model.masters;
+		if (_v1.$ === 'Just') {
+			return 'Список мастеров обновлен';
+		} else {
+			return 'Список мастеров не обновлен';
 		}
 	}();
 	var leadsStatus = function () {
@@ -15386,7 +15586,14 @@ var $author$project$App$viewModelStatus = function (model) {
 					[
 						$mdgriffith$elm_ui$Element$padding(10)
 					]),
-				$mdgriffith$elm_ui$Element$text(usersStatus))
+				$mdgriffith$elm_ui$Element$text(usersStatus)),
+				A2(
+				$mdgriffith$elm_ui$Element$el,
+				_List_fromArray(
+					[
+						$mdgriffith$elm_ui$Element$padding(10)
+					]),
+				$mdgriffith$elm_ui$Element$text(mastersStatus))
 			]));
 };
 var $author$project$App$view = function (model) {
@@ -15411,7 +15618,7 @@ var $author$project$App$main = $elm$browser$Browser$element(
 				$author$project$App$initModel,
 				$elm$core$Platform$Cmd$batch(
 					_List_fromArray(
-						[$author$project$App$getUsers, $author$project$App$getPipelines])));
+						[$author$project$App$getUsers, $author$project$App$getPipelines, $author$project$App$getMasters])));
 		},
 		subscriptions: function (_v1) {
 			return $elm$core$Platform$Sub$none;
