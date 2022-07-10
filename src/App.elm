@@ -46,6 +46,9 @@ type alias Filter = {
   , pipeline : Maybe String
   , status   : Maybe String
   , master   : Maybe String
+
+  , created_at_from : Maybe String
+  , created_at_to   : Maybe String
   }
 
 decodePipelines : D.Decoder (List Pipeline)
@@ -99,6 +102,7 @@ type alias Lead = {
   , worksCost    : Float -- Стоимость работ для клиента
   , netWorksCost : Float -- Стоимость работ
   , officeIncome : Float -- Перевод в офис, Заработал Офис
+  , createdAt    : Posix -- Дата создания
   , closedDate   : Maybe Posix -- Дата закрытия
   , statusId     : Int
   }
@@ -121,6 +125,7 @@ decodeLeads  =
     |> andMap (D.field "_lworksCost" D.float)
     |> andMap (D.field "_lnetWorksCost" D.float)
     |> andMap (D.field "_lofficeIncome" D.float)
+    |> andMap (D.field "_lcreatedAt" decoder)
     |> andMap (D.maybe (D.field "_lclosedDate" decoder))
     |> andMap (D.field "_lstatusId" D.int)
     |> D.list
@@ -139,6 +144,8 @@ type Msg =
   | UserSelected String
   | StatusSelected String
   | MasterSelected String
+  | CreatedAtFromSelected String
+  | CreatedAtToSelected String
 
   | RefreshLeads
   
@@ -162,7 +169,15 @@ initModel =
   {
     httpStatus = Success
 
-  , filter = {user = Nothing, pipeline = Nothing, status = Nothing, master = Nothing}
+  , filter = {
+        user = Nothing
+      , pipeline = Nothing
+      , status = Nothing
+      , master = Nothing
+
+      , created_at_from = Nothing
+      , created_at_to = Nothing
+      }
   , pipelines = Nothing
   , statuses = Nothing
   , users = Nothing
@@ -173,13 +188,15 @@ initModel =
   }
 
 -- !! Сделать сразу передачу Filter 
-getLeads : String -> Maybe String -> Maybe String -> Cmd Msg
-getLeads user status master = 
+getLeads : String -> Maybe String -> Maybe String -> Maybe String -> Maybe String -> Cmd Msg
+getLeads user status master created_at_from created_at_to = 
     let status2 = Maybe.map (\s -> "&status=" ++ s) status |> Maybe.withDefault ""
         master2 = Maybe.map (\s -> "&master=" ++ s) master |> Maybe.withDefault ""
+        created_at_from2 = Maybe.map (\s -> "&created_at_from=" ++ s) created_at_from |> Maybe.withDefault ""
+        created_at_to2 = Maybe.map (\s -> "&created_at_to=" ++ s) created_at_to |> Maybe.withDefault ""
     in
     Http.get
-      { url = "api/leads/?user=" ++ user ++ status2 ++ master2
+      { url = "api/leads/?user=" ++ user ++ status2 ++ master2 ++ created_at_from2 ++ created_at_to2
       , expect = Http.expectJson GotLeads decodeLeads
       }
 
@@ -250,20 +267,20 @@ update action model =
 
     RefreshLeads -> 
       case model.filter.user of
-          Just user -> ({ model | httpStatus = Loading "Получаем данные"}, getLeads user model.filter.status model.filter.master)
+          Just user -> ({ model | httpStatus = Loading "Получаем данные"}, getLeads user model.filter.status model.filter.master model.filter.created_at_from model.filter.created_at_to)
           Nothing -> ({model | httpStatus = LastFailure "Укажите пользователя"}, Cmd.none)
 
     UserSelected user -> 
       let mfilter = model.filter
       in
-      ({ model | filter = { mfilter | user = Just user}, leads = Nothing, httpStatus = Loading "Загружаем заявки..."}, getLeads user model.filter.status model.filter.status)
+      ({ model | filter = { mfilter | user = Just user}, leads = Nothing, httpStatus = Loading "Загружаем заявки..."}, getLeads user model.filter.status model.filter.status  model.filter.created_at_from model.filter.created_at_to)
 
     StatusSelected status -> 
       let mfilter = model.filter
           status0 = if status == "" then Nothing else Just status
           cmd = 
             case model.filter.user of
-                Just user -> getLeads user status0 model.filter.master
+                Just user -> getLeads user status0 model.filter.master  model.filter.created_at_from model.filter.created_at_to
                 _         -> Cmd.none
       in
       ({ model | filter = { mfilter | status = status0}, leads = Nothing, httpStatus = Loading "Загружаем заявки..."}, cmd)      
@@ -273,10 +290,30 @@ update action model =
           master0 = if master == "" then Nothing else Just master
           cmd = 
             case model.filter.user of
-                Just user -> getLeads user model.filter.status master0
+                Just user -> getLeads user model.filter.status master0  model.filter.created_at_from model.filter.created_at_to
                 _         -> Cmd.none
       in
       ({ model | filter = { mfilter | master = master0}, leads = Nothing, httpStatus = Loading "Загружаем заявки..."}, cmd)
+
+    CreatedAtFromSelected created_at_from -> 
+      let mfilter = model.filter
+          created_at_from0 = if created_at_from == "" then Nothing else Just created_at_from
+          cmd = 
+            case model.filter.user of
+                Just user -> getLeads user model.filter.status model.filter.master created_at_from0 model.filter.created_at_to
+                _         -> Cmd.none
+      in
+      ({ model | filter = { mfilter | created_at_from = created_at_from0}, leads = Nothing, httpStatus = Loading "Загружаем заявки..."}, cmd)      
+
+    CreatedAtToSelected created_at_to -> 
+      let mfilter = model.filter
+          created_at_to0 = if created_at_to == "" then Nothing else Just created_at_to
+          cmd = 
+            case model.filter.user of
+                Just user -> getLeads user model.filter.status model.filter.master model.filter.created_at_from created_at_to0
+                _         -> Cmd.none
+      in
+      ({ model | filter = { mfilter | created_at_to = created_at_to0}, leads = Nothing, httpStatus = Loading "Загружаем заявки..."}, cmd)      
 
 main : Program () Model Msg
 main =  Browser.element { init = \_ -> (initModel, Cmd.batch [getUsers, getPipelines, getMasters]), update = update, view = view, subscriptions = \_ -> Sub.none}
@@ -344,8 +381,21 @@ viewFilters model =
                 E.el [E.padding 10] <| E.html (Html.select [Html.onInput MasterSelected, Html.style "font-size" "1.5rem", Html.style "height" "1.8rem"] options)
 
         Nothing -> E.el [E.padding 10] (E.text "Фильтр мастеров не доступен")
+
+    createdAtFromFilter = 
+      let val = Maybe.withDefault "" model.filter.created_at_from
+          label = EI.labelAbove [] <| E.text "Создано с"
+      in
+      E.el [E.padding 10] <| EI.text [E.htmlAttribute (Html.type_ "date"), E.htmlAttribute (Html.value val)] {onChange = CreatedAtFromSelected, text = "", placeholder = Nothing, label = label}
+
+    createdAtToFilter = 
+      let val = Maybe.withDefault "" model.filter.created_at_to
+          label = EI.labelAbove [] <| E.text "Создано по"
+      in
+      E.el [E.padding 10] <| EI.text [E.htmlAttribute (Html.type_ "date"), E.htmlAttribute (Html.value val)] {onChange = CreatedAtToSelected, text = "", placeholder = Nothing, label = label}
+
   in
-    E.wrappedRow [] [usersFilter, statusesFilter, mastersFilter]
+    E.wrappedRow [] [usersFilter, statusesFilter, mastersFilter, createdAtFromFilter, createdAtToFilter]
 
 
 viewLeads : Model -> E.Element Msg
@@ -396,6 +446,11 @@ viewLeads model =
           , width = E.fill
           , view = \l -> E.el (EBg.color (statusColor l.statusId) :: dataCellStyle) <| E.text (String.fromFloat l.masterSalary)
           }
+        , {
+            header = E.el headerCellStyle <| E.text "Дата создания"
+          , width = E.fill
+          , view = \l -> E.el (EBg.color (statusColor l.statusId) :: dataCellStyle) <| E.text (format config "%d.%m.%Y %I:%M:%S" utc l.createdAt)
+          }          
         , {
             header = E.el headerCellStyle <| E.text "Адрес заявки"
           , width = E.fill |> E.maximum 200
