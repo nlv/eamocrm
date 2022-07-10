@@ -9,20 +9,31 @@ import Element.Background as EBg
 import Element.Font as EF
 import Http
 import Browser
+import Task
 
 import Json.Decode as D
 import Json.Decode.Extra exposing (andMap)
 
-import Time exposing (Posix, utc)
+import Time exposing (Posix, utc, Weekday)
+import DateTime
+import Extra.DateTime as DateTimeExtra
 import Iso8601 exposing (decoder)
 import Time.Format exposing (format)
 import Time.Format.Config.Config_ru_ru exposing (config)
 
 import Maybe exposing (withDefault)
-import Html.Attributes as Html
+import Html.Attributes as HtmlA 
 import Html.Events as Html
 
+import DateRangePicker exposing (SelectedDateRange)
+import DateRangePicker.Types exposing (DateLimit(..), ViewType(..))
+import Extra.DateTime as DateTimeExtra
+-- import Extra.I18n
+import Components.Double.DateRangePicker as DoubleDateRangePicker
+import Components.WithInput.Double.DateRangePicker as DoubleDateRangePickerWithInput
+
 import Dict
+import Extra.I18n exposing (Language(..), getI18n)
 
 type alias Status = {
     id   : Int
@@ -46,6 +57,7 @@ type alias Filter = {
   , pipeline : Maybe String
   , status   : Maybe String
   , master   : Maybe String
+  , created_at : Maybe SelectedDateRange
   }
 
 decodePipelines : D.Decoder (List Pipeline)
@@ -141,6 +153,11 @@ type Msg =
   | MasterSelected String
 
   | RefreshLeads
+
+  | InitialiseTime Time.Posix
+
+  | CreatedAtPickerMsg DoubleDateRangePicker.Msg
+  | CreatedAtPickerWithInputMsg DoubleDateRangePickerWithInput.Msg
   
 
 type HttpStatus = LastFailure String | Loading String | Success
@@ -154,6 +171,14 @@ type alias Model = {
   , statuses : Maybe (Dict.Dict String Status)  
   , masters : Maybe (Dict.Dict String Enum)  
 
+  , created_at_picker : Maybe DoubleDateRangePicker.Model
+
+  , withInput : {
+        created_at_picker : Maybe DoubleDateRangePickerWithInput.Model
+      } 
+
+
+
   , leads : Maybe (List Lead)
   }
 
@@ -162,13 +187,24 @@ initModel =
   {
     httpStatus = Success
 
-  , filter = {user = Nothing, pipeline = Nothing, status = Nothing, master = Nothing}
+  , filter = {
+        user = Nothing
+      , pipeline = Nothing
+      , status = Nothing
+      , master = Nothing
+      , created_at = Nothing
+      }
   , pipelines = Nothing
   , statuses = Nothing
   , users = Nothing
   , masters = Nothing
 
   , leads = Nothing
+  , created_at_picker = Nothing
+
+  , withInput = {created_at_picker = Nothing}
+
+
 
   }
 
@@ -216,6 +252,53 @@ update action model =
       indexedMasters masters = List.map (\s -> (String.fromInt s.id, s)) masters
   in
   case action of
+
+    InitialiseTime todayPosix ->
+      ({model | 
+          created_at_picker = Just (DoubleDateRangePicker.init Russian Time.Mon todayPosix)
+        , withInput = { created_at_picker = Just (DoubleDateRangePickerWithInput.init Russian Time.Mon todayPosix)}
+       }, Cmd.none
+       )
+
+    CreatedAtPickerMsg subMsg ->
+        case model.created_at_picker of
+            Just picker ->
+                let
+                    ( subModel, subCmd ) =
+                        DoubleDateRangePicker.update subMsg picker
+                in
+                ( { model
+                    | created_at_picker = Just subModel
+                  }
+                , Cmd.map CreatedAtPickerMsg subCmd
+                )
+
+            Nothing ->
+                ( model
+                , Cmd.none
+                )       
+
+    CreatedAtPickerWithInputMsg subMsg ->
+            case model.withInput.created_at_picker of
+                Just picker ->
+                    let
+                        ( subModel, subCmd ) =
+                            DoubleDateRangePickerWithInput.update subMsg picker
+
+                        { withInput } =
+                            model
+
+                        updatedWithInput =
+                            { withInput | created_at_picker = Just subModel }
+                    in
+                    ( { model | withInput = updatedWithInput }
+                    , Cmd.none
+                    )
+
+                Nothing ->
+                    ( model
+                    , Cmd.none
+                    )                
 
     GotLeads result ->
       case result of
@@ -279,7 +362,17 @@ update action model =
       ({ model | filter = { mfilter | master = master0}, leads = Nothing, httpStatus = Loading "Загружаем заявки..."}, cmd)
 
 main : Program () Model Msg
-main =  Browser.element { init = \_ -> (initModel, Cmd.batch [getUsers, getPipelines, getMasters]), update = update, view = view, subscriptions = \_ -> Sub.none}
+main =  Browser.element { init = \_ -> (initModel, Cmd.batch [Task.perform InitialiseTime Time.now, getUsers, getPipelines, getMasters]), update = update, view = view, subscriptions = \_ -> Sub.none}
+
+subscriptions : Model -> Sub Msg
+subscriptions model = 
+  case model.withInput.created_at_picker of
+    Just picker ->
+      -- Sub.none
+      Sub.map CreatedAtPickerWithInputMsg (DoubleDateRangePickerWithInput.subscriptions picker)
+
+    Nothing ->
+      Sub.none
 
 view : Model -> Html.Html Msg
 view model = 
@@ -307,11 +400,11 @@ viewFilters model =
           let
             selected user = 
               case model.filter.user of
-                  Just userF -> Html.selected (user == userF)
-                  _            -> Html.selected (user == "")
-            options = List.map (\(_, u) -> Html.option [selected (String.fromInt u.id), Html.value (String.fromInt u.id)] [Html.text u.name]) (Dict.toList users)
+                  Just userF -> HtmlA.selected (user == userF)
+                  _            -> HtmlA.selected (user == "")
+            options = List.map (\(_, u) -> Html.option [selected (String.fromInt u.id), HtmlA.value (String.fromInt u.id)] [Html.text u.name]) (Dict.toList users)
             in
-                E.el [E.padding 10] <| E.html (Html.select [Html.onInput UserSelected, Html.style "font-size" "1.5rem", Html.style "height" "1.8rem"] options)
+                E.el [E.padding 10] <| E.html (Html.select [Html.onInput UserSelected, HtmlA.style "font-size" "1.5rem", HtmlA.style "height" "1.8rem"] options)
 
         Nothing -> E.el [E.padding 10] (E.text "Фильтр пользователей не доступен")
 
@@ -321,12 +414,12 @@ viewFilters model =
           let
             selected status = 
               case model.filter.status of
-                  Just statusF -> Html.selected (status == statusF)
-                  _            -> Html.selected (status == "")
-            options0 = List.map (\(_, u) -> Html.option [selected (String.fromInt u.id), Html.value (String.fromInt u.id)] [Html.text u.name]) (Dict.toList statuses)
-            options = Html.option [selected "", Html.value ""] [Html.text ""] :: options0
+                  Just statusF -> HtmlA.selected (status == statusF)
+                  _            -> HtmlA.selected (status == "")
+            options0 = List.map (\(_, u) -> Html.option [selected (String.fromInt u.id), HtmlA.value (String.fromInt u.id)] [Html.text u.name]) (Dict.toList statuses)
+            options = Html.option [selected "", HtmlA.value ""] [Html.text ""] :: options0
             in
-                E.el [E.padding 10] <| E.html (Html.select [Html.onInput StatusSelected, Html.style "font-size" "1.5rem", Html.style "height" "1.8rem"] options)
+                E.el [E.padding 10] <| E.html (Html.select [Html.onInput StatusSelected, HtmlA.style "font-size" "1.5rem", HtmlA.style "height" "1.8rem"] options)
 
         Nothing -> E.el [E.padding 10] (E.text "Фильтр статусов не доступен")
 
@@ -336,16 +429,25 @@ viewFilters model =
           let
             selected master = 
               case model.filter.master of
-                  Just masterF -> Html.selected (master == masterF)
-                  _            -> Html.selected (master == "")
-            options0 = List.map (\(_, u) -> Html.option [selected (String.fromInt u.id), Html.value (String.fromInt u.id)] [Html.text u.value]) (Dict.toList masters)
-            options = Html.option [selected "", Html.value ""] [Html.text ""] :: options0
+                  Just masterF -> HtmlA.selected (master == masterF)
+                  _            -> HtmlA.selected (master == "")
+            options0 = List.map (\(_, u) -> Html.option [selected (String.fromInt u.id), HtmlA.value (String.fromInt u.id)] [Html.text u.value]) (Dict.toList masters)
+            options = Html.option [selected "", HtmlA.value ""] [Html.text ""] :: options0
             in
-                E.el [E.padding 10] <| E.html (Html.select [Html.onInput MasterSelected, Html.style "font-size" "1.5rem", Html.style "height" "1.8rem"] options)
+                E.el [E.padding 10, E.htmlAttribute <| HtmlA.class "picker-row"] <| E.html (Html.select [Html.onInput MasterSelected, HtmlA.style "font-size" "1.5rem", HtmlA.style "height" "1.8rem"] options)
 
         Nothing -> E.el [E.padding 10] (E.text "Фильтр мастеров не доступен")
+
+    createdAtFilter = 
+      case model.created_at_picker of
+        Just picker ->
+          E.el [E.padding 10] <| E.html (Html.map CreatedAtPickerMsg (DoubleDateRangePicker.view picker))
+
+        Nothing ->
+          E.el [E.padding 10] <| E.text "Выбор даты создания заявки не инициализирован!"
+
   in
-    E.wrappedRow [] [usersFilter, statusesFilter, mastersFilter]
+    E.wrappedRow [] [usersFilter, statusesFilter, mastersFilter, createdAtFilter]
 
 
 viewLeads : Model -> E.Element Msg

@@ -1,0 +1,29 @@
+.date-time-picker,
+.date-range-picker {
+    display: flex;
+    font-family: 'Roboto', sans-serif;
+
+    --white: #FFFFFF;
+    --black: #000000;
+
+    --brand-accent: #D71A21;
+    --brand-accent-light: #F7D1D2;
+    --brand-accent-lightest: #FBE9E9;
+    --brand-primary: #006698;
+    --concrete-grey: #9B9B9B;
+    --off-white: #F6F6F6;
+    --rich-grey: #4A4A4A;
+
+    --regular-weight: 400;
+    --medium-weight: 500;
+}
+
+.no-select {
+    -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none;   /* Safari */
+    -khtml-user-select: none;    /* Konqueror HTML */
+    -moz-user-select: none;      /* Firefox */
+    -ms-user-select: none;       /* Internet Explorer/Edge */
+    user-select: none;           /* Non-prefixed version, currently
+                                    supported by Chrome and Opera */
+}

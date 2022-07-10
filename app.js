@@ -4548,6 +4548,52 @@ function _Http_track(router, xhr, tracker)
 }
 
 
+function _Time_now(millisToPosix)
+{
+	return _Scheduler_binding(function(callback)
+	{
+		callback(_Scheduler_succeed(millisToPosix(Date.now())));
+	});
+}
+
+var _Time_setInterval = F2(function(interval, task)
+{
+	return _Scheduler_binding(function(callback)
+	{
+		var id = setInterval(function() { _Scheduler_rawSpawn(task); }, interval);
+		return function() { clearInterval(id); };
+	});
+});
+
+function _Time_here()
+{
+	return _Scheduler_binding(function(callback)
+	{
+		callback(_Scheduler_succeed(
+			A2($elm$time$Time$customZone, -(new Date().getTimezoneOffset()), _List_Nil)
+		));
+	});
+}
+
+
+function _Time_getZoneName()
+{
+	return _Scheduler_binding(function(callback)
+	{
+		try
+		{
+			var name = $elm$time$Time$Name(Intl.DateTimeFormat().resolvedOptions().timeZone);
+		}
+		catch (e)
+		{
+			var name = $elm$time$Time$Offset(new Date().getTimezoneOffset());
+		}
+		callback(_Scheduler_succeed(name));
+	});
+}
+
+
+
 
 // STRINGS
 
@@ -4893,6 +4939,9 @@ var $elm$core$Set$toList = function (_v0) {
 var $elm$core$Basics$EQ = {$: 'EQ'};
 var $elm$core$Basics$GT = {$: 'GT'};
 var $elm$core$Basics$LT = {$: 'LT'};
+var $author$project$App$InitialiseTime = function (a) {
+	return {$: 'InitialiseTime', a: a};
+};
 var $elm$core$Result$Err = function (a) {
 	return {$: 'Err', a: a};
 };
@@ -6472,22 +6521,45 @@ var $author$project$App$getUsers = $elm$http$Http$get(
 	});
 var $author$project$App$Success = {$: 'Success'};
 var $author$project$App$initModel = {
-	filter: {master: $elm$core$Maybe$Nothing, pipeline: $elm$core$Maybe$Nothing, status: $elm$core$Maybe$Nothing, user: $elm$core$Maybe$Nothing},
+	created_at_picker: $elm$core$Maybe$Nothing,
+	filter: {created_at: $elm$core$Maybe$Nothing, master: $elm$core$Maybe$Nothing, pipeline: $elm$core$Maybe$Nothing, status: $elm$core$Maybe$Nothing, user: $elm$core$Maybe$Nothing},
 	httpStatus: $author$project$App$Success,
 	leads: $elm$core$Maybe$Nothing,
 	masters: $elm$core$Maybe$Nothing,
 	pipelines: $elm$core$Maybe$Nothing,
 	statuses: $elm$core$Maybe$Nothing,
-	users: $elm$core$Maybe$Nothing
+	users: $elm$core$Maybe$Nothing,
+	withInput: {created_at_picker: $elm$core$Maybe$Nothing}
 };
 var $elm$core$Platform$Sub$batch = _Platform_batch;
 var $elm$core$Platform$Sub$none = $elm$core$Platform$Sub$batch(_List_Nil);
+var $elm$time$Time$Name = function (a) {
+	return {$: 'Name', a: a};
+};
+var $elm$time$Time$Offset = function (a) {
+	return {$: 'Offset', a: a};
+};
+var $elm$time$Time$Zone = F2(
+	function (a, b) {
+		return {$: 'Zone', a: a, b: b};
+	});
+var $elm$time$Time$customZone = $elm$time$Time$Zone;
+var $elm$time$Time$Posix = function (a) {
+	return {$: 'Posix', a: a};
+};
+var $elm$time$Time$millisToPosix = $elm$time$Time$Posix;
+var $elm$time$Time$now = _Time_now($elm$time$Time$millisToPosix);
+var $author$project$App$CreatedAtPickerMsg = function (a) {
+	return {$: 'CreatedAtPickerMsg', a: a};
+};
 var $author$project$App$LastFailure = function (a) {
 	return {$: 'LastFailure', a: a};
 };
 var $author$project$App$Loading = function (a) {
 	return {$: 'Loading', a: a};
 };
+var $elm$time$Time$Mon = {$: 'Mon'};
+var $author$project$Extra$I18n$Russian = {$: 'Russian'};
 var $elm$core$List$filter = F2(
 	function (isGood, list) {
 		return A3(
@@ -6818,10 +6890,6 @@ var $rtfeldman$elm_iso8601_date_strings$Iso8601$fractionsOfASecondInMs = A2(
 	},
 	$elm$parser$Parser$getChompedString(
 		$elm$parser$Parser$chompWhile($elm$core$Char$isDigit)));
-var $elm$time$Time$Posix = function (a) {
-	return {$: 'Posix', a: a};
-};
-var $elm$time$Time$millisToPosix = $elm$time$Time$Posix;
 var $rtfeldman$elm_iso8601_date_strings$Iso8601$fromParts = F6(
 	function (monthYearDayMs, hour, minute, second, ms, utcOffsetMinutes) {
 		return $elm$time$Time$millisToPosix((((monthYearDayMs + (((hour * 60) * 60) * 1000)) + (((minute - utcOffsetMinutes) * 60) * 1000)) + (second * 1000)) + ms);
@@ -7520,8 +7588,2858 @@ var $elm$core$List$head = function (list) {
 		return $elm$core$Maybe$Nothing;
 	}
 };
+var $PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Types$DateLimit = function (a) {
+	return {$: 'DateLimit', a: a};
+};
+var $PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Types$Double = {$: 'Double'};
+var $PanagiotisGeorgiadis$elm_datetime$DateTime$Internal$DateTime = function (a) {
+	return {$: 'DateTime', a: a};
+};
+var $PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$Date = function (a) {
+	return {$: 'Date', a: a};
+};
+var $PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$Year = function (a) {
+	return {$: 'Year', a: a};
+};
+var $PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$dayToInt = function (_v0) {
+	var day = _v0.a;
+	return day;
+};
+var $PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$compareDays = F2(
+	function (lhs, rhs) {
+		return A2(
+			$elm$core$Basics$compare,
+			$PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$dayToInt(lhs),
+			$PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$dayToInt(rhs));
+	});
+var $PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$Day = function (a) {
+	return {$: 'Day', a: a};
+};
+var $PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$isLeapYear = function (_v0) {
+	var _int = _v0.a;
+	return (!A2($elm$core$Basics$modBy, 4, _int)) && ((!A2($elm$core$Basics$modBy, 400, _int)) || (!(!A2($elm$core$Basics$modBy, 100, _int))));
+};
+var $PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$lastDayOf = F2(
+	function (year, month) {
+		switch (month.$) {
+			case 'Jan':
+				return $PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$Day(31);
+			case 'Feb':
+				return $PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$isLeapYear(year) ? $PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$Day(29) : $PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$Day(28);
+			case 'Mar':
+				return $PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$Day(31);
+			case 'Apr':
+				return $PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$Day(30);
+			case 'May':
+				return $PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$Day(31);
+			case 'Jun':
+				return $PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$Day(30);
+			case 'Jul':
+				return $PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$Day(31);
+			case 'Aug':
+				return $PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$Day(31);
+			case 'Sep':
+				return $PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$Day(30);
+			case 'Oct':
+				return $PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$Day(31);
+			case 'Nov':
+				return $PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$Day(30);
+			default:
+				return $PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$Day(31);
+		}
+	});
+var $elm$time$Time$Apr = {$: 'Apr'};
+var $elm$time$Time$Aug = {$: 'Aug'};
+var $elm$time$Time$Dec = {$: 'Dec'};
+var $elm$time$Time$Feb = {$: 'Feb'};
+var $elm$time$Time$Jan = {$: 'Jan'};
+var $elm$time$Time$Jul = {$: 'Jul'};
+var $elm$time$Time$Jun = {$: 'Jun'};
+var $elm$time$Time$Mar = {$: 'Mar'};
+var $elm$time$Time$May = {$: 'May'};
+var $elm$time$Time$Nov = {$: 'Nov'};
+var $elm$time$Time$Oct = {$: 'Oct'};
+var $elm$time$Time$Sep = {$: 'Sep'};
+var $PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$rollMonthBackwards = function (month) {
+	switch (month.$) {
+		case 'Jan':
+			return $elm$time$Time$Dec;
+		case 'Feb':
+			return $elm$time$Time$Jan;
+		case 'Mar':
+			return $elm$time$Time$Feb;
+		case 'Apr':
+			return $elm$time$Time$Mar;
+		case 'May':
+			return $elm$time$Time$Apr;
+		case 'Jun':
+			return $elm$time$Time$May;
+		case 'Jul':
+			return $elm$time$Time$Jun;
+		case 'Aug':
+			return $elm$time$Time$Jul;
+		case 'Sep':
+			return $elm$time$Time$Aug;
+		case 'Oct':
+			return $elm$time$Time$Sep;
+		case 'Nov':
+			return $elm$time$Time$Oct;
+		default:
+			return $elm$time$Time$Nov;
+	}
+};
+var $PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$yearToInt = function (_v0) {
+	var year = _v0.a;
+	return year;
+};
+var $PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$decrementMonth = function (_v0) {
+	var date = _v0.a;
+	var updatedMonth = $PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$rollMonthBackwards(date.month);
+	var updatedYear = function () {
+		if (updatedMonth.$ === 'Dec') {
+			return $PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$Year(
+				$PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$yearToInt(date.year) - 1);
+		} else {
+			return date.year;
+		}
+	}();
+	var lastDayOfUpdatedMonth = A2($PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$lastDayOf, updatedYear, updatedMonth);
+	var updatedDay = function () {
+		var _v1 = A2($PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$compareDays, date.day, lastDayOfUpdatedMonth);
+		if (_v1.$ === 'GT') {
+			return lastDayOfUpdatedMonth;
+		} else {
+			return date.day;
+		}
+	}();
+	return $PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$Date(
+		{day: updatedDay, month: updatedMonth, year: updatedYear});
+};
+var $PanagiotisGeorgiadis$elm_datetime$Calendar$decrementMonth = $PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$decrementMonth;
+var $PanagiotisGeorgiadis$elm_datetime$DateTime$Internal$decrementMonth = function (_v0) {
+	var date = _v0.a.date;
+	var time = _v0.a.time;
+	return $PanagiotisGeorgiadis$elm_datetime$DateTime$Internal$DateTime(
+		{
+			date: $PanagiotisGeorgiadis$elm_datetime$Calendar$decrementMonth(date),
+			time: time
+		});
+};
+var $PanagiotisGeorgiadis$elm_datetime$DateTime$decrementMonth = $PanagiotisGeorgiadis$elm_datetime$DateTime$Internal$decrementMonth;
+var $author$project$Extra$DateTime$decrementMonths = F2(
+	function (count, dateTime) {
+		decrementMonths:
+		while (true) {
+			if (count > 0) {
+				var $temp$count = count - 1,
+					$temp$dateTime = $PanagiotisGeorgiadis$elm_datetime$DateTime$decrementMonth(dateTime);
+				count = $temp$count;
+				dateTime = $temp$dateTime;
+				continue decrementMonths;
+			} else {
+				return dateTime;
+			}
+		}
+	});
+var $elm$time$Time$flooredDiv = F2(
+	function (numerator, denominator) {
+		return $elm$core$Basics$floor(numerator / denominator);
+	});
+var $elm$time$Time$posixToMillis = function (_v0) {
+	var millis = _v0.a;
+	return millis;
+};
+var $elm$time$Time$toAdjustedMinutesHelp = F3(
+	function (defaultOffset, posixMinutes, eras) {
+		toAdjustedMinutesHelp:
+		while (true) {
+			if (!eras.b) {
+				return posixMinutes + defaultOffset;
+			} else {
+				var era = eras.a;
+				var olderEras = eras.b;
+				if (_Utils_cmp(era.start, posixMinutes) < 0) {
+					return posixMinutes + era.offset;
+				} else {
+					var $temp$defaultOffset = defaultOffset,
+						$temp$posixMinutes = posixMinutes,
+						$temp$eras = olderEras;
+					defaultOffset = $temp$defaultOffset;
+					posixMinutes = $temp$posixMinutes;
+					eras = $temp$eras;
+					continue toAdjustedMinutesHelp;
+				}
+			}
+		}
+	});
+var $elm$time$Time$toAdjustedMinutes = F2(
+	function (_v0, time) {
+		var defaultOffset = _v0.a;
+		var eras = _v0.b;
+		return A3(
+			$elm$time$Time$toAdjustedMinutesHelp,
+			defaultOffset,
+			A2(
+				$elm$time$Time$flooredDiv,
+				$elm$time$Time$posixToMillis(time),
+				60000),
+			eras);
+	});
+var $elm$core$Basics$ge = _Utils_ge;
+var $elm$time$Time$toCivil = function (minutes) {
+	var rawDay = A2($elm$time$Time$flooredDiv, minutes, 60 * 24) + 719468;
+	var era = (((rawDay >= 0) ? rawDay : (rawDay - 146096)) / 146097) | 0;
+	var dayOfEra = rawDay - (era * 146097);
+	var yearOfEra = ((((dayOfEra - ((dayOfEra / 1460) | 0)) + ((dayOfEra / 36524) | 0)) - ((dayOfEra / 146096) | 0)) / 365) | 0;
+	var dayOfYear = dayOfEra - (((365 * yearOfEra) + ((yearOfEra / 4) | 0)) - ((yearOfEra / 100) | 0));
+	var mp = (((5 * dayOfYear) + 2) / 153) | 0;
+	var month = mp + ((mp < 10) ? 3 : (-9));
+	var year = yearOfEra + (era * 400);
+	return {
+		day: (dayOfYear - ((((153 * mp) + 2) / 5) | 0)) + 1,
+		month: month,
+		year: year + ((month <= 2) ? 1 : 0)
+	};
+};
+var $elm$time$Time$toDay = F2(
+	function (zone, time) {
+		return $elm$time$Time$toCivil(
+			A2($elm$time$Time$toAdjustedMinutes, zone, time)).day;
+	});
+var $elm$time$Time$toMonth = F2(
+	function (zone, time) {
+		var _v0 = $elm$time$Time$toCivil(
+			A2($elm$time$Time$toAdjustedMinutes, zone, time)).month;
+		switch (_v0) {
+			case 1:
+				return $elm$time$Time$Jan;
+			case 2:
+				return $elm$time$Time$Feb;
+			case 3:
+				return $elm$time$Time$Mar;
+			case 4:
+				return $elm$time$Time$Apr;
+			case 5:
+				return $elm$time$Time$May;
+			case 6:
+				return $elm$time$Time$Jun;
+			case 7:
+				return $elm$time$Time$Jul;
+			case 8:
+				return $elm$time$Time$Aug;
+			case 9:
+				return $elm$time$Time$Sep;
+			case 10:
+				return $elm$time$Time$Oct;
+			case 11:
+				return $elm$time$Time$Nov;
+			default:
+				return $elm$time$Time$Dec;
+		}
+	});
+var $elm$time$Time$toYear = F2(
+	function (zone, time) {
+		return $elm$time$Time$toCivil(
+			A2($elm$time$Time$toAdjustedMinutes, zone, time)).year;
+	});
+var $elm$time$Time$utc = A2($elm$time$Time$Zone, 0, _List_Nil);
+var $PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$fromPosix = function (posix) {
+	return $PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$Date(
+		{
+			day: $PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$Day(
+				A2($elm$time$Time$toDay, $elm$time$Time$utc, posix)),
+			month: A2($elm$time$Time$toMonth, $elm$time$Time$utc, posix),
+			year: $PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$Year(
+				A2($elm$time$Time$toYear, $elm$time$Time$utc, posix))
+		});
+};
+var $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$Hour = function (a) {
+	return {$: 'Hour', a: a};
+};
+var $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$Millisecond = function (a) {
+	return {$: 'Millisecond', a: a};
+};
+var $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$Minute = function (a) {
+	return {$: 'Minute', a: a};
+};
+var $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$Second = function (a) {
+	return {$: 'Second', a: a};
+};
+var $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$Time = function (a) {
+	return {$: 'Time', a: a};
+};
+var $elm$time$Time$toHour = F2(
+	function (zone, time) {
+		return A2(
+			$elm$core$Basics$modBy,
+			24,
+			A2(
+				$elm$time$Time$flooredDiv,
+				A2($elm$time$Time$toAdjustedMinutes, zone, time),
+				60));
+	});
+var $elm$time$Time$toMillis = F2(
+	function (_v0, time) {
+		return A2(
+			$elm$core$Basics$modBy,
+			1000,
+			$elm$time$Time$posixToMillis(time));
+	});
+var $elm$time$Time$toMinute = F2(
+	function (zone, time) {
+		return A2(
+			$elm$core$Basics$modBy,
+			60,
+			A2($elm$time$Time$toAdjustedMinutes, zone, time));
+	});
+var $elm$time$Time$toSecond = F2(
+	function (_v0, time) {
+		return A2(
+			$elm$core$Basics$modBy,
+			60,
+			A2(
+				$elm$time$Time$flooredDiv,
+				$elm$time$Time$posixToMillis(time),
+				1000));
+	});
+var $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$fromPosix = function (posix) {
+	return $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$Time(
+		{
+			hours: $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$Hour(
+				A2($elm$time$Time$toHour, $elm$time$Time$utc, posix)),
+			milliseconds: $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$Millisecond(
+				A2($elm$time$Time$toMillis, $elm$time$Time$utc, posix)),
+			minutes: $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$Minute(
+				A2($elm$time$Time$toMinute, $elm$time$Time$utc, posix)),
+			seconds: $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$Second(
+				A2($elm$time$Time$toSecond, $elm$time$Time$utc, posix))
+		});
+};
+var $PanagiotisGeorgiadis$elm_datetime$DateTime$Internal$fromPosix = function (timePosix) {
+	return $PanagiotisGeorgiadis$elm_datetime$DateTime$Internal$DateTime(
+		{
+			date: $PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$fromPosix(timePosix),
+			time: $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$fromPosix(timePosix)
+		});
+};
+var $PanagiotisGeorgiadis$elm_datetime$DateTime$fromPosix = $PanagiotisGeorgiadis$elm_datetime$DateTime$Internal$fromPosix;
+var $author$project$Extra$I18n$English = {$: 'English'};
+var $author$project$Extra$I18n$Greek = {$: 'Greek'};
+var $author$project$Extra$I18n$getEnglishMonth = function (month) {
+	switch (month.$) {
+		case 'Jan':
+			return 'January';
+		case 'Feb':
+			return 'February';
+		case 'Mar':
+			return 'March';
+		case 'Apr':
+			return 'April';
+		case 'May':
+			return 'May';
+		case 'Jun':
+			return 'June';
+		case 'Jul':
+			return 'July';
+		case 'Aug':
+			return 'August';
+		case 'Sep':
+			return 'September';
+		case 'Oct':
+			return 'October';
+		case 'Nov':
+			return 'November';
+		default:
+			return 'December';
+	}
+};
+var $author$project$Extra$I18n$getGreekMonth = function (month) {
+	switch (month.$) {
+		case 'Jan':
+			return 'Ιανουάριος';
+		case 'Feb':
+			return 'Φεβρουάριος';
+		case 'Mar':
+			return 'Μάρτιος';
+		case 'Apr':
+			return 'Απρίλιος';
+		case 'May':
+			return 'Μάϊος';
+		case 'Jun':
+			return 'Ιούνιος';
+		case 'Jul':
+			return 'Ιούλιος';
+		case 'Aug':
+			return 'Αύγουστος';
+		case 'Sep':
+			return 'Σεπτέμβριος';
+		case 'Oct':
+			return 'Οκτώβριος';
+		case 'Nov':
+			return 'Νοέμβριος';
+		default:
+			return 'Δεκέμβριος';
+	}
+};
+var $author$project$Extra$I18n$getRussianMonth = function (month) {
+	switch (month.$) {
+		case 'Jan':
+			return 'Январь';
+		case 'Feb':
+			return 'Февраль';
+		case 'Mar':
+			return 'Март';
+		case 'Apr':
+			return 'Апрель';
+		case 'May':
+			return 'Май';
+		case 'Jun':
+			return 'Июнь';
+		case 'Jul':
+			return 'Июль';
+		case 'Aug':
+			return 'Август';
+		case 'Sep':
+			return 'Сентябрь';
+		case 'Oct':
+			return 'Октябрь';
+		case 'Nov':
+			return 'Ноябрь';
+		default:
+			return 'Декабрь';
+	}
+};
+var $author$project$Extra$I18n$monthToString = F3(
+	function (language, textMode, month) {
+		var monthString = function () {
+			switch (language.$) {
+				case 'Greek':
+					return $author$project$Extra$I18n$getGreekMonth(month);
+				case 'English':
+					return $author$project$Extra$I18n$getEnglishMonth(month);
+				default:
+					return $author$project$Extra$I18n$getRussianMonth(month);
+			}
+		}();
+		if (textMode.$ === 'Condensed') {
+			return A2($elm$core$String$left, 3, monthString);
+		} else {
+			return monthString;
+		}
+	});
+var $author$project$Extra$I18n$getEnglishWeekday = function (weekday) {
+	switch (weekday.$) {
+		case 'Mon':
+			return 'Monday';
+		case 'Tue':
+			return 'Tuesday';
+		case 'Wed':
+			return 'Wednesday';
+		case 'Thu':
+			return 'Thursday';
+		case 'Fri':
+			return 'Friday';
+		case 'Sat':
+			return 'Saturday';
+		default:
+			return 'Sunday';
+	}
+};
+var $author$project$Extra$I18n$getGreekWeekday = function (weekday) {
+	switch (weekday.$) {
+		case 'Mon':
+			return 'Δευτέρα';
+		case 'Tue':
+			return 'Τρίτη';
+		case 'Wed':
+			return 'Τετάρτη';
+		case 'Thu':
+			return 'Πέμπτη';
+		case 'Fri':
+			return 'Παρασκευή';
+		case 'Sat':
+			return 'Σάββατο';
+		default:
+			return 'Κυριακή';
+	}
+};
+var $author$project$Extra$I18n$getRussianWeekday = function (weekday) {
+	switch (weekday.$) {
+		case 'Mon':
+			return 'Понедельник';
+		case 'Tue':
+			return 'Вторник';
+		case 'Wed':
+			return 'Среда';
+		case 'Thu':
+			return 'Четверг';
+		case 'Fri':
+			return 'Пятница';
+		case 'Sat':
+			return 'Суббота';
+		default:
+			return 'Воскресенье';
+	}
+};
+var $author$project$Extra$I18n$weekdayToString = F3(
+	function (language, textMode, weekday) {
+		var weekdayString = function () {
+			switch (language.$) {
+				case 'Greek':
+					return $author$project$Extra$I18n$getGreekWeekday(weekday);
+				case 'English':
+					return $author$project$Extra$I18n$getEnglishWeekday(weekday);
+				default:
+					return $author$project$Extra$I18n$getRussianWeekday(weekday);
+			}
+		}();
+		if (textMode.$ === 'Condensed') {
+			return A2($elm$core$String$left, 3, weekdayString);
+		} else {
+			return weekdayString;
+		}
+	});
+var $author$project$Extra$I18n$getI18n = function (language) {
+	switch (language.$) {
+		case 'English':
+			return {
+				monthToString: $author$project$Extra$I18n$monthToString($author$project$Extra$I18n$English),
+				todayButtonText: 'Today',
+				weekdayToString: $author$project$Extra$I18n$weekdayToString($author$project$Extra$I18n$English)
+			};
+		case 'Russian':
+			return {
+				monthToString: $author$project$Extra$I18n$monthToString($author$project$Extra$I18n$Russian),
+				todayButtonText: 'Сегодня',
+				weekdayToString: $author$project$Extra$I18n$weekdayToString($author$project$Extra$I18n$Russian)
+			};
+		default:
+			return {
+				monthToString: $author$project$Extra$I18n$monthToString($author$project$Extra$I18n$Greek),
+				todayButtonText: 'Σήμερα',
+				weekdayToString: $author$project$Extra$I18n$weekdayToString($author$project$Extra$I18n$Greek)
+			};
+	}
+};
+var $PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$rollMonthForward = function (month) {
+	switch (month.$) {
+		case 'Jan':
+			return $elm$time$Time$Feb;
+		case 'Feb':
+			return $elm$time$Time$Mar;
+		case 'Mar':
+			return $elm$time$Time$Apr;
+		case 'Apr':
+			return $elm$time$Time$May;
+		case 'May':
+			return $elm$time$Time$Jun;
+		case 'Jun':
+			return $elm$time$Time$Jul;
+		case 'Jul':
+			return $elm$time$Time$Aug;
+		case 'Aug':
+			return $elm$time$Time$Sep;
+		case 'Sep':
+			return $elm$time$Time$Oct;
+		case 'Oct':
+			return $elm$time$Time$Nov;
+		case 'Nov':
+			return $elm$time$Time$Dec;
+		default:
+			return $elm$time$Time$Jan;
+	}
+};
+var $PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$incrementMonth = function (_v0) {
+	var date = _v0.a;
+	var updatedMonth = $PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$rollMonthForward(date.month);
+	var updatedYear = function () {
+		if (updatedMonth.$ === 'Jan') {
+			return $PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$Year(
+				$PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$yearToInt(date.year) + 1);
+		} else {
+			return date.year;
+		}
+	}();
+	var lastDayOfUpdatedMonth = A2($PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$lastDayOf, updatedYear, updatedMonth);
+	var updatedDay = function () {
+		var _v1 = A2($PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$compareDays, date.day, lastDayOfUpdatedMonth);
+		if (_v1.$ === 'GT') {
+			return lastDayOfUpdatedMonth;
+		} else {
+			return date.day;
+		}
+	}();
+	return $PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$Date(
+		{day: updatedDay, month: updatedMonth, year: updatedYear});
+};
+var $PanagiotisGeorgiadis$elm_datetime$Calendar$incrementMonth = $PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$incrementMonth;
+var $PanagiotisGeorgiadis$elm_datetime$DateTime$Internal$incrementMonth = function (_v0) {
+	var date = _v0.a.date;
+	var time = _v0.a.time;
+	return $PanagiotisGeorgiadis$elm_datetime$DateTime$Internal$DateTime(
+		{
+			date: $PanagiotisGeorgiadis$elm_datetime$Calendar$incrementMonth(date),
+			time: time
+		});
+};
+var $PanagiotisGeorgiadis$elm_datetime$DateTime$incrementMonth = $PanagiotisGeorgiadis$elm_datetime$DateTime$Internal$incrementMonth;
+var $author$project$Extra$DateTime$incrementMonths = F2(
+	function (count, dateTime) {
+		incrementMonths:
+		while (true) {
+			if (count > 0) {
+				var $temp$count = count - 1,
+					$temp$dateTime = $PanagiotisGeorgiadis$elm_datetime$DateTime$incrementMonth(dateTime);
+				count = $temp$count;
+				dateTime = $temp$dateTime;
+				continue incrementMonths;
+			} else {
+				return dateTime;
+			}
+		}
+	});
+var $PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$Update$DoubleCalendar = {$: 'DoubleCalendar'};
+var $PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$Update$Model = function (a) {
+	return {$: 'Model', a: a};
+};
+var $PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$Update$NoOffset = {$: 'NoOffset'};
+var $PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$Update$NoTimePickers = {$: 'NoTimePickers'};
+var $PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$Update$NoneSelected = {$: 'NoneSelected'};
+var $PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$Update$Offset = function (a) {
+	return {$: 'Offset', a: a};
+};
+var $PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$Update$SingleCalendar = {$: 'SingleCalendar'};
+var $PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$Update$TimePickers = function (a) {
+	return {$: 'TimePickers', a: a};
+};
+var $PanagiotisGeorgiadis$elm_datepicker$DatePicker$Internal$I18n$monthToString = F2(
+	function (mode, month) {
+		var monthString = function () {
+			switch (month.$) {
+				case 'Jan':
+					return 'January';
+				case 'Feb':
+					return 'February';
+				case 'Mar':
+					return 'March';
+				case 'Apr':
+					return 'April';
+				case 'May':
+					return 'May';
+				case 'Jun':
+					return 'June';
+				case 'Jul':
+					return 'July';
+				case 'Aug':
+					return 'August';
+				case 'Sep':
+					return 'September';
+				case 'Oct':
+					return 'October';
+				case 'Nov':
+					return 'November';
+				default:
+					return 'December';
+			}
+		}();
+		if (mode.$ === 'Condensed') {
+			return A2($elm$core$String$left, 3, monthString);
+		} else {
+			return monthString;
+		}
+	});
+var $PanagiotisGeorgiadis$elm_datepicker$DatePicker$Internal$I18n$weekdayToString = F2(
+	function (mode, weekday) {
+		var weekdayString = function () {
+			switch (weekday.$) {
+				case 'Mon':
+					return 'Monday';
+				case 'Tue':
+					return 'Tuesday';
+				case 'Wed':
+					return 'Wednesday';
+				case 'Thu':
+					return 'Thursday';
+				case 'Fri':
+					return 'Friday';
+				case 'Sat':
+					return 'Saturday';
+				default:
+					return 'Sunday';
+			}
+		}();
+		if (mode.$ === 'Condensed') {
+			return A2($elm$core$String$left, 3, weekdayString);
+		} else {
+			return weekdayString;
+		}
+	});
+var $PanagiotisGeorgiadis$elm_datepicker$DatePicker$Internal$I18n$defaultI18n = {monthToString: $PanagiotisGeorgiadis$elm_datepicker$DatePicker$Internal$I18n$monthToString, todayButtonText: 'Today', weekdayToString: $PanagiotisGeorgiadis$elm_datepicker$DatePicker$Internal$I18n$weekdayToString};
+var $PanagiotisGeorgiadis$elm_datepicker$TimePicker$Internal$Update$Hours = {$: 'Hours'};
+var $PanagiotisGeorgiadis$elm_datepicker$TimePicker$Internal$Update$Milliseconds = {$: 'Milliseconds'};
+var $PanagiotisGeorgiadis$elm_datepicker$TimePicker$Internal$Update$Minutes = {$: 'Minutes'};
+var $PanagiotisGeorgiadis$elm_datepicker$TimePicker$Internal$Update$Model = function (a) {
+	return {$: 'Model', a: a};
+};
+var $PanagiotisGeorgiadis$elm_datepicker$TimePicker$Internal$Update$Seconds = {$: 'Seconds'};
+var $elm$core$Basics$composeL = F3(
+	function (g, f, x) {
+		return g(
+			f(x));
+	});
+var $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$getHours = function (_v0) {
+	var hours = _v0.a.hours;
+	return hours;
+};
+var $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$hoursToInt = function (_v0) {
+	var hours = _v0.a;
+	return hours;
+};
+var $PanagiotisGeorgiadis$elm_datetime$Clock$getHours = A2($elm$core$Basics$composeL, $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$hoursToInt, $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$getHours);
+var $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$getMilliseconds = function (_v0) {
+	var milliseconds = _v0.a.milliseconds;
+	return milliseconds;
+};
+var $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$millisecondsToInt = function (_v0) {
+	var milliseconds = _v0.a;
+	return milliseconds;
+};
+var $PanagiotisGeorgiadis$elm_datetime$Clock$getMilliseconds = A2($elm$core$Basics$composeL, $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$millisecondsToInt, $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$getMilliseconds);
+var $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$getMinutes = function (_v0) {
+	var minutes = _v0.a.minutes;
+	return minutes;
+};
+var $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$minutesToInt = function (_v0) {
+	var minutes = _v0.a;
+	return minutes;
+};
+var $PanagiotisGeorgiadis$elm_datetime$Clock$getMinutes = A2($elm$core$Basics$composeL, $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$minutesToInt, $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$getMinutes);
+var $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$getSeconds = function (_v0) {
+	var seconds = _v0.a.seconds;
+	return seconds;
+};
+var $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$secondsToInt = function (_v0) {
+	var seconds = _v0.a;
+	return seconds;
+};
+var $PanagiotisGeorgiadis$elm_datetime$Clock$getSeconds = A2($elm$core$Basics$composeL, $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$secondsToInt, $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$getSeconds);
+var $PanagiotisGeorgiadis$elm_datepicker$TimePicker$Update$millisToString = function (millis) {
+	return (millis < 10) ? ('00' + $elm$core$String$fromInt(millis)) : ((millis < 100) ? ('0' + $elm$core$String$fromInt(millis)) : $elm$core$String$fromInt(millis));
+};
+var $PanagiotisGeorgiadis$elm_datepicker$TimePicker$Update$timeToString = function (time) {
+	return (time < 10) ? ('0' + $elm$core$String$fromInt(time)) : $elm$core$String$fromInt(time);
+};
+var $PanagiotisGeorgiadis$elm_datepicker$TimePicker$Update$toString = function (timePart) {
+	switch (timePart.$) {
+		case 'Hours':
+			return A2($elm$core$Basics$composeL, $PanagiotisGeorgiadis$elm_datepicker$TimePicker$Update$timeToString, $PanagiotisGeorgiadis$elm_datetime$Clock$getHours);
+		case 'Minutes':
+			return A2($elm$core$Basics$composeL, $PanagiotisGeorgiadis$elm_datepicker$TimePicker$Update$timeToString, $PanagiotisGeorgiadis$elm_datetime$Clock$getMinutes);
+		case 'Seconds':
+			return A2($elm$core$Basics$composeL, $PanagiotisGeorgiadis$elm_datepicker$TimePicker$Update$timeToString, $PanagiotisGeorgiadis$elm_datetime$Clock$getSeconds);
+		default:
+			return A2($elm$core$Basics$composeL, $PanagiotisGeorgiadis$elm_datepicker$TimePicker$Update$millisToString, $PanagiotisGeorgiadis$elm_datetime$Clock$getMilliseconds);
+	}
+};
+var $PanagiotisGeorgiadis$elm_datepicker$TimePicker$Update$initialise = function (_v0) {
+	var pickerType = _v0.pickerType;
+	var time = _v0.time;
+	return $PanagiotisGeorgiadis$elm_datepicker$TimePicker$Internal$Update$Model(
+		{
+			hours: A2($PanagiotisGeorgiadis$elm_datepicker$TimePicker$Update$toString, $PanagiotisGeorgiadis$elm_datepicker$TimePicker$Internal$Update$Hours, time),
+			milliseconds: A2($PanagiotisGeorgiadis$elm_datepicker$TimePicker$Update$toString, $PanagiotisGeorgiadis$elm_datepicker$TimePicker$Internal$Update$Milliseconds, time),
+			minutes: A2($PanagiotisGeorgiadis$elm_datepicker$TimePicker$Update$toString, $PanagiotisGeorgiadis$elm_datepicker$TimePicker$Internal$Update$Minutes, time),
+			pickerType: pickerType,
+			seconds: A2($PanagiotisGeorgiadis$elm_datepicker$TimePicker$Update$toString, $PanagiotisGeorgiadis$elm_datepicker$TimePicker$Internal$Update$Seconds, time),
+			time: time
+		});
+};
+var $PanagiotisGeorgiadis$elm_datetime$DateTime$Internal$setTime = F2(
+	function (time, _v0) {
+		var date = _v0.a.date;
+		return $PanagiotisGeorgiadis$elm_datetime$DateTime$Internal$DateTime(
+			{date: date, time: time});
+	});
+var $PanagiotisGeorgiadis$elm_datetime$DateTime$setTime = $PanagiotisGeorgiadis$elm_datetime$DateTime$Internal$setTime;
+var $PanagiotisGeorgiadis$elm_datetime$DateTime$Internal$getDate = function (_v0) {
+	var date = _v0.a.date;
+	return date;
+};
+var $PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$getMonth = function (_v0) {
+	var month = _v0.a.month;
+	return month;
+};
+var $PanagiotisGeorgiadis$elm_datetime$Calendar$getMonth = $PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$getMonth;
+var $PanagiotisGeorgiadis$elm_datetime$DateTime$Internal$getMonth = A2($elm$core$Basics$composeL, $PanagiotisGeorgiadis$elm_datetime$Calendar$getMonth, $PanagiotisGeorgiadis$elm_datetime$DateTime$Internal$getDate);
+var $PanagiotisGeorgiadis$elm_datetime$DateTime$getMonth = $PanagiotisGeorgiadis$elm_datetime$DateTime$Internal$getMonth;
+var $PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$monthToInt = function (month) {
+	switch (month.$) {
+		case 'Jan':
+			return 1;
+		case 'Feb':
+			return 2;
+		case 'Mar':
+			return 3;
+		case 'Apr':
+			return 4;
+		case 'May':
+			return 5;
+		case 'Jun':
+			return 6;
+		case 'Jul':
+			return 7;
+		case 'Aug':
+			return 8;
+		case 'Sep':
+			return 9;
+		case 'Oct':
+			return 10;
+		case 'Nov':
+			return 11;
+		default:
+			return 12;
+	}
+};
+var $PanagiotisGeorgiadis$elm_datetime$Calendar$monthToInt = $PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$monthToInt;
+var $PanagiotisGeorgiadis$elm_datepicker$Utils$DateTime$getMonthInt = A2($elm$core$Basics$composeL, $PanagiotisGeorgiadis$elm_datetime$Calendar$monthToInt, $PanagiotisGeorgiadis$elm_datetime$DateTime$getMonth);
+var $PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$getYear = function (_v0) {
+	var year = _v0.a.year;
+	return year;
+};
+var $PanagiotisGeorgiadis$elm_datetime$Calendar$getYear = A2($elm$core$Basics$composeL, $PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$yearToInt, $PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$getYear);
+var $PanagiotisGeorgiadis$elm_datetime$DateTime$Internal$getYear = A2($elm$core$Basics$composeL, $PanagiotisGeorgiadis$elm_datetime$Calendar$getYear, $PanagiotisGeorgiadis$elm_datetime$DateTime$Internal$getDate);
+var $PanagiotisGeorgiadis$elm_datetime$DateTime$getYear = $PanagiotisGeorgiadis$elm_datetime$DateTime$Internal$getYear;
+var $PanagiotisGeorgiadis$elm_datepicker$Utils$DateTime$compareYearMonth = F2(
+	function (lhs, rhs) {
+		var yearsComparison = A2(
+			$elm$core$Basics$compare,
+			$PanagiotisGeorgiadis$elm_datetime$DateTime$getYear(lhs),
+			$PanagiotisGeorgiadis$elm_datetime$DateTime$getYear(rhs));
+		if (yearsComparison.$ === 'EQ') {
+			return A2(
+				$elm$core$Basics$compare,
+				$PanagiotisGeorgiadis$elm_datepicker$Utils$DateTime$getMonthInt(lhs),
+				$PanagiotisGeorgiadis$elm_datepicker$Utils$DateTime$getMonthInt(rhs));
+		} else {
+			return yearsComparison;
+		}
+	});
+var $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$midnight = $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$Time(
+	{
+		hours: $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$Hour(0),
+		milliseconds: $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$Millisecond(0),
+		minutes: $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$Minute(0),
+		seconds: $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$Second(0)
+	});
+var $PanagiotisGeorgiadis$elm_datetime$Clock$midnight = $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$midnight;
+var $PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$validatePrimaryDate = function (_v0) {
+	var today = _v0.today;
+	var primaryDate = _v0.primaryDate;
+	var dateLimit = _v0.dateLimit;
+	var date = function () {
+		if (primaryDate.$ === 'Just') {
+			var d = primaryDate.a;
+			return d;
+		} else {
+			return A2($PanagiotisGeorgiadis$elm_datetime$DateTime$setTime, $PanagiotisGeorgiadis$elm_datetime$Clock$midnight, today);
+		}
+	}();
+	if (dateLimit.$ === 'DateLimit') {
+		var minDate = dateLimit.a.minDate;
+		var maxDate = dateLimit.a.maxDate;
+		var isBetweenConstrains = (_Utils_eq(
+			A2($PanagiotisGeorgiadis$elm_datepicker$Utils$DateTime$compareYearMonth, minDate, date),
+			$elm$core$Basics$LT) || _Utils_eq(
+			A2($PanagiotisGeorgiadis$elm_datepicker$Utils$DateTime$compareYearMonth, minDate, date),
+			$elm$core$Basics$EQ)) && (_Utils_eq(
+			A2($PanagiotisGeorgiadis$elm_datepicker$Utils$DateTime$compareYearMonth, maxDate, date),
+			$elm$core$Basics$GT) || _Utils_eq(
+			A2($PanagiotisGeorgiadis$elm_datepicker$Utils$DateTime$compareYearMonth, maxDate, date),
+			$elm$core$Basics$EQ));
+		return isBetweenConstrains ? date : minDate;
+	} else {
+		return date;
+	}
+};
+var $PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$initialise = F4(
+	function (viewType, calendarConfig, timePickerConfig, i18n) {
+		var today = calendarConfig.today;
+		var dateLimit = calendarConfig.dateLimit;
+		var dateRangeOffset = calendarConfig.dateRangeOffset;
+		var startingWeekday = calendarConfig.startingWeekday;
+		var viewType_ = function () {
+			if (viewType.$ === 'Single') {
+				return $PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$Update$SingleCalendar;
+			} else {
+				return $PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$Update$DoubleCalendar;
+			}
+		}();
+		var dateRangeOffset_ = function () {
+			if (dateRangeOffset.$ === 'Just') {
+				var minDateRangeLength = dateRangeOffset.a.minDateRangeLength;
+				return $PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$Update$Offset(
+					{invalidDates: _List_Nil, minDateRangeLength: minDateRangeLength});
+			} else {
+				return $PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$Update$NoOffset;
+			}
+		}();
+		var _v0 = function () {
+			var dateTime = $PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$validatePrimaryDate(calendarConfig);
+			if (timePickerConfig.$ === 'Just') {
+				var t = timePickerConfig.a;
+				var timePicker = $PanagiotisGeorgiadis$elm_datepicker$TimePicker$Update$initialise(
+					{pickerType: t.pickerType, time: t.defaultTime});
+				return _Utils_Tuple2(
+					A2($PanagiotisGeorgiadis$elm_datetime$DateTime$setTime, t.defaultTime, dateTime),
+					$PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$Update$TimePickers(
+						{endPicker: timePicker, i18n: t.i18n, mirrorTimes: t.mirrorTimes, startPicker: timePicker}));
+			} else {
+				return _Utils_Tuple2(dateTime, $PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$Update$NoTimePickers);
+			}
+		}();
+		var primaryDate_ = _v0.a;
+		var timePickers = _v0.b;
+		return $PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$Update$Model(
+			{
+				dateLimit: dateLimit,
+				dateRangeOffset: dateRangeOffset_,
+				i18n: function () {
+					if (i18n.$ === 'Just') {
+						var i18n_ = i18n.a;
+						return i18n_;
+					} else {
+						return $PanagiotisGeorgiadis$elm_datepicker$DatePicker$Internal$I18n$defaultI18n;
+					}
+				}(),
+				primaryDate: primaryDate_,
+				range: $PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$Update$NoneSelected,
+				startingWeekday: startingWeekday,
+				timePickers: timePickers,
+				today: today,
+				viewType: viewType_
+			});
+	});
+var $PanagiotisGeorgiadis$elm_datetime$Calendar$lastDayOf = function (date) {
+	return $PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$dayToInt(
+		A2(
+			$PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$lastDayOf,
+			$PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$getYear(date),
+			$PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$getMonth(date)));
+};
+var $PanagiotisGeorgiadis$elm_datetime$DateTime$Internal$lastDayOf = function (_v0) {
+	var date = _v0.a.date;
+	return $PanagiotisGeorgiadis$elm_datetime$Calendar$lastDayOf(date);
+};
+var $PanagiotisGeorgiadis$elm_datetime$DateTime$lastDayOf = $PanagiotisGeorgiadis$elm_datetime$DateTime$Internal$lastDayOf;
+var $PanagiotisGeorgiadis$elm_datetime$DateTime$Internal$setDate = F2(
+	function (date, _v0) {
+		var time = _v0.a.time;
+		return $PanagiotisGeorgiadis$elm_datetime$DateTime$Internal$DateTime(
+			{date: date, time: time});
+	});
+var $elm$core$Maybe$andThen = F2(
+	function (callback, maybeValue) {
+		if (maybeValue.$ === 'Just') {
+			var value = maybeValue.a;
+			return callback(value);
+		} else {
+			return $elm$core$Maybe$Nothing;
+		}
+	});
+var $PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$dayFromInt = F3(
+	function (year, month, day) {
+		var maxValidDay = $PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$dayToInt(
+			A2($PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$lastDayOf, year, month));
+		return ((day > 0) && (!_Utils_eq(
+			A2($elm$core$Basics$compare, day, maxValidDay),
+			$elm$core$Basics$GT))) ? $elm$core$Maybe$Just(
+			$PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$Day(day)) : $elm$core$Maybe$Nothing;
+	});
+var $PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$fromYearMonthDay = F3(
+	function (y, m, d) {
+		var maxDay = A2($PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$lastDayOf, y, m);
+		var _v0 = A2($PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$compareDays, d, maxDay);
+		if (_v0.$ === 'GT') {
+			return $elm$core$Maybe$Nothing;
+		} else {
+			return $elm$core$Maybe$Just(
+				$PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$Date(
+					{day: d, month: m, year: y}));
+		}
+	});
+var $PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$fromRawDay = F3(
+	function (year, month, day) {
+		return A2(
+			$elm$core$Maybe$andThen,
+			A2($PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$fromYearMonthDay, year, month),
+			A3($PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$dayFromInt, year, month, day));
+	});
+var $PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$yearFromInt = function (year) {
+	return (year > 0) ? $elm$core$Maybe$Just(
+		$PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$Year(year)) : $elm$core$Maybe$Nothing;
+};
+var $PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$fromRawParts = function (_v0) {
+	var year = _v0.year;
+	var month = _v0.month;
+	var day = _v0.day;
+	return A2(
+		$elm$core$Maybe$andThen,
+		function (y) {
+			return A3($PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$fromRawDay, y, month, day);
+		},
+		$PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$yearFromInt(year));
+};
+var $PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$setDay = F2(
+	function (day, date) {
+		return $PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$fromRawParts(
+			{
+				day: day,
+				month: $PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$getMonth(date),
+				year: $PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$yearToInt(
+					$PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$getYear(date))
+			});
+	});
+var $PanagiotisGeorgiadis$elm_datetime$Calendar$setDay = $PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$setDay;
+var $PanagiotisGeorgiadis$elm_datetime$DateTime$Internal$setDay = F2(
+	function (day, dateTime) {
+		return A2(
+			$elm$core$Maybe$map,
+			function (d) {
+				return A2($PanagiotisGeorgiadis$elm_datetime$DateTime$Internal$setDate, d, dateTime);
+			},
+			A2(
+				$PanagiotisGeorgiadis$elm_datetime$Calendar$setDay,
+				day,
+				$PanagiotisGeorgiadis$elm_datetime$DateTime$Internal$getDate(dateTime)));
+	});
+var $PanagiotisGeorgiadis$elm_datetime$DateTime$setDay = $PanagiotisGeorgiadis$elm_datetime$DateTime$Internal$setDay;
+var $author$project$Components$Double$DateRangePicker$init = F3(
+	function (language, startingWeekday, todayPosix) {
+		var today = $PanagiotisGeorgiadis$elm_datetime$DateTime$fromPosix(todayPosix);
+		var timePickerConfig = $elm$core$Maybe$Nothing;
+		var i18n = $elm$core$Maybe$Just(
+			$author$project$Extra$I18n$getI18n(language));
+		var _v0 = function () {
+			var _v1 = _Utils_Tuple2(
+				A2($author$project$Extra$DateTime$decrementMonths, 6, today),
+				A2($author$project$Extra$DateTime$incrementMonths, 6, today));
+			var past = _v1.a;
+			var future = _v1.b;
+			return _Utils_Tuple2(
+				A2(
+					$elm$core$Maybe$withDefault,
+					past,
+					A2($PanagiotisGeorgiadis$elm_datetime$DateTime$setDay, 1, past)),
+				A2(
+					$elm$core$Maybe$withDefault,
+					future,
+					A2(
+						$PanagiotisGeorgiadis$elm_datetime$DateTime$setDay,
+						$PanagiotisGeorgiadis$elm_datetime$DateTime$lastDayOf(future),
+						future)));
+		}();
+		var minDate = _v0.a;
+		var maxDate = _v0.b;
+		var calendarConfig = {
+			dateLimit: $PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Types$DateLimit(
+				{maxDate: maxDate, minDate: minDate}),
+			dateRangeOffset: $elm$core$Maybe$Just(
+				{minDateRangeLength: 7}),
+			primaryDate: $elm$core$Maybe$Nothing,
+			startingWeekday: startingWeekday,
+			today: today
+		};
+		return {
+			picker: A4($PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$initialise, $PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Types$Double, calendarConfig, timePickerConfig, i18n),
+			selectedRange: $elm$core$Maybe$Nothing
+		};
+	});
+var $author$project$Components$WithInput$Double$DateRangePicker$init = F3(
+	function (language, startingWeekday, todayPosix) {
+		var today = $PanagiotisGeorgiadis$elm_datetime$DateTime$fromPosix(todayPosix);
+		var timePickerConfig = $elm$core$Maybe$Nothing;
+		var i18n = $elm$core$Maybe$Just(
+			$author$project$Extra$I18n$getI18n(language));
+		var _v0 = function () {
+			var _v1 = _Utils_Tuple2(
+				A2($author$project$Extra$DateTime$decrementMonths, 6, today),
+				A2($author$project$Extra$DateTime$incrementMonths, 6, today));
+			var past = _v1.a;
+			var future = _v1.b;
+			return _Utils_Tuple2(
+				A2(
+					$elm$core$Maybe$withDefault,
+					past,
+					A2($PanagiotisGeorgiadis$elm_datetime$DateTime$setDay, 1, past)),
+				A2(
+					$elm$core$Maybe$withDefault,
+					future,
+					A2(
+						$PanagiotisGeorgiadis$elm_datetime$DateTime$setDay,
+						$PanagiotisGeorgiadis$elm_datetime$DateTime$lastDayOf(future),
+						future)));
+		}();
+		var minDate = _v0.a;
+		var maxDate = _v0.b;
+		var calendarConfig = {
+			dateLimit: $PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Types$DateLimit(
+				{maxDate: maxDate, minDate: minDate}),
+			dateRangeOffset: $elm$core$Maybe$Just(
+				{minDateRangeLength: 7}),
+			primaryDate: $elm$core$Maybe$Nothing,
+			startingWeekday: startingWeekday,
+			today: today
+		};
+		return {
+			isFocused: false,
+			picker: A4($PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$initialise, $PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Types$Double, calendarConfig, timePickerConfig, i18n),
+			selectedRange: $elm$core$Maybe$Nothing
+		};
+	});
+var $elm$core$Platform$Cmd$map = _Platform_map;
 var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
 var $author$project$App$pipeline_id = 5023048;
+var $author$project$Components$Double$DateRangePicker$PickerMsg = function (a) {
+	return {$: 'PickerMsg', a: a};
+};
+var $PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$Update$BothSelected = function (a) {
+	return {$: 'BothSelected', a: a};
+};
+var $PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$Update$Chosen = F2(
+	function (a, b) {
+		return {$: 'Chosen', a: a, b: b};
+	});
+var $PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$DateRangeSelected = function (a) {
+	return {$: 'DateRangeSelected', a: a};
+};
+var $PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$Update$DoubleTimePicker = {$: 'DoubleTimePicker'};
+var $PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$None = {$: 'None'};
+var $PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$Update$RangeEndPickerMsg = function (a) {
+	return {$: 'RangeEndPickerMsg', a: a};
+};
+var $PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$Update$RangeStartPickerMsg = function (a) {
+	return {$: 'RangeStartPickerMsg', a: a};
+};
+var $PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$Update$StartDateSelected = function (a) {
+	return {$: 'StartDateSelected', a: a};
+};
+var $PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$Update$SyncTimePickers = function (a) {
+	return {$: 'SyncTimePickers', a: a};
+};
+var $PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$Update$Visually = F2(
+	function (a, b) {
+		return {$: 'Visually', a: a, b: b};
+	});
+var $PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$compareMonths = F2(
+	function (lhs, rhs) {
+		return A2(
+			$elm$core$Basics$compare,
+			$PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$monthToInt(lhs),
+			$PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$monthToInt(rhs));
+	});
+var $PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$compareYears = F2(
+	function (lhs, rhs) {
+		return A2(
+			$elm$core$Basics$compare,
+			$PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$yearToInt(lhs),
+			$PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$yearToInt(rhs));
+	});
+var $PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$getDay = function (_v0) {
+	var date = _v0.a;
+	return date.day;
+};
+var $PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$compare = F2(
+	function (lhs, rhs) {
+		var _v0 = _Utils_Tuple3(
+			A2(
+				$PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$compareYears,
+				$PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$getYear(lhs),
+				$PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$getYear(rhs)),
+			A2(
+				$PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$compareMonths,
+				$PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$getMonth(lhs),
+				$PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$getMonth(rhs)),
+			A2(
+				$PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$compareDays,
+				$PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$getDay(lhs),
+				$PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$getDay(rhs)));
+		var yearsComparison = _v0.a;
+		var monthsComparison = _v0.b;
+		var daysComparison = _v0.c;
+		if (yearsComparison.$ === 'EQ') {
+			if (monthsComparison.$ === 'EQ') {
+				return daysComparison;
+			} else {
+				return monthsComparison;
+			}
+		} else {
+			return yearsComparison;
+		}
+	});
+var $PanagiotisGeorgiadis$elm_datetime$Calendar$compare = $PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$compare;
+var $PanagiotisGeorgiadis$elm_datetime$DateTime$Internal$compareDates = F2(
+	function (_v0, _v1) {
+		var lhs = _v0.a;
+		var rhs = _v1.a;
+		return A2($PanagiotisGeorgiadis$elm_datetime$Calendar$compare, lhs.date, rhs.date);
+	});
+var $PanagiotisGeorgiadis$elm_datetime$DateTime$compareDates = $PanagiotisGeorgiadis$elm_datetime$DateTime$Internal$compareDates;
+var $PanagiotisGeorgiadis$elm_datepicker$Utils$Actions$fireAction = function (msg) {
+	return A2(
+		$elm$core$Task$perform,
+		function (_v0) {
+			return msg;
+		},
+		$elm$core$Task$succeed(_Utils_Tuple0));
+};
+var $PanagiotisGeorgiadis$elm_datetime$DateTime$getDate = $PanagiotisGeorgiadis$elm_datetime$DateTime$Internal$getDate;
+var $PanagiotisGeorgiadis$elm_datepicker$TimePicker$Update$getTime = function (_v0) {
+	var time = _v0.a.time;
+	return time;
+};
+var $PanagiotisGeorgiadis$elm_datetime$DateTime$setDate = $PanagiotisGeorgiadis$elm_datetime$DateTime$Internal$setDate;
+var $PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$Update$ShowClockView = {$: 'ShowClockView'};
+var $PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$Update$showClockView = function (_v0) {
+	var viewType = _v0.viewType;
+	var timePickers = _v0.timePickers;
+	var _v1 = _Utils_Tuple2(viewType, timePickers);
+	if ((_v1.a.$ === 'DoubleCalendar') && (_v1.b.$ === 'TimePickers')) {
+		var _v2 = _v1.a;
+		return $PanagiotisGeorgiadis$elm_datepicker$Utils$Actions$fireAction($PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$Update$ShowClockView);
+	} else {
+		return $elm$core$Platform$Cmd$none;
+	}
+};
+var $PanagiotisGeorgiadis$elm_datepicker$TimePicker$Update$None = {$: 'None'};
+var $PanagiotisGeorgiadis$elm_datepicker$TimePicker$Update$UpdatedTime = function (a) {
+	return {$: 'UpdatedTime', a: a};
+};
+var $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$decrementHours = function (_v0) {
+	var time = _v0.a;
+	var newHours = $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$hoursToInt(time.hours) - 1;
+	return (newHours < 0) ? _Utils_Tuple2(
+		$PanagiotisGeorgiadis$elm_datetime$Clock$Internal$Time(
+			_Utils_update(
+				time,
+				{
+					hours: $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$Hour(23)
+				})),
+		true) : _Utils_Tuple2(
+		$PanagiotisGeorgiadis$elm_datetime$Clock$Internal$Time(
+			_Utils_update(
+				time,
+				{
+					hours: $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$Hour(newHours)
+				})),
+		false);
+};
+var $PanagiotisGeorgiadis$elm_datetime$Clock$decrementHours = $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$decrementHours;
+var $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$decrementMinutes = function (_v0) {
+	var time = _v0.a;
+	var newMinutes = $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$minutesToInt(time.minutes) - 1;
+	return (newMinutes < 0) ? $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$decrementHours(
+		$PanagiotisGeorgiadis$elm_datetime$Clock$Internal$Time(
+			_Utils_update(
+				time,
+				{
+					minutes: $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$Minute(59)
+				}))) : _Utils_Tuple2(
+		$PanagiotisGeorgiadis$elm_datetime$Clock$Internal$Time(
+			_Utils_update(
+				time,
+				{
+					minutes: $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$Minute(newMinutes)
+				})),
+		false);
+};
+var $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$decrementSeconds = function (_v0) {
+	var time = _v0.a;
+	var newSeconds = $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$secondsToInt(time.seconds) - 1;
+	return (newSeconds < 0) ? $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$decrementMinutes(
+		$PanagiotisGeorgiadis$elm_datetime$Clock$Internal$Time(
+			_Utils_update(
+				time,
+				{
+					seconds: $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$Second(59)
+				}))) : _Utils_Tuple2(
+		$PanagiotisGeorgiadis$elm_datetime$Clock$Internal$Time(
+			_Utils_update(
+				time,
+				{
+					seconds: $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$Second(newSeconds)
+				})),
+		false);
+};
+var $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$decrementMilliseconds = function (_v0) {
+	var time = _v0.a;
+	var newMillis = $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$millisecondsToInt(time.milliseconds) - 1;
+	return (newMillis < 0) ? $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$decrementSeconds(
+		$PanagiotisGeorgiadis$elm_datetime$Clock$Internal$Time(
+			_Utils_update(
+				time,
+				{
+					milliseconds: $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$Millisecond(999)
+				}))) : _Utils_Tuple2(
+		$PanagiotisGeorgiadis$elm_datetime$Clock$Internal$Time(
+			_Utils_update(
+				time,
+				{
+					milliseconds: $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$Millisecond(newMillis)
+				})),
+		false);
+};
+var $PanagiotisGeorgiadis$elm_datetime$Clock$decrementMilliseconds = $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$decrementMilliseconds;
+var $PanagiotisGeorgiadis$elm_datetime$Clock$decrementMinutes = $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$decrementMinutes;
+var $PanagiotisGeorgiadis$elm_datetime$Clock$decrementSeconds = $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$decrementSeconds;
+var $PanagiotisGeorgiadis$elm_datepicker$TimePicker$Update$getHoursStep = function (_v0) {
+	var pickerType = _v0.pickerType;
+	switch (pickerType.$) {
+		case 'HH':
+			var hoursStep = pickerType.a.hoursStep;
+			return hoursStep;
+		case 'HH_MM':
+			var hoursStep = pickerType.a.hoursStep;
+			return hoursStep;
+		case 'HH_MM_SS':
+			var hoursStep = pickerType.a.hoursStep;
+			return hoursStep;
+		default:
+			var hoursStep = pickerType.a.hoursStep;
+			return hoursStep;
+	}
+};
+var $PanagiotisGeorgiadis$elm_datepicker$TimePicker$Update$getMillisecondsStep = function (_v0) {
+	var pickerType = _v0.pickerType;
+	switch (pickerType.$) {
+		case 'HH':
+			return 1;
+		case 'HH_MM':
+			return 1;
+		case 'HH_MM_SS':
+			return 1;
+		default:
+			var millisecondsStep = pickerType.a.millisecondsStep;
+			return millisecondsStep;
+	}
+};
+var $PanagiotisGeorgiadis$elm_datepicker$TimePicker$Update$getMinutesStep = function (_v0) {
+	var pickerType = _v0.pickerType;
+	switch (pickerType.$) {
+		case 'HH':
+			return 1;
+		case 'HH_MM':
+			var minutesStep = pickerType.a.minutesStep;
+			return minutesStep;
+		case 'HH_MM_SS':
+			var minutesStep = pickerType.a.minutesStep;
+			return minutesStep;
+		default:
+			var minutesStep = pickerType.a.minutesStep;
+			return minutesStep;
+	}
+};
+var $PanagiotisGeorgiadis$elm_datepicker$TimePicker$Update$getSecondsStep = function (_v0) {
+	var pickerType = _v0.pickerType;
+	switch (pickerType.$) {
+		case 'HH':
+			return 1;
+		case 'HH_MM':
+			return 1;
+		case 'HH_MM_SS':
+			var secondsStep = pickerType.a.secondsStep;
+			return secondsStep;
+		default:
+			var secondsStep = pickerType.a.secondsStep;
+			return secondsStep;
+	}
+};
+var $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$incrementHours = function (_v0) {
+	var time = _v0.a;
+	var newHours = $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$hoursToInt(time.hours) + 1;
+	return (newHours >= 24) ? _Utils_Tuple2(
+		$PanagiotisGeorgiadis$elm_datetime$Clock$Internal$Time(
+			_Utils_update(
+				time,
+				{
+					hours: $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$Hour(0)
+				})),
+		true) : _Utils_Tuple2(
+		$PanagiotisGeorgiadis$elm_datetime$Clock$Internal$Time(
+			_Utils_update(
+				time,
+				{
+					hours: $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$Hour(newHours)
+				})),
+		false);
+};
+var $PanagiotisGeorgiadis$elm_datetime$Clock$incrementHours = $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$incrementHours;
+var $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$incrementMinutes = function (_v0) {
+	var time = _v0.a;
+	var newMinutes = $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$minutesToInt(time.minutes) + 1;
+	return (newMinutes >= 60) ? $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$incrementHours(
+		$PanagiotisGeorgiadis$elm_datetime$Clock$Internal$Time(
+			_Utils_update(
+				time,
+				{
+					minutes: $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$Minute(0)
+				}))) : _Utils_Tuple2(
+		$PanagiotisGeorgiadis$elm_datetime$Clock$Internal$Time(
+			_Utils_update(
+				time,
+				{
+					minutes: $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$Minute(newMinutes)
+				})),
+		false);
+};
+var $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$incrementSeconds = function (_v0) {
+	var time = _v0.a;
+	var newSeconds = $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$secondsToInt(time.seconds) + 1;
+	return (newSeconds >= 60) ? $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$incrementMinutes(
+		$PanagiotisGeorgiadis$elm_datetime$Clock$Internal$Time(
+			_Utils_update(
+				time,
+				{
+					seconds: $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$Second(0)
+				}))) : _Utils_Tuple2(
+		$PanagiotisGeorgiadis$elm_datetime$Clock$Internal$Time(
+			_Utils_update(
+				time,
+				{
+					seconds: $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$Second(newSeconds)
+				})),
+		false);
+};
+var $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$incrementMilliseconds = function (_v0) {
+	var time = _v0.a;
+	var newMillis = $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$millisecondsToInt(time.milliseconds) + 1;
+	return (newMillis >= 1000) ? $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$incrementSeconds(
+		$PanagiotisGeorgiadis$elm_datetime$Clock$Internal$Time(
+			_Utils_update(
+				time,
+				{
+					milliseconds: $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$Millisecond(0)
+				}))) : _Utils_Tuple2(
+		$PanagiotisGeorgiadis$elm_datetime$Clock$Internal$Time(
+			_Utils_update(
+				time,
+				{
+					milliseconds: $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$Millisecond(newMillis)
+				})),
+		false);
+};
+var $PanagiotisGeorgiadis$elm_datetime$Clock$incrementMilliseconds = $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$incrementMilliseconds;
+var $PanagiotisGeorgiadis$elm_datetime$Clock$incrementMinutes = $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$incrementMinutes;
+var $PanagiotisGeorgiadis$elm_datetime$Clock$incrementSeconds = $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$incrementSeconds;
+var $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$InternalTime = F4(
+	function (hours, minutes, seconds, milliseconds) {
+		return {hours: hours, milliseconds: milliseconds, minutes: minutes, seconds: seconds};
+	});
+var $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$hoursFromInt = function (hours) {
+	return ((hours >= 0) && (hours < 24)) ? $elm$core$Maybe$Just(
+		$PanagiotisGeorgiadis$elm_datetime$Clock$Internal$Hour(hours)) : $elm$core$Maybe$Nothing;
+};
+var $elm$core$Maybe$map4 = F5(
+	function (func, ma, mb, mc, md) {
+		if (ma.$ === 'Nothing') {
+			return $elm$core$Maybe$Nothing;
+		} else {
+			var a = ma.a;
+			if (mb.$ === 'Nothing') {
+				return $elm$core$Maybe$Nothing;
+			} else {
+				var b = mb.a;
+				if (mc.$ === 'Nothing') {
+					return $elm$core$Maybe$Nothing;
+				} else {
+					var c = mc.a;
+					if (md.$ === 'Nothing') {
+						return $elm$core$Maybe$Nothing;
+					} else {
+						var d = md.a;
+						return $elm$core$Maybe$Just(
+							A4(func, a, b, c, d));
+					}
+				}
+			}
+		}
+	});
+var $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$millisecondsFromInt = function (millis) {
+	return ((millis >= 0) && (millis < 1000)) ? $elm$core$Maybe$Just(
+		$PanagiotisGeorgiadis$elm_datetime$Clock$Internal$Millisecond(millis)) : $elm$core$Maybe$Nothing;
+};
+var $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$minutesFromInt = function (minutes) {
+	return ((minutes >= 0) && (minutes < 60)) ? $elm$core$Maybe$Just(
+		$PanagiotisGeorgiadis$elm_datetime$Clock$Internal$Minute(minutes)) : $elm$core$Maybe$Nothing;
+};
+var $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$secondsFromInt = function (seconds) {
+	return ((seconds >= 0) && (seconds < 60)) ? $elm$core$Maybe$Just(
+		$PanagiotisGeorgiadis$elm_datetime$Clock$Internal$Second(seconds)) : $elm$core$Maybe$Nothing;
+};
+var $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$fromRawParts = function (_v0) {
+	var hours = _v0.hours;
+	var minutes = _v0.minutes;
+	var seconds = _v0.seconds;
+	var milliseconds = _v0.milliseconds;
+	return A5(
+		$elm$core$Maybe$map4,
+		F4(
+			function (h, m, s, mm) {
+				return $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$Time(
+					A4($PanagiotisGeorgiadis$elm_datetime$Clock$Internal$InternalTime, h, m, s, mm));
+			}),
+		$PanagiotisGeorgiadis$elm_datetime$Clock$Internal$hoursFromInt(hours),
+		$PanagiotisGeorgiadis$elm_datetime$Clock$Internal$minutesFromInt(minutes),
+		$PanagiotisGeorgiadis$elm_datetime$Clock$Internal$secondsFromInt(seconds),
+		$PanagiotisGeorgiadis$elm_datetime$Clock$Internal$millisecondsFromInt(milliseconds));
+};
+var $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$setHours = F2(
+	function (hours, time) {
+		return $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$fromRawParts(
+			{
+				hours: hours,
+				milliseconds: $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$millisecondsToInt(
+					$PanagiotisGeorgiadis$elm_datetime$Clock$Internal$getMilliseconds(time)),
+				minutes: $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$minutesToInt(
+					$PanagiotisGeorgiadis$elm_datetime$Clock$Internal$getMinutes(time)),
+				seconds: $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$secondsToInt(
+					$PanagiotisGeorgiadis$elm_datetime$Clock$Internal$getSeconds(time))
+			});
+	});
+var $PanagiotisGeorgiadis$elm_datetime$Clock$setHours = $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$setHours;
+var $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$setMilliseconds = F2(
+	function (milliseconds, time) {
+		return $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$fromRawParts(
+			{
+				hours: $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$hoursToInt(
+					$PanagiotisGeorgiadis$elm_datetime$Clock$Internal$getHours(time)),
+				milliseconds: milliseconds,
+				minutes: $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$minutesToInt(
+					$PanagiotisGeorgiadis$elm_datetime$Clock$Internal$getMinutes(time)),
+				seconds: $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$secondsToInt(
+					$PanagiotisGeorgiadis$elm_datetime$Clock$Internal$getSeconds(time))
+			});
+	});
+var $PanagiotisGeorgiadis$elm_datetime$Clock$setMilliseconds = $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$setMilliseconds;
+var $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$setMinutes = F2(
+	function (minutes, time) {
+		return $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$fromRawParts(
+			{
+				hours: $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$hoursToInt(
+					$PanagiotisGeorgiadis$elm_datetime$Clock$Internal$getHours(time)),
+				milliseconds: $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$millisecondsToInt(
+					$PanagiotisGeorgiadis$elm_datetime$Clock$Internal$getMilliseconds(time)),
+				minutes: minutes,
+				seconds: $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$secondsToInt(
+					$PanagiotisGeorgiadis$elm_datetime$Clock$Internal$getSeconds(time))
+			});
+	});
+var $PanagiotisGeorgiadis$elm_datetime$Clock$setMinutes = $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$setMinutes;
+var $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$setSeconds = F2(
+	function (seconds, time) {
+		return $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$fromRawParts(
+			{
+				hours: $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$hoursToInt(
+					$PanagiotisGeorgiadis$elm_datetime$Clock$Internal$getHours(time)),
+				milliseconds: $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$millisecondsToInt(
+					$PanagiotisGeorgiadis$elm_datetime$Clock$Internal$getMilliseconds(time)),
+				minutes: $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$minutesToInt(
+					$PanagiotisGeorgiadis$elm_datetime$Clock$Internal$getMinutes(time)),
+				seconds: seconds
+			});
+	});
+var $PanagiotisGeorgiadis$elm_datetime$Clock$setSeconds = $PanagiotisGeorgiadis$elm_datetime$Clock$Internal$setSeconds;
+var $PanagiotisGeorgiadis$elm_datepicker$TimePicker$Update$stepThrough = function (_v0) {
+	stepThrough:
+	while (true) {
+		var n = _v0.n;
+		var updateFn = _v0.updateFn;
+		var time = _v0.time;
+		var _v1 = _Utils_Tuple2(
+			updateFn(time),
+			n - 1);
+		var time_ = _v1.a;
+		var n_ = _v1.b;
+		if (n_ <= 0) {
+			return time_;
+		} else {
+			var $temp$_v0 = {n: n_, time: time_, updateFn: updateFn};
+			_v0 = $temp$_v0;
+			continue stepThrough;
+		}
+	}
+};
+var $PanagiotisGeorgiadis$elm_datepicker$TimePicker$Update$updateDisplayTime = F2(
+	function (time, _v0) {
+		var model = _v0.a;
+		return $PanagiotisGeorgiadis$elm_datepicker$TimePicker$Internal$Update$Model(
+			_Utils_update(
+				model,
+				{
+					hours: A2($PanagiotisGeorgiadis$elm_datepicker$TimePicker$Update$toString, $PanagiotisGeorgiadis$elm_datepicker$TimePicker$Internal$Update$Hours, time),
+					milliseconds: A2($PanagiotisGeorgiadis$elm_datepicker$TimePicker$Update$toString, $PanagiotisGeorgiadis$elm_datepicker$TimePicker$Internal$Update$Milliseconds, time),
+					minutes: A2($PanagiotisGeorgiadis$elm_datepicker$TimePicker$Update$toString, $PanagiotisGeorgiadis$elm_datepicker$TimePicker$Internal$Update$Minutes, time),
+					seconds: A2($PanagiotisGeorgiadis$elm_datepicker$TimePicker$Update$toString, $PanagiotisGeorgiadis$elm_datepicker$TimePicker$Internal$Update$Seconds, time),
+					time: time
+				}));
+	});
+var $elm$core$String$fromList = _String_fromList;
+var $elm$core$String$foldr = _String_foldr;
+var $elm$core$String$toList = function (string) {
+	return A3($elm$core$String$foldr, $elm$core$List$cons, _List_Nil, string);
+};
+var $PanagiotisGeorgiadis$elm_datepicker$TimePicker$Update$filterNonDigits = A2(
+	$elm$core$Basics$composeL,
+	A2(
+		$elm$core$Basics$composeL,
+		$elm$core$String$fromList,
+		$elm$core$List$filter($elm$core$Char$isDigit)),
+	$elm$core$String$toList);
+var $PanagiotisGeorgiadis$elm_datepicker$TimePicker$Update$validateTimeSegment = function (_v0) {
+	var _default = _v0._default;
+	var _new = _v0._new;
+	var ceil = _v0.ceil;
+	var _v1 = $elm$core$String$toInt(_new);
+	if (_v1.$ === 'Just') {
+		var v = _v1.a;
+		return ((v >= 0) && (_Utils_cmp(v, ceil) < 0)) ? _new : _default;
+	} else {
+		return $elm$core$String$isEmpty(_new) ? _new : _default;
+	}
+};
+var $PanagiotisGeorgiadis$elm_datepicker$TimePicker$Update$validate = F3(
+	function (_v0, timePart, newValue) {
+		var hours = _v0.hours;
+		var minutes = _v0.minutes;
+		var seconds = _v0.seconds;
+		var milliseconds = _v0.milliseconds;
+		var sanitisedValue = $PanagiotisGeorgiadis$elm_datepicker$TimePicker$Update$filterNonDigits(newValue);
+		var validationParams = F2(
+			function (_default, ceil) {
+				return {ceil: ceil, _default: _default, _new: sanitisedValue};
+			});
+		switch (timePart.$) {
+			case 'Hours':
+				return $PanagiotisGeorgiadis$elm_datepicker$TimePicker$Update$validateTimeSegment(
+					A2(validationParams, hours, 24));
+			case 'Minutes':
+				return $PanagiotisGeorgiadis$elm_datepicker$TimePicker$Update$validateTimeSegment(
+					A2(validationParams, minutes, 60));
+			case 'Seconds':
+				return $PanagiotisGeorgiadis$elm_datepicker$TimePicker$Update$validateTimeSegment(
+					A2(validationParams, seconds, 60));
+			default:
+				return $PanagiotisGeorgiadis$elm_datepicker$TimePicker$Update$validateTimeSegment(
+					A2(validationParams, milliseconds, 1000));
+		}
+	});
+var $PanagiotisGeorgiadis$elm_datepicker$TimePicker$Update$update = F2(
+	function (msg, _v0) {
+		var model = _v0.a;
+		switch (msg.$) {
+			case 'InputHandler':
+				var timePart = msg.a;
+				var value = msg.b;
+				var validatedValue = A3($PanagiotisGeorgiadis$elm_datepicker$TimePicker$Update$validate, model, timePart, value);
+				var updatedModel = function () {
+					switch (timePart.$) {
+						case 'Hours':
+							return $PanagiotisGeorgiadis$elm_datepicker$TimePicker$Internal$Update$Model(
+								_Utils_update(
+									model,
+									{hours: validatedValue}));
+						case 'Minutes':
+							return $PanagiotisGeorgiadis$elm_datepicker$TimePicker$Internal$Update$Model(
+								_Utils_update(
+									model,
+									{minutes: validatedValue}));
+						case 'Seconds':
+							return $PanagiotisGeorgiadis$elm_datepicker$TimePicker$Internal$Update$Model(
+								_Utils_update(
+									model,
+									{seconds: validatedValue}));
+						default:
+							return $PanagiotisGeorgiadis$elm_datepicker$TimePicker$Internal$Update$Model(
+								_Utils_update(
+									model,
+									{milliseconds: validatedValue}));
+					}
+				}();
+				return _Utils_Tuple3(updatedModel, $elm$core$Platform$Cmd$none, $PanagiotisGeorgiadis$elm_datepicker$TimePicker$Update$None);
+			case 'Update':
+				var timePart = msg.a;
+				var value = msg.b;
+				var updatedTime = function () {
+					switch (timePart.$) {
+						case 'Hours':
+							return (value === '') ? A2($PanagiotisGeorgiadis$elm_datetime$Clock$setHours, 0, model.time) : A2(
+								$elm$core$Maybe$andThen,
+								function (h) {
+									return A2($PanagiotisGeorgiadis$elm_datetime$Clock$setHours, h, model.time);
+								},
+								$elm$core$String$toInt(value));
+						case 'Minutes':
+							return (value === '') ? A2($PanagiotisGeorgiadis$elm_datetime$Clock$setMinutes, 0, model.time) : A2(
+								$elm$core$Maybe$andThen,
+								function (m) {
+									return A2($PanagiotisGeorgiadis$elm_datetime$Clock$setMinutes, m, model.time);
+								},
+								$elm$core$String$toInt(value));
+						case 'Seconds':
+							return (value === '') ? A2($PanagiotisGeorgiadis$elm_datetime$Clock$setSeconds, 0, model.time) : A2(
+								$elm$core$Maybe$andThen,
+								function (s) {
+									return A2($PanagiotisGeorgiadis$elm_datetime$Clock$setSeconds, s, model.time);
+								},
+								$elm$core$String$toInt(value));
+						default:
+							return (value === '') ? A2($PanagiotisGeorgiadis$elm_datetime$Clock$setMilliseconds, 0, model.time) : A2(
+								$elm$core$Maybe$andThen,
+								function (m) {
+									return A2($PanagiotisGeorgiadis$elm_datetime$Clock$setMilliseconds, m, model.time);
+								},
+								$elm$core$String$toInt(value));
+					}
+				}();
+				if (updatedTime.$ === 'Just') {
+					var time = updatedTime.a;
+					var updatedModel = function () {
+						switch (timePart.$) {
+							case 'Hours':
+								return $PanagiotisGeorgiadis$elm_datepicker$TimePicker$Internal$Update$Model(
+									_Utils_update(
+										model,
+										{
+											hours: A2($PanagiotisGeorgiadis$elm_datepicker$TimePicker$Update$toString, $PanagiotisGeorgiadis$elm_datepicker$TimePicker$Internal$Update$Hours, time),
+											time: time
+										}));
+							case 'Minutes':
+								return $PanagiotisGeorgiadis$elm_datepicker$TimePicker$Internal$Update$Model(
+									_Utils_update(
+										model,
+										{
+											minutes: A2($PanagiotisGeorgiadis$elm_datepicker$TimePicker$Update$toString, $PanagiotisGeorgiadis$elm_datepicker$TimePicker$Internal$Update$Minutes, time),
+											time: time
+										}));
+							case 'Seconds':
+								return $PanagiotisGeorgiadis$elm_datepicker$TimePicker$Internal$Update$Model(
+									_Utils_update(
+										model,
+										{
+											seconds: A2($PanagiotisGeorgiadis$elm_datepicker$TimePicker$Update$toString, $PanagiotisGeorgiadis$elm_datepicker$TimePicker$Internal$Update$Seconds, time),
+											time: time
+										}));
+							default:
+								return $PanagiotisGeorgiadis$elm_datepicker$TimePicker$Internal$Update$Model(
+									_Utils_update(
+										model,
+										{
+											milliseconds: A2($PanagiotisGeorgiadis$elm_datepicker$TimePicker$Update$toString, $PanagiotisGeorgiadis$elm_datepicker$TimePicker$Internal$Update$Milliseconds, time),
+											time: time
+										}));
+						}
+					}();
+					return _Utils_Tuple3(
+						updatedModel,
+						$elm$core$Platform$Cmd$none,
+						$PanagiotisGeorgiadis$elm_datepicker$TimePicker$Update$UpdatedTime(time));
+				} else {
+					return _Utils_Tuple3(
+						$PanagiotisGeorgiadis$elm_datepicker$TimePicker$Internal$Update$Model(model),
+						$elm$core$Platform$Cmd$none,
+						$PanagiotisGeorgiadis$elm_datepicker$TimePicker$Update$None);
+				}
+			case 'Increment':
+				var timePart = msg.a;
+				var _v6 = function () {
+					switch (timePart.$) {
+						case 'Hours':
+							return _Utils_Tuple2(
+								A2($elm$core$Basics$composeL, $elm$core$Tuple$first, $PanagiotisGeorgiadis$elm_datetime$Clock$incrementHours),
+								$PanagiotisGeorgiadis$elm_datepicker$TimePicker$Update$getHoursStep(model));
+						case 'Minutes':
+							return _Utils_Tuple2(
+								A2($elm$core$Basics$composeL, $elm$core$Tuple$first, $PanagiotisGeorgiadis$elm_datetime$Clock$incrementMinutes),
+								$PanagiotisGeorgiadis$elm_datepicker$TimePicker$Update$getMinutesStep(model));
+						case 'Seconds':
+							return _Utils_Tuple2(
+								A2($elm$core$Basics$composeL, $elm$core$Tuple$first, $PanagiotisGeorgiadis$elm_datetime$Clock$incrementSeconds),
+								$PanagiotisGeorgiadis$elm_datepicker$TimePicker$Update$getSecondsStep(model));
+						default:
+							return _Utils_Tuple2(
+								A2($elm$core$Basics$composeL, $elm$core$Tuple$first, $PanagiotisGeorgiadis$elm_datetime$Clock$incrementMilliseconds),
+								$PanagiotisGeorgiadis$elm_datepicker$TimePicker$Update$getMillisecondsStep(model));
+					}
+				}();
+				var updateFn = _v6.a;
+				var step = _v6.b;
+				var time = $PanagiotisGeorgiadis$elm_datepicker$TimePicker$Update$stepThrough(
+					{n: step, time: model.time, updateFn: updateFn});
+				return _Utils_Tuple3(
+					A2(
+						$PanagiotisGeorgiadis$elm_datepicker$TimePicker$Update$updateDisplayTime,
+						time,
+						$PanagiotisGeorgiadis$elm_datepicker$TimePicker$Internal$Update$Model(model)),
+					$elm$core$Platform$Cmd$none,
+					$PanagiotisGeorgiadis$elm_datepicker$TimePicker$Update$UpdatedTime(time));
+			default:
+				var timePart = msg.a;
+				var _v8 = function () {
+					switch (timePart.$) {
+						case 'Hours':
+							return _Utils_Tuple2(
+								A2($elm$core$Basics$composeL, $elm$core$Tuple$first, $PanagiotisGeorgiadis$elm_datetime$Clock$decrementHours),
+								$PanagiotisGeorgiadis$elm_datepicker$TimePicker$Update$getHoursStep(model));
+						case 'Minutes':
+							return _Utils_Tuple2(
+								A2($elm$core$Basics$composeL, $elm$core$Tuple$first, $PanagiotisGeorgiadis$elm_datetime$Clock$decrementMinutes),
+								$PanagiotisGeorgiadis$elm_datepicker$TimePicker$Update$getMinutesStep(model));
+						case 'Seconds':
+							return _Utils_Tuple2(
+								A2($elm$core$Basics$composeL, $elm$core$Tuple$first, $PanagiotisGeorgiadis$elm_datetime$Clock$decrementSeconds),
+								$PanagiotisGeorgiadis$elm_datepicker$TimePicker$Update$getSecondsStep(model));
+						default:
+							return _Utils_Tuple2(
+								A2($elm$core$Basics$composeL, $elm$core$Tuple$first, $PanagiotisGeorgiadis$elm_datetime$Clock$decrementMilliseconds),
+								$PanagiotisGeorgiadis$elm_datepicker$TimePicker$Update$getMillisecondsStep(model));
+					}
+				}();
+				var updateFn = _v8.a;
+				var step = _v8.b;
+				var time = $PanagiotisGeorgiadis$elm_datepicker$TimePicker$Update$stepThrough(
+					{n: step, time: model.time, updateFn: updateFn});
+				return _Utils_Tuple3(
+					A2(
+						$PanagiotisGeorgiadis$elm_datepicker$TimePicker$Update$updateDisplayTime,
+						time,
+						$PanagiotisGeorgiadis$elm_datepicker$TimePicker$Internal$Update$Model(model)),
+					$elm$core$Platform$Cmd$none,
+					$PanagiotisGeorgiadis$elm_datepicker$TimePicker$Update$UpdatedTime(time));
+		}
+	});
+var $PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$millisInADay = ((1000 * 60) * 60) * 24;
+var $PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$millisInYear = function (year) {
+	return $PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$isLeapYear(year) ? ($PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$millisInADay * 366) : ($PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$millisInADay * 365);
+};
+var $elm$core$List$sum = function (numbers) {
+	return A3($elm$core$List$foldl, $elm$core$Basics$add, 0, numbers);
+};
+var $PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$millisSinceEpoch = function (_v0) {
+	var year = _v0.a;
+	var getTotalMillis = A2(
+		$elm$core$Basics$composeL,
+		A2(
+			$elm$core$Basics$composeL,
+			$elm$core$List$sum,
+			$elm$core$List$map($PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$millisInYear)),
+		$elm$core$List$filterMap($PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$yearFromInt));
+	var epochYear = 1970;
+	return (year >= 1970) ? getTotalMillis(
+		A2($elm$core$List$range, epochYear, year - 1)) : (-getTotalMillis(
+		A2($elm$core$List$range, year, epochYear - 1)));
+};
+var $PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$millisSinceStartOfTheMonth = function (day) {
+	return $PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$millisInADay * ($PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$dayToInt(day) - 1);
+};
+var $elm$core$Array$fromListHelp = F3(
+	function (list, nodeList, nodeListSize) {
+		fromListHelp:
+		while (true) {
+			var _v0 = A2($elm$core$Elm$JsArray$initializeFromList, $elm$core$Array$branchFactor, list);
+			var jsArray = _v0.a;
+			var remainingItems = _v0.b;
+			if (_Utils_cmp(
+				$elm$core$Elm$JsArray$length(jsArray),
+				$elm$core$Array$branchFactor) < 0) {
+				return A2(
+					$elm$core$Array$builderToArray,
+					true,
+					{nodeList: nodeList, nodeListSize: nodeListSize, tail: jsArray});
+			} else {
+				var $temp$list = remainingItems,
+					$temp$nodeList = A2(
+					$elm$core$List$cons,
+					$elm$core$Array$Leaf(jsArray),
+					nodeList),
+					$temp$nodeListSize = nodeListSize + 1;
+				list = $temp$list;
+				nodeList = $temp$nodeList;
+				nodeListSize = $temp$nodeListSize;
+				continue fromListHelp;
+			}
+		}
+	});
+var $elm$core$Array$fromList = function (list) {
+	if (!list.b) {
+		return $elm$core$Array$empty;
+	} else {
+		return A3($elm$core$Array$fromListHelp, list, _List_Nil, 0);
+	}
+};
+var $PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$months = $elm$core$Array$fromList(
+	_List_fromArray(
+		[$elm$time$Time$Jan, $elm$time$Time$Feb, $elm$time$Time$Mar, $elm$time$Time$Apr, $elm$time$Time$May, $elm$time$Time$Jun, $elm$time$Time$Jul, $elm$time$Time$Aug, $elm$time$Time$Sep, $elm$time$Time$Oct, $elm$time$Time$Nov, $elm$time$Time$Dec]));
+var $elm$core$Elm$JsArray$appendN = _JsArray_appendN;
+var $elm$core$Elm$JsArray$slice = _JsArray_slice;
+var $elm$core$Array$appendHelpBuilder = F2(
+	function (tail, builder) {
+		var tailLen = $elm$core$Elm$JsArray$length(tail);
+		var notAppended = ($elm$core$Array$branchFactor - $elm$core$Elm$JsArray$length(builder.tail)) - tailLen;
+		var appended = A3($elm$core$Elm$JsArray$appendN, $elm$core$Array$branchFactor, builder.tail, tail);
+		return (notAppended < 0) ? {
+			nodeList: A2(
+				$elm$core$List$cons,
+				$elm$core$Array$Leaf(appended),
+				builder.nodeList),
+			nodeListSize: builder.nodeListSize + 1,
+			tail: A3($elm$core$Elm$JsArray$slice, notAppended, tailLen, tail)
+		} : ((!notAppended) ? {
+			nodeList: A2(
+				$elm$core$List$cons,
+				$elm$core$Array$Leaf(appended),
+				builder.nodeList),
+			nodeListSize: builder.nodeListSize + 1,
+			tail: $elm$core$Elm$JsArray$empty
+		} : {nodeList: builder.nodeList, nodeListSize: builder.nodeListSize, tail: appended});
+	});
+var $elm$core$List$drop = F2(
+	function (n, list) {
+		drop:
+		while (true) {
+			if (n <= 0) {
+				return list;
+			} else {
+				if (!list.b) {
+					return list;
+				} else {
+					var x = list.a;
+					var xs = list.b;
+					var $temp$n = n - 1,
+						$temp$list = xs;
+					n = $temp$n;
+					list = $temp$list;
+					continue drop;
+				}
+			}
+		}
+	});
+var $elm$core$Bitwise$shiftLeftBy = _Bitwise_shiftLeftBy;
+var $elm$core$Bitwise$shiftRightZfBy = _Bitwise_shiftRightZfBy;
+var $elm$core$Array$tailIndex = function (len) {
+	return (len >>> 5) << 5;
+};
+var $elm$core$Array$sliceLeft = F2(
+	function (from, array) {
+		var len = array.a;
+		var tree = array.c;
+		var tail = array.d;
+		if (!from) {
+			return array;
+		} else {
+			if (_Utils_cmp(
+				from,
+				$elm$core$Array$tailIndex(len)) > -1) {
+				return A4(
+					$elm$core$Array$Array_elm_builtin,
+					len - from,
+					$elm$core$Array$shiftStep,
+					$elm$core$Elm$JsArray$empty,
+					A3(
+						$elm$core$Elm$JsArray$slice,
+						from - $elm$core$Array$tailIndex(len),
+						$elm$core$Elm$JsArray$length(tail),
+						tail));
+			} else {
+				var skipNodes = (from / $elm$core$Array$branchFactor) | 0;
+				var helper = F2(
+					function (node, acc) {
+						if (node.$ === 'SubTree') {
+							var subTree = node.a;
+							return A3($elm$core$Elm$JsArray$foldr, helper, acc, subTree);
+						} else {
+							var leaf = node.a;
+							return A2($elm$core$List$cons, leaf, acc);
+						}
+					});
+				var leafNodes = A3(
+					$elm$core$Elm$JsArray$foldr,
+					helper,
+					_List_fromArray(
+						[tail]),
+					tree);
+				var nodesToInsert = A2($elm$core$List$drop, skipNodes, leafNodes);
+				if (!nodesToInsert.b) {
+					return $elm$core$Array$empty;
+				} else {
+					var head = nodesToInsert.a;
+					var rest = nodesToInsert.b;
+					var firstSlice = from - (skipNodes * $elm$core$Array$branchFactor);
+					var initialBuilder = {
+						nodeList: _List_Nil,
+						nodeListSize: 0,
+						tail: A3(
+							$elm$core$Elm$JsArray$slice,
+							firstSlice,
+							$elm$core$Elm$JsArray$length(head),
+							head)
+					};
+					return A2(
+						$elm$core$Array$builderToArray,
+						true,
+						A3($elm$core$List$foldl, $elm$core$Array$appendHelpBuilder, initialBuilder, rest));
+				}
+			}
+		}
+	});
+var $elm$core$Bitwise$and = _Bitwise_and;
+var $elm$core$Array$bitMask = 4294967295 >>> (32 - $elm$core$Array$shiftStep);
+var $elm$core$Elm$JsArray$unsafeGet = _JsArray_unsafeGet;
+var $elm$core$Array$fetchNewTail = F4(
+	function (shift, end, treeEnd, tree) {
+		fetchNewTail:
+		while (true) {
+			var pos = $elm$core$Array$bitMask & (treeEnd >>> shift);
+			var _v0 = A2($elm$core$Elm$JsArray$unsafeGet, pos, tree);
+			if (_v0.$ === 'SubTree') {
+				var sub = _v0.a;
+				var $temp$shift = shift - $elm$core$Array$shiftStep,
+					$temp$end = end,
+					$temp$treeEnd = treeEnd,
+					$temp$tree = sub;
+				shift = $temp$shift;
+				end = $temp$end;
+				treeEnd = $temp$treeEnd;
+				tree = $temp$tree;
+				continue fetchNewTail;
+			} else {
+				var values = _v0.a;
+				return A3($elm$core$Elm$JsArray$slice, 0, $elm$core$Array$bitMask & end, values);
+			}
+		}
+	});
+var $elm$core$Array$hoistTree = F3(
+	function (oldShift, newShift, tree) {
+		hoistTree:
+		while (true) {
+			if ((_Utils_cmp(oldShift, newShift) < 1) || (!$elm$core$Elm$JsArray$length(tree))) {
+				return tree;
+			} else {
+				var _v0 = A2($elm$core$Elm$JsArray$unsafeGet, 0, tree);
+				if (_v0.$ === 'SubTree') {
+					var sub = _v0.a;
+					var $temp$oldShift = oldShift - $elm$core$Array$shiftStep,
+						$temp$newShift = newShift,
+						$temp$tree = sub;
+					oldShift = $temp$oldShift;
+					newShift = $temp$newShift;
+					tree = $temp$tree;
+					continue hoistTree;
+				} else {
+					return tree;
+				}
+			}
+		}
+	});
+var $elm$core$Elm$JsArray$unsafeSet = _JsArray_unsafeSet;
+var $elm$core$Array$sliceTree = F3(
+	function (shift, endIdx, tree) {
+		var lastPos = $elm$core$Array$bitMask & (endIdx >>> shift);
+		var _v0 = A2($elm$core$Elm$JsArray$unsafeGet, lastPos, tree);
+		if (_v0.$ === 'SubTree') {
+			var sub = _v0.a;
+			var newSub = A3($elm$core$Array$sliceTree, shift - $elm$core$Array$shiftStep, endIdx, sub);
+			return (!$elm$core$Elm$JsArray$length(newSub)) ? A3($elm$core$Elm$JsArray$slice, 0, lastPos, tree) : A3(
+				$elm$core$Elm$JsArray$unsafeSet,
+				lastPos,
+				$elm$core$Array$SubTree(newSub),
+				A3($elm$core$Elm$JsArray$slice, 0, lastPos + 1, tree));
+		} else {
+			return A3($elm$core$Elm$JsArray$slice, 0, lastPos, tree);
+		}
+	});
+var $elm$core$Array$sliceRight = F2(
+	function (end, array) {
+		var len = array.a;
+		var startShift = array.b;
+		var tree = array.c;
+		var tail = array.d;
+		if (_Utils_eq(end, len)) {
+			return array;
+		} else {
+			if (_Utils_cmp(
+				end,
+				$elm$core$Array$tailIndex(len)) > -1) {
+				return A4(
+					$elm$core$Array$Array_elm_builtin,
+					end,
+					startShift,
+					tree,
+					A3($elm$core$Elm$JsArray$slice, 0, $elm$core$Array$bitMask & end, tail));
+			} else {
+				var endIdx = $elm$core$Array$tailIndex(end);
+				var depth = $elm$core$Basics$floor(
+					A2(
+						$elm$core$Basics$logBase,
+						$elm$core$Array$branchFactor,
+						A2($elm$core$Basics$max, 1, endIdx - 1)));
+				var newShift = A2($elm$core$Basics$max, 5, depth * $elm$core$Array$shiftStep);
+				return A4(
+					$elm$core$Array$Array_elm_builtin,
+					end,
+					newShift,
+					A3(
+						$elm$core$Array$hoistTree,
+						startShift,
+						newShift,
+						A3($elm$core$Array$sliceTree, startShift, endIdx, tree)),
+					A4($elm$core$Array$fetchNewTail, startShift, end, endIdx, tree));
+			}
+		}
+	});
+var $elm$core$Array$translateIndex = F2(
+	function (index, _v0) {
+		var len = _v0.a;
+		var posIndex = (index < 0) ? (len + index) : index;
+		return (posIndex < 0) ? 0 : ((_Utils_cmp(posIndex, len) > 0) ? len : posIndex);
+	});
+var $elm$core$Array$slice = F3(
+	function (from, to, array) {
+		var correctTo = A2($elm$core$Array$translateIndex, to, array);
+		var correctFrom = A2($elm$core$Array$translateIndex, from, array);
+		return (_Utils_cmp(correctFrom, correctTo) > 0) ? $elm$core$Array$empty : A2(
+			$elm$core$Array$sliceLeft,
+			correctFrom,
+			A2($elm$core$Array$sliceRight, correctTo, array));
+	});
+var $PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$getPrecedingMonths = function (month) {
+	return $elm$core$Array$toList(
+		A3(
+			$elm$core$Array$slice,
+			0,
+			$PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$monthToInt(month) - 1,
+			$PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$months));
+};
+var $PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$millisSinceStartOfTheYear = F2(
+	function (year, month) {
+		return A3(
+			$elm$core$List$foldl,
+			F2(
+				function (m, res) {
+					return res + ($PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$millisInADay * $PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$dayToInt(
+						A2($PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$lastDayOf, year, m)));
+				}),
+			0,
+			$PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$getPrecedingMonths(month));
+	});
+var $PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$toMillis = function (_v0) {
+	var year = _v0.a.year;
+	var month = _v0.a.month;
+	var day = _v0.a.day;
+	return ($PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$millisSinceEpoch(year) + A2($PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$millisSinceStartOfTheYear, year, month)) + $PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$millisSinceStartOfTheMonth(day);
+};
+var $PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$toPosix = A2($elm$core$Basics$composeL, $elm$time$Time$millisToPosix, $PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$toMillis);
+var $PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$decrementDay = function (date) {
+	var millis = $elm$time$Time$posixToMillis(
+		$PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$toPosix(date)) - $PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$millisInADay;
+	var newDate = $PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$fromPosix(
+		$elm$time$Time$millisToPosix(millis));
+	return newDate;
+};
+var $PanagiotisGeorgiadis$elm_datetime$Calendar$decrementDay = $PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$decrementDay;
+var $PanagiotisGeorgiadis$elm_datetime$DateTime$Internal$decrementDay = function (_v0) {
+	var date = _v0.a.date;
+	var time = _v0.a.time;
+	return $PanagiotisGeorgiadis$elm_datetime$DateTime$Internal$DateTime(
+		{
+			date: $PanagiotisGeorgiadis$elm_datetime$Calendar$decrementDay(date),
+			time: time
+		});
+};
+var $PanagiotisGeorgiadis$elm_datetime$DateTime$decrementDay = $PanagiotisGeorgiadis$elm_datetime$DateTime$Internal$decrementDay;
+var $PanagiotisGeorgiadis$elm_datepicker$Utils$DateTime$decrementDays = F2(
+	function (days, date) {
+		decrementDays:
+		while (true) {
+			if (days > 0) {
+				var $temp$days = days - 1,
+					$temp$date = $PanagiotisGeorgiadis$elm_datetime$DateTime$decrementDay(date);
+				days = $temp$days;
+				date = $temp$date;
+				continue decrementDays;
+			} else {
+				return date;
+			}
+		}
+	});
+var $elm$core$Basics$abs = function (n) {
+	return (n < 0) ? (-n) : n;
+};
+var $PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$incrementDay = function (date) {
+	var millis = $elm$time$Time$posixToMillis(
+		$PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$toPosix(date)) + $PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$millisInADay;
+	var newDate = $PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$fromPosix(
+		$elm$time$Time$millisToPosix(millis));
+	return newDate;
+};
+var $PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$getDateRange_ = F3(
+	function (daysCount, prevDate, res) {
+		getDateRange_:
+		while (true) {
+			var updatedRes = _Utils_ap(
+				res,
+				_List_fromArray(
+					[prevDate]));
+			if (daysCount > 0) {
+				var _v0 = _Utils_Tuple2(
+					daysCount - 1,
+					$PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$incrementDay(prevDate));
+				var updatedDaysCount = _v0.a;
+				var updatedPrevDate = _v0.b;
+				var $temp$daysCount = updatedDaysCount,
+					$temp$prevDate = updatedPrevDate,
+					$temp$res = updatedRes;
+				daysCount = $temp$daysCount;
+				prevDate = $temp$prevDate;
+				res = $temp$res;
+				continue getDateRange_;
+			} else {
+				return updatedRes;
+			}
+		}
+	});
+var $PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$getDateRange = F2(
+	function (startDate, endDate) {
+		var _v0 = _Utils_Tuple2(
+			$PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$toPosix(startDate),
+			$PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$toPosix(endDate));
+		var startPosix = _v0.a;
+		var endPosix = _v0.b;
+		var posixDiff = $elm$time$Time$posixToMillis(endPosix) - $elm$time$Time$posixToMillis(startPosix);
+		var daysDiff = (((((((posixDiff / 1000) | 0) / 60) | 0) / 60) | 0) / 24) | 0;
+		return (daysDiff > 0) ? A3($PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$getDateRange_, daysDiff, startDate, _List_Nil) : A3(
+			$PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$getDateRange_,
+			$elm$core$Basics$abs(daysDiff),
+			endDate,
+			_List_Nil);
+	});
+var $PanagiotisGeorgiadis$elm_datetime$Calendar$getDateRange = $PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$getDateRange;
+var $PanagiotisGeorgiadis$elm_datetime$DateTime$Internal$getDateRange = F3(
+	function (_v0, _v1, time) {
+		var start = _v0.a;
+		var end = _v1.a;
+		return A2(
+			$elm$core$List$map,
+			function (date) {
+				return $PanagiotisGeorgiadis$elm_datetime$DateTime$Internal$DateTime(
+					{date: date, time: time});
+			},
+			A2($PanagiotisGeorgiadis$elm_datetime$Calendar$getDateRange, start.date, end.date));
+	});
+var $PanagiotisGeorgiadis$elm_datetime$DateTime$getDateRange = $PanagiotisGeorgiadis$elm_datetime$DateTime$Internal$getDateRange;
+var $PanagiotisGeorgiadis$elm_datetime$Calendar$incrementDay = $PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$incrementDay;
+var $PanagiotisGeorgiadis$elm_datetime$DateTime$Internal$incrementDay = function (_v0) {
+	var date = _v0.a.date;
+	var time = _v0.a.time;
+	return $PanagiotisGeorgiadis$elm_datetime$DateTime$Internal$DateTime(
+		{
+			date: $PanagiotisGeorgiadis$elm_datetime$Calendar$incrementDay(date),
+			time: time
+		});
+};
+var $PanagiotisGeorgiadis$elm_datetime$DateTime$incrementDay = $PanagiotisGeorgiadis$elm_datetime$DateTime$Internal$incrementDay;
+var $PanagiotisGeorgiadis$elm_datepicker$Utils$DateTime$incrementDays = F2(
+	function (days, date) {
+		incrementDays:
+		while (true) {
+			if (days > 0) {
+				var $temp$days = days - 1,
+					$temp$date = $PanagiotisGeorgiadis$elm_datetime$DateTime$incrementDay(date);
+				days = $temp$days;
+				date = $temp$date;
+				continue incrementDays;
+			} else {
+				return date;
+			}
+		}
+	});
+var $PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$Update$updateDateRangeOffset = function (model) {
+	var range = model.range;
+	var dateRangeOffset = model.dateRangeOffset;
+	if (dateRangeOffset.$ === 'Offset') {
+		var minDateRangeLength = dateRangeOffset.a.minDateRangeLength;
+		var offsetConfig = function (invalidDates) {
+			return {invalidDates: invalidDates, minDateRangeLength: minDateRangeLength};
+		};
+		if (range.$ === 'StartDateSelected') {
+			var start = range.a;
+			var isNotEqualToStartDate = function (d) {
+				return !_Utils_eq(
+					A2($PanagiotisGeorgiadis$elm_datetime$DateTime$compareDates, start, d),
+					$elm$core$Basics$EQ);
+			};
+			var invalidPastDates = A2(
+				$elm$core$List$filter,
+				isNotEqualToStartDate,
+				$elm$core$List$reverse(
+					A2(
+						$elm$core$List$drop,
+						1,
+						A3(
+							$PanagiotisGeorgiadis$elm_datetime$DateTime$getDateRange,
+							start,
+							A2($PanagiotisGeorgiadis$elm_datepicker$Utils$DateTime$decrementDays, minDateRangeLength - 1, start),
+							$PanagiotisGeorgiadis$elm_datetime$Clock$midnight))));
+			var invalidFutureDates = A2(
+				$elm$core$List$filter,
+				isNotEqualToStartDate,
+				$elm$core$List$reverse(
+					A2(
+						$elm$core$List$drop,
+						1,
+						$elm$core$List$reverse(
+							A3(
+								$PanagiotisGeorgiadis$elm_datetime$DateTime$getDateRange,
+								start,
+								A2($PanagiotisGeorgiadis$elm_datepicker$Utils$DateTime$incrementDays, minDateRangeLength - 1, start),
+								$PanagiotisGeorgiadis$elm_datetime$Clock$midnight)))));
+			var invalidDates = _Utils_ap(invalidFutureDates, invalidPastDates);
+			return _Utils_update(
+				model,
+				{
+					dateRangeOffset: $PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$Update$Offset(
+						offsetConfig(invalidDates))
+				});
+		} else {
+			return _Utils_update(
+				model,
+				{
+					dateRangeOffset: $PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$Update$Offset(
+						offsetConfig(_List_Nil))
+				});
+		}
+	} else {
+		return model;
+	}
+};
+var $PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$update = F2(
+	function (msg, _v0) {
+		var model = _v0.a;
+		switch (msg.$) {
+			case 'PreviousMonth':
+				return _Utils_Tuple3(
+					$PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$Update$Model(
+						_Utils_update(
+							model,
+							{
+								primaryDate: $PanagiotisGeorgiadis$elm_datetime$DateTime$decrementMonth(model.primaryDate)
+							})),
+					$elm$core$Platform$Cmd$none,
+					$PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$None);
+			case 'NextMonth':
+				return _Utils_Tuple3(
+					$PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$Update$Model(
+						_Utils_update(
+							model,
+							{
+								primaryDate: $PanagiotisGeorgiadis$elm_datetime$DateTime$incrementMonth(model.primaryDate)
+							})),
+					$elm$core$Platform$Cmd$none,
+					$PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$None);
+			case 'SelectDate':
+				var date = msg.a;
+				var updateModel = function (start) {
+					var _v6 = A2($PanagiotisGeorgiadis$elm_datetime$DateTime$compareDates, start, date);
+					switch (_v6.$) {
+						case 'EQ':
+							return _Utils_Tuple3(
+								_Utils_update(
+									model,
+									{range: $PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$Update$NoneSelected}),
+								$elm$core$Platform$Cmd$none,
+								$PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$DateRangeSelected($elm$core$Maybe$Nothing));
+						case 'LT':
+							var _v7 = function () {
+								var _v8 = model.timePickers;
+								if (_v8.$ === 'TimePickers') {
+									var startPicker = _v8.a.startPicker;
+									var endPicker = _v8.a.endPicker;
+									return _Utils_Tuple2(
+										A2(
+											$PanagiotisGeorgiadis$elm_datetime$DateTime$setTime,
+											$PanagiotisGeorgiadis$elm_datepicker$TimePicker$Update$getTime(startPicker),
+											start),
+										A2(
+											$PanagiotisGeorgiadis$elm_datetime$DateTime$setTime,
+											$PanagiotisGeorgiadis$elm_datepicker$TimePicker$Update$getTime(endPicker),
+											date));
+								} else {
+									return _Utils_Tuple2(start, date);
+								}
+							}();
+							var start_ = _v7.a;
+							var end_ = _v7.b;
+							return _Utils_Tuple3(
+								_Utils_update(
+									model,
+									{
+										range: $PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$Update$BothSelected(
+											A2($PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$Update$Chosen, start_, end_))
+									}),
+								$PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$Update$showClockView(model),
+								$PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$DateRangeSelected(
+									$elm$core$Maybe$Just(
+										{endDate: end_, startDate: start_})));
+						default:
+							var _v9 = function () {
+								var _v10 = model.timePickers;
+								if (_v10.$ === 'TimePickers') {
+									var startPicker = _v10.a.startPicker;
+									var endPicker = _v10.a.endPicker;
+									return _Utils_Tuple2(
+										A2(
+											$PanagiotisGeorgiadis$elm_datetime$DateTime$setTime,
+											$PanagiotisGeorgiadis$elm_datepicker$TimePicker$Update$getTime(startPicker),
+											date),
+										A2(
+											$PanagiotisGeorgiadis$elm_datetime$DateTime$setTime,
+											$PanagiotisGeorgiadis$elm_datepicker$TimePicker$Update$getTime(endPicker),
+											start));
+								} else {
+									return _Utils_Tuple2(date, start);
+								}
+							}();
+							var start_ = _v9.a;
+							var end_ = _v9.b;
+							return _Utils_Tuple3(
+								_Utils_update(
+									model,
+									{
+										range: $PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$Update$BothSelected(
+											A2($PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$Update$Chosen, start_, end_))
+									}),
+								$PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$Update$showClockView(model),
+								$PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$DateRangeSelected(
+									$elm$core$Maybe$Just(
+										{endDate: end_, startDate: start_})));
+					}
+				};
+				var _v2 = function () {
+					var _v3 = model.range;
+					switch (_v3.$) {
+						case 'StartDateSelected':
+							var start = _v3.a;
+							return updateModel(start);
+						case 'BothSelected':
+							if (_v3.a.$ === 'Visually') {
+								var _v4 = _v3.a;
+								var start = _v4.a;
+								return updateModel(start);
+							} else {
+								var _v5 = _v3.a;
+								return _Utils_Tuple3(
+									_Utils_update(
+										model,
+										{
+											range: $PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$Update$StartDateSelected(date)
+										}),
+									$elm$core$Platform$Cmd$none,
+									$PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$DateRangeSelected($elm$core$Maybe$Nothing));
+							}
+						default:
+							return _Utils_Tuple3(
+								_Utils_update(
+									model,
+									{
+										range: $PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$Update$StartDateSelected(date)
+									}),
+								$elm$core$Platform$Cmd$none,
+								$PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$None);
+					}
+				}();
+				var model_ = _v2.a;
+				var cmd = _v2.b;
+				var extMsg = _v2.c;
+				return _Utils_Tuple3(
+					$PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$Update$Model(
+						$PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$Update$updateDateRangeOffset(model_)),
+					cmd,
+					extMsg);
+			case 'UpdateVisualSelection':
+				var date = msg.a;
+				var updateModel = function (start) {
+					var _v13 = A2($PanagiotisGeorgiadis$elm_datetime$DateTime$compareDates, start, date);
+					if (_v13.$ === 'EQ') {
+						return _Utils_update(
+							model,
+							{
+								range: $PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$Update$StartDateSelected(start)
+							});
+					} else {
+						return _Utils_update(
+							model,
+							{
+								range: $PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$Update$BothSelected(
+									A2($PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$Update$Visually, start, date))
+							});
+					}
+				};
+				var updatedModel = function () {
+					var _v11 = model.range;
+					_v11$2:
+					while (true) {
+						switch (_v11.$) {
+							case 'StartDateSelected':
+								var start = _v11.a;
+								return updateModel(start);
+							case 'BothSelected':
+								if (_v11.a.$ === 'Visually') {
+									var _v12 = _v11.a;
+									var start = _v12.a;
+									return updateModel(start);
+								} else {
+									break _v11$2;
+								}
+							default:
+								break _v11$2;
+						}
+					}
+					return model;
+				}();
+				return _Utils_Tuple3(
+					$PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$Update$Model(updatedModel),
+					$elm$core$Platform$Cmd$none,
+					$PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$None);
+			case 'ResetVisualSelection':
+				var _v14 = model.range;
+				if ((_v14.$ === 'BothSelected') && (_v14.a.$ === 'Visually')) {
+					var _v15 = _v14.a;
+					var start = _v15.a;
+					return _Utils_Tuple3(
+						$PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$Update$Model(
+							_Utils_update(
+								model,
+								{
+									range: $PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$Update$StartDateSelected(start)
+								})),
+						$elm$core$Platform$Cmd$none,
+						$PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$None);
+				} else {
+					return _Utils_Tuple3(
+						$PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$Update$Model(model),
+						$elm$core$Platform$Cmd$none,
+						$PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$None);
+				}
+			case 'ShowClockView':
+				return _Utils_Tuple3(
+					$PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$Update$Model(
+						_Utils_update(
+							model,
+							{viewType: $PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$Update$DoubleTimePicker})),
+					$elm$core$Platform$Cmd$none,
+					$PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$None);
+			case 'ShowCalendarView':
+				return _Utils_Tuple3(
+					$PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$Update$Model(
+						_Utils_update(
+							model,
+							{viewType: $PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$Update$DoubleCalendar})),
+					$elm$core$Platform$Cmd$none,
+					$PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$None);
+			case 'ToggleTimeMirroring':
+				var _v16 = model.timePickers;
+				if (_v16.$ === 'TimePickers') {
+					var pickers = _v16.a;
+					var startPicker = pickers.startPicker;
+					var mirrorTimes = pickers.mirrorTimes;
+					return _Utils_Tuple3(
+						$PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$Update$Model(
+							_Utils_update(
+								model,
+								{
+									timePickers: $PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$Update$TimePickers(
+										_Utils_update(
+											pickers,
+											{mirrorTimes: !mirrorTimes}))
+								})),
+						$PanagiotisGeorgiadis$elm_datepicker$Utils$Actions$fireAction(
+							$PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$Update$SyncTimePickers(
+								$PanagiotisGeorgiadis$elm_datepicker$TimePicker$Update$getTime(startPicker))),
+						$PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$None);
+				} else {
+					return _Utils_Tuple3(
+						$PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$Update$Model(model),
+						$elm$core$Platform$Cmd$none,
+						$PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$None);
+				}
+			case 'SyncTimePickers':
+				var time = msg.a;
+				var _v17 = model.timePickers;
+				if (_v17.$ === 'TimePickers') {
+					var pickers = _v17.a;
+					var startPicker = pickers.startPicker;
+					var endPicker = pickers.endPicker;
+					var mirrorTimes = pickers.mirrorTimes;
+					if (mirrorTimes) {
+						var updateFn = $PanagiotisGeorgiadis$elm_datepicker$TimePicker$Update$updateDisplayTime(time);
+						var _v18 = function () {
+							var _v19 = model.range;
+							if ((_v19.$ === 'BothSelected') && (_v19.a.$ === 'Chosen')) {
+								var _v20 = _v19.a;
+								var start = _v20.a;
+								var end = _v20.b;
+								var _v21 = _Utils_Tuple2(
+									A2($PanagiotisGeorgiadis$elm_datetime$DateTime$setTime, time, start),
+									A2($PanagiotisGeorgiadis$elm_datetime$DateTime$setTime, time, end));
+								var updatedStartDate = _v21.a;
+								var updatedEndDate = _v21.b;
+								return _Utils_Tuple2(
+									$PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$Update$BothSelected(
+										A2($PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$Update$Chosen, updatedStartDate, updatedEndDate)),
+									$PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$DateRangeSelected(
+										$elm$core$Maybe$Just(
+											{endDate: updatedEndDate, startDate: updatedStartDate})));
+							} else {
+								return _Utils_Tuple2(model.range, $PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$None);
+							}
+						}();
+						var range = _v18.a;
+						var extMsg = _v18.b;
+						return _Utils_Tuple3(
+							$PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$Update$Model(
+								_Utils_update(
+									model,
+									{
+										range: range,
+										timePickers: $PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$Update$TimePickers(
+											_Utils_update(
+												pickers,
+												{
+													endPicker: updateFn(endPicker),
+													startPicker: updateFn(startPicker)
+												}))
+									})),
+							$elm$core$Platform$Cmd$none,
+							extMsg);
+					} else {
+						return _Utils_Tuple3(
+							$PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$Update$Model(model),
+							$elm$core$Platform$Cmd$none,
+							$PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$None);
+					}
+				} else {
+					return _Utils_Tuple3(
+						$PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$Update$Model(model),
+						$elm$core$Platform$Cmd$none,
+						$PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$None);
+				}
+			case 'RangeStartPickerMsg':
+				var subMsg = msg.a;
+				var _v22 = model.timePickers;
+				if (_v22.$ === 'TimePickers') {
+					var pickers = _v22.a;
+					var startPicker = pickers.startPicker;
+					var _v23 = A2($PanagiotisGeorgiadis$elm_datepicker$TimePicker$Update$update, subMsg, startPicker);
+					var subModel = _v23.a;
+					var subCmd = _v23.b;
+					var extMsg = _v23.c;
+					var _v24 = function () {
+						var _v25 = _Utils_Tuple2(extMsg, model.range);
+						if (_v25.a.$ === 'UpdatedTime') {
+							if ((_v25.b.$ === 'BothSelected') && (_v25.b.a.$ === 'Chosen')) {
+								var time = _v25.a.a;
+								var _v26 = _v25.b.a;
+								var start = _v26.a;
+								var end = _v26.b;
+								var updatedStart = A2($PanagiotisGeorgiadis$elm_datetime$DateTime$setTime, time, start);
+								return _Utils_Tuple3(
+									$PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$Update$BothSelected(
+										A2($PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$Update$Chosen, updatedStart, end)),
+									$PanagiotisGeorgiadis$elm_datepicker$Utils$Actions$fireAction(
+										$PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$Update$SyncTimePickers(time)),
+									$PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$DateRangeSelected(
+										$elm$core$Maybe$Just(
+											{endDate: end, startDate: updatedStart})));
+							} else {
+								var time = _v25.a.a;
+								return _Utils_Tuple3(
+									model.range,
+									$PanagiotisGeorgiadis$elm_datepicker$Utils$Actions$fireAction(
+										$PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$Update$SyncTimePickers(time)),
+									$PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$None);
+							}
+						} else {
+							return _Utils_Tuple3(model.range, $elm$core$Platform$Cmd$none, $PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$None);
+						}
+					}();
+					var range = _v24.a;
+					var cmd = _v24.b;
+					var externalMsg = _v24.c;
+					return _Utils_Tuple3(
+						$PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$Update$Model(
+							_Utils_update(
+								model,
+								{
+									range: range,
+									timePickers: $PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$Update$TimePickers(
+										_Utils_update(
+											pickers,
+											{startPicker: subModel}))
+								})),
+						$elm$core$Platform$Cmd$batch(
+							_List_fromArray(
+								[
+									A2($elm$core$Platform$Cmd$map, $PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$Update$RangeStartPickerMsg, subCmd),
+									cmd
+								])),
+						externalMsg);
+				} else {
+					return _Utils_Tuple3(
+						$PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$Update$Model(model),
+						$elm$core$Platform$Cmd$none,
+						$PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$None);
+				}
+			case 'RangeEndPickerMsg':
+				var subMsg = msg.a;
+				var _v27 = model.timePickers;
+				if (_v27.$ === 'TimePickers') {
+					var pickers = _v27.a;
+					var endPicker = pickers.endPicker;
+					var _v28 = A2($PanagiotisGeorgiadis$elm_datepicker$TimePicker$Update$update, subMsg, endPicker);
+					var subModel = _v28.a;
+					var subCmd = _v28.b;
+					var extMsg = _v28.c;
+					var _v29 = function () {
+						var _v30 = _Utils_Tuple2(extMsg, model.range);
+						if (_v30.a.$ === 'UpdatedTime') {
+							if ((_v30.b.$ === 'BothSelected') && (_v30.b.a.$ === 'Chosen')) {
+								var time = _v30.a.a;
+								var _v31 = _v30.b.a;
+								var start = _v31.a;
+								var end = _v31.b;
+								var updatedEnd = A2($PanagiotisGeorgiadis$elm_datetime$DateTime$setTime, time, end);
+								return _Utils_Tuple3(
+									$PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$Update$BothSelected(
+										A2($PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$Update$Chosen, start, updatedEnd)),
+									$PanagiotisGeorgiadis$elm_datepicker$Utils$Actions$fireAction(
+										$PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$Update$SyncTimePickers(time)),
+									$PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$DateRangeSelected(
+										$elm$core$Maybe$Just(
+											{endDate: updatedEnd, startDate: start})));
+							} else {
+								var time = _v30.a.a;
+								return _Utils_Tuple3(
+									model.range,
+									$PanagiotisGeorgiadis$elm_datepicker$Utils$Actions$fireAction(
+										$PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$Update$SyncTimePickers(time)),
+									$PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$None);
+							}
+						} else {
+							return _Utils_Tuple3(model.range, $elm$core$Platform$Cmd$none, $PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$None);
+						}
+					}();
+					var range = _v29.a;
+					var cmd = _v29.b;
+					var externalMsg = _v29.c;
+					return _Utils_Tuple3(
+						$PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$Update$Model(
+							_Utils_update(
+								model,
+								{
+									range: range,
+									timePickers: $PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$Update$TimePickers(
+										_Utils_update(
+											pickers,
+											{endPicker: subModel}))
+								})),
+						$elm$core$Platform$Cmd$batch(
+							_List_fromArray(
+								[
+									A2($elm$core$Platform$Cmd$map, $PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$Update$RangeEndPickerMsg, subCmd),
+									cmd
+								])),
+						externalMsg);
+				} else {
+					return _Utils_Tuple3(
+						$PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$Update$Model(model),
+						$elm$core$Platform$Cmd$none,
+						$PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$None);
+				}
+			default:
+				return _Utils_Tuple3(
+					$PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$Update$Model(
+						_Utils_update(
+							model,
+							{
+								primaryDate: A2(
+									$PanagiotisGeorgiadis$elm_datetime$DateTime$setDate,
+									$PanagiotisGeorgiadis$elm_datetime$DateTime$getDate(model.today),
+									model.primaryDate)
+							})),
+					$elm$core$Platform$Cmd$none,
+					$PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$None);
+		}
+	});
+var $author$project$Components$Double$DateRangePicker$update = F2(
+	function (msg, model) {
+		var subMsg = msg.a;
+		var _v1 = A2($PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$update, subMsg, model.picker);
+		var updated = _v1.a;
+		var subCmd = _v1.b;
+		var extMsg = _v1.c;
+		var selectedRange = function () {
+			if (extMsg.$ === 'None') {
+				return model.selectedRange;
+			} else {
+				var range = extMsg.a;
+				return range;
+			}
+		}();
+		return _Utils_Tuple2(
+			_Utils_update(
+				model,
+				{picker: updated, selectedRange: selectedRange}),
+			A2($elm$core$Platform$Cmd$map, $author$project$Components$Double$DateRangePicker$PickerMsg, subCmd));
+	});
+var $author$project$Components$WithInput$Double$DateRangePicker$PickerMsg = function (a) {
+	return {$: 'PickerMsg', a: a};
+};
+var $author$project$Components$WithInput$Double$DateRangePicker$update = F2(
+	function (msg, model) {
+		switch (msg.$) {
+			case 'NoOp':
+				return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+			case 'PickerMsg':
+				var subMsg = msg.a;
+				var _v1 = A2($PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$update, subMsg, model.picker);
+				var updated = _v1.a;
+				var subCmd = _v1.b;
+				var extMsg = _v1.c;
+				var selectedRange = function () {
+					if (extMsg.$ === 'None') {
+						return model.selectedRange;
+					} else {
+						var dateRange = extMsg.a;
+						return dateRange;
+					}
+				}();
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{picker: updated, selectedRange: selectedRange}),
+					A2($elm$core$Platform$Cmd$map, $author$project$Components$WithInput$Double$DateRangePicker$PickerMsg, subCmd));
+			case 'FocusHandler':
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{isFocused: true}),
+					$elm$core$Platform$Cmd$none);
+			default:
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{isFocused: false}),
+					$elm$core$Platform$Cmd$none);
+		}
+	});
 var $author$project$App$update = F2(
 	function (action, model) {
 		var indexedUsers = function (users) {
@@ -7565,6 +10483,61 @@ var $author$project$App$update = F2(
 				masters);
 		};
 		switch (action.$) {
+			case 'InitialiseTime':
+				var todayPosix = action.a;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							created_at_picker: $elm$core$Maybe$Just(
+								A3($author$project$Components$Double$DateRangePicker$init, $author$project$Extra$I18n$Russian, $elm$time$Time$Mon, todayPosix)),
+							withInput: {
+								created_at_picker: $elm$core$Maybe$Just(
+									A3($author$project$Components$WithInput$Double$DateRangePicker$init, $author$project$Extra$I18n$Russian, $elm$time$Time$Mon, todayPosix))
+							}
+						}),
+					$elm$core$Platform$Cmd$none);
+			case 'CreatedAtPickerMsg':
+				var subMsg = action.a;
+				var _v1 = model.created_at_picker;
+				if (_v1.$ === 'Just') {
+					var picker = _v1.a;
+					var _v2 = A2($author$project$Components$Double$DateRangePicker$update, subMsg, picker);
+					var subModel = _v2.a;
+					var subCmd = _v2.b;
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{
+								created_at_picker: $elm$core$Maybe$Just(subModel)
+							}),
+						A2($elm$core$Platform$Cmd$map, $author$project$App$CreatedAtPickerMsg, subCmd));
+				} else {
+					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+				}
+			case 'CreatedAtPickerWithInputMsg':
+				var subMsg = action.a;
+				var _v3 = model.withInput.created_at_picker;
+				if (_v3.$ === 'Just') {
+					var picker = _v3.a;
+					var _v4 = model;
+					var withInput = _v4.withInput;
+					var _v5 = A2($author$project$Components$WithInput$Double$DateRangePicker$update, subMsg, picker);
+					var subModel = _v5.a;
+					var subCmd = _v5.b;
+					var updatedWithInput = _Utils_update(
+						withInput,
+						{
+							created_at_picker: $elm$core$Maybe$Just(subModel)
+						});
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{withInput: updatedWithInput}),
+						$elm$core$Platform$Cmd$none);
+				} else {
+					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+				}
 			case 'GotLeads':
 				var result = action.a;
 				if (result.$ === 'Ok') {
@@ -7686,9 +10659,9 @@ var $author$project$App$update = F2(
 						$elm$core$Platform$Cmd$none);
 				}
 			case 'RefreshLeads':
-				var _v6 = model.filter.user;
-				if (_v6.$ === 'Just') {
-					var user = _v6.a;
+				var _v11 = model.filter.user;
+				if (_v11.$ === 'Just') {
+					var user = _v11.a;
 					return _Utils_Tuple2(
 						_Utils_update(
 							model,
@@ -7726,9 +10699,9 @@ var $author$project$App$update = F2(
 				var status0 = (status === '') ? $elm$core$Maybe$Nothing : $elm$core$Maybe$Just(status);
 				var mfilter = model.filter;
 				var cmd = function () {
-					var _v7 = model.filter.user;
-					if (_v7.$ === 'Just') {
-						var user = _v7.a;
+					var _v12 = model.filter.user;
+					if (_v12.$ === 'Just') {
+						var user = _v12.a;
 						return A3($author$project$App$getLeads, user, status0, model.filter.master);
 					} else {
 						return $elm$core$Platform$Cmd$none;
@@ -7750,9 +10723,9 @@ var $author$project$App$update = F2(
 				var mfilter = model.filter;
 				var master0 = (master === '') ? $elm$core$Maybe$Nothing : $elm$core$Maybe$Just(master);
 				var cmd = function () {
-					var _v8 = model.filter.user;
-					if (_v8.$ === 'Just') {
-						var user = _v8.a;
+					var _v13 = model.filter.user;
+					if (_v13.$ === 'Just') {
+						var user = _v13.a;
 						return A3($author$project$App$getLeads, user, model.filter.status, master0);
 					} else {
 						return $elm$core$Platform$Cmd$none;
@@ -7886,7 +10859,6 @@ var $mdgriffith$elm_ui$Internal$Flag$Flag = function (a) {
 var $mdgriffith$elm_ui$Internal$Flag$Second = function (a) {
 	return {$: 'Second', a: a};
 };
-var $elm$core$Bitwise$shiftLeftBy = _Bitwise_shiftLeftBy;
 var $mdgriffith$elm_ui$Internal$Flag$flag = function (i) {
 	return (i > 31) ? $mdgriffith$elm_ui$Internal$Flag$Second(1 << (i - 32)) : $mdgriffith$elm_ui$Internal$Flag$Flag(1 << i);
 };
@@ -11402,7 +14374,6 @@ var $elm$virtual_dom$VirtualDom$keyedNode = function (tag) {
 		_VirtualDom_noScript(tag));
 };
 var $elm$html$Html$p = _VirtualDom_node('p');
-var $elm$core$Bitwise$and = _Bitwise_and;
 var $mdgriffith$elm_ui$Internal$Flag$present = F2(
 	function (myFlag, _v0) {
 		var fieldOne = _v0.a;
@@ -12250,7 +15221,6 @@ var $mdgriffith$elm_ui$Internal$Model$renderWidth = function (w) {
 	}
 };
 var $mdgriffith$elm_ui$Internal$Flag$borderWidth = $mdgriffith$elm_ui$Internal$Flag$flag(27);
-var $elm$core$Basics$ge = _Utils_ge;
 var $mdgriffith$elm_ui$Internal$Model$skippable = F2(
 	function (flag, style) {
 		if (_Utils_eq(flag, $mdgriffith$elm_ui$Internal$Flag$borderWidth)) {
@@ -13522,13 +16492,11 @@ var $mdgriffith$elm_ui$Element$el = F2(
 				_List_fromArray(
 					[child])));
 	});
-var $elm$core$Basics$composeL = F3(
-	function (g, f, x) {
-		return g(
-			f(x));
-	});
 var $mdgriffith$elm_ui$Internal$Model$unstyled = A2($elm$core$Basics$composeL, $mdgriffith$elm_ui$Internal$Model$Unstyled, $elm$core$Basics$always);
 var $mdgriffith$elm_ui$Element$html = $mdgriffith$elm_ui$Internal$Model$unstyled;
+var $mdgriffith$elm_ui$Element$htmlAttribute = $mdgriffith$elm_ui$Internal$Model$Attr;
+var $elm$virtual_dom$VirtualDom$map = _VirtualDom_map;
+var $elm$html$Html$map = $elm$virtual_dom$VirtualDom$map;
 var $elm$html$Html$Events$alwaysStop = function (x) {
 	return _Utils_Tuple2(x, true);
 };
@@ -13599,6 +16567,1794 @@ var $mdgriffith$elm_ui$Element$text = function (content) {
 	return $mdgriffith$elm_ui$Internal$Model$Text(content);
 };
 var $elm$html$Html$Attributes$value = $elm$html$Html$Attributes$stringProperty('value');
+var $elm$html$Html$br = _VirtualDom_node('br');
+var $elm$html$Html$h3 = _VirtualDom_node('h3');
+var $elm$html$Html$span = _VirtualDom_node('span');
+var $author$project$Extra$DateTime$formatMillis = function (millis) {
+	return (millis < 10) ? ('00' + $elm$core$String$fromInt(millis)) : ((millis < 100) ? ('0' + $elm$core$String$fromInt(millis)) : $elm$core$String$fromInt(millis));
+};
+var $author$project$Extra$DateTime$formatTime = function (time) {
+	return (time < 10) ? ('0' + $elm$core$String$fromInt(time)) : $elm$core$String$fromInt(time);
+};
+var $PanagiotisGeorgiadis$elm_datetime$Calendar$getDay = A2($elm$core$Basics$composeL, $PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$dayToInt, $PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$getDay);
+var $PanagiotisGeorgiadis$elm_datetime$DateTime$Internal$getDay = A2($elm$core$Basics$composeL, $PanagiotisGeorgiadis$elm_datetime$Calendar$getDay, $PanagiotisGeorgiadis$elm_datetime$DateTime$Internal$getDate);
+var $PanagiotisGeorgiadis$elm_datetime$DateTime$getDay = $PanagiotisGeorgiadis$elm_datetime$DateTime$Internal$getDay;
+var $PanagiotisGeorgiadis$elm_datetime$DateTime$Internal$getTime = function (_v0) {
+	var time = _v0.a.time;
+	return time;
+};
+var $PanagiotisGeorgiadis$elm_datetime$DateTime$Internal$getHours = A2($elm$core$Basics$composeL, $PanagiotisGeorgiadis$elm_datetime$Clock$getHours, $PanagiotisGeorgiadis$elm_datetime$DateTime$Internal$getTime);
+var $PanagiotisGeorgiadis$elm_datetime$DateTime$getHours = $PanagiotisGeorgiadis$elm_datetime$DateTime$Internal$getHours;
+var $PanagiotisGeorgiadis$elm_datetime$DateTime$Internal$getMilliseconds = A2($elm$core$Basics$composeL, $PanagiotisGeorgiadis$elm_datetime$Clock$getMilliseconds, $PanagiotisGeorgiadis$elm_datetime$DateTime$Internal$getTime);
+var $PanagiotisGeorgiadis$elm_datetime$DateTime$getMilliseconds = $PanagiotisGeorgiadis$elm_datetime$DateTime$Internal$getMilliseconds;
+var $PanagiotisGeorgiadis$elm_datetime$DateTime$Internal$getMinutes = A2($elm$core$Basics$composeL, $PanagiotisGeorgiadis$elm_datetime$Clock$getMinutes, $PanagiotisGeorgiadis$elm_datetime$DateTime$Internal$getTime);
+var $PanagiotisGeorgiadis$elm_datetime$DateTime$getMinutes = $PanagiotisGeorgiadis$elm_datetime$DateTime$Internal$getMinutes;
+var $PanagiotisGeorgiadis$elm_datetime$DateTime$Internal$getSeconds = A2($elm$core$Basics$composeL, $PanagiotisGeorgiadis$elm_datetime$Clock$getSeconds, $PanagiotisGeorgiadis$elm_datetime$DateTime$Internal$getTime);
+var $PanagiotisGeorgiadis$elm_datetime$DateTime$getSeconds = $PanagiotisGeorgiadis$elm_datetime$DateTime$Internal$getSeconds;
+var $elm$time$Time$Fri = {$: 'Fri'};
+var $elm$time$Time$Sat = {$: 'Sat'};
+var $elm$time$Time$Sun = {$: 'Sun'};
+var $elm$time$Time$Thu = {$: 'Thu'};
+var $elm$time$Time$Tue = {$: 'Tue'};
+var $elm$time$Time$Wed = {$: 'Wed'};
+var $elm$time$Time$toWeekday = F2(
+	function (zone, time) {
+		var _v0 = A2(
+			$elm$core$Basics$modBy,
+			7,
+			A2(
+				$elm$time$Time$flooredDiv,
+				A2($elm$time$Time$toAdjustedMinutes, zone, time),
+				60 * 24));
+		switch (_v0) {
+			case 0:
+				return $elm$time$Time$Thu;
+			case 1:
+				return $elm$time$Time$Fri;
+			case 2:
+				return $elm$time$Time$Sat;
+			case 3:
+				return $elm$time$Time$Sun;
+			case 4:
+				return $elm$time$Time$Mon;
+			case 5:
+				return $elm$time$Time$Tue;
+			default:
+				return $elm$time$Time$Wed;
+		}
+	});
+var $PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$getWeekday = function (date) {
+	return A2(
+		$elm$time$Time$toWeekday,
+		$elm$time$Time$utc,
+		$PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$toPosix(date));
+};
+var $PanagiotisGeorgiadis$elm_datetime$Calendar$getWeekday = $PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$getWeekday;
+var $PanagiotisGeorgiadis$elm_datetime$DateTime$Internal$getWeekday = function (_v0) {
+	var dateTime = _v0.a;
+	return $PanagiotisGeorgiadis$elm_datetime$Calendar$getWeekday(dateTime.date);
+};
+var $PanagiotisGeorgiadis$elm_datetime$DateTime$getWeekday = $PanagiotisGeorgiadis$elm_datetime$DateTime$Internal$getWeekday;
+var $author$project$Extra$Time$Month$toString = function (month) {
+	switch (month.$) {
+		case 'Jan':
+			return 'January';
+		case 'Feb':
+			return 'February';
+		case 'Mar':
+			return 'March';
+		case 'Apr':
+			return 'April';
+		case 'May':
+			return 'May';
+		case 'Jun':
+			return 'June';
+		case 'Jul':
+			return 'July';
+		case 'Aug':
+			return 'August';
+		case 'Sep':
+			return 'September';
+		case 'Oct':
+			return 'October';
+		case 'Nov':
+			return 'November';
+		default:
+			return 'December';
+	}
+};
+var $author$project$Extra$Time$Weekday$toString = function (weekday) {
+	switch (weekday.$) {
+		case 'Mon':
+			return 'Monday';
+		case 'Tue':
+			return 'Tuesday';
+		case 'Wed':
+			return 'Wednesday';
+		case 'Thu':
+			return 'Thursday';
+		case 'Fri':
+			return 'Friday';
+		case 'Sat':
+			return 'Saturday';
+		default:
+			return 'Sunday';
+	}
+};
+var $author$project$Extra$DateTime$toString = function (dateTime) {
+	return A2(
+		$elm$core$String$join,
+		' ',
+		_List_fromArray(
+			[
+				A2(
+				$elm$core$String$join,
+				' ',
+				_List_fromArray(
+					[
+						$author$project$Extra$Time$Weekday$toString(
+						$PanagiotisGeorgiadis$elm_datetime$DateTime$getWeekday(dateTime)),
+						$elm$core$String$fromInt(
+						$PanagiotisGeorgiadis$elm_datetime$DateTime$getDay(dateTime)),
+						$author$project$Extra$Time$Month$toString(
+						$PanagiotisGeorgiadis$elm_datetime$DateTime$getMonth(dateTime)),
+						$elm$core$String$fromInt(
+						$PanagiotisGeorgiadis$elm_datetime$DateTime$getYear(dateTime))
+					])),
+				A2(
+				$elm$core$String$join,
+				':',
+				_List_fromArray(
+					[
+						$author$project$Extra$DateTime$formatTime(
+						$PanagiotisGeorgiadis$elm_datetime$DateTime$getHours(dateTime)),
+						$author$project$Extra$DateTime$formatTime(
+						$PanagiotisGeorgiadis$elm_datetime$DateTime$getMinutes(dateTime)),
+						$author$project$Extra$DateTime$formatTime(
+						$PanagiotisGeorgiadis$elm_datetime$DateTime$getSeconds(dateTime)),
+						$author$project$Extra$DateTime$formatMillis(
+						$PanagiotisGeorgiadis$elm_datetime$DateTime$getMilliseconds(dateTime)) + 'Z'
+					]))
+			]));
+};
+var $PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$Update$ResetVisualSelection = {$: 'ResetVisualSelection'};
+var $PanagiotisGeorgiadis$elm_datepicker$Icons$Right = {$: 'Right'};
+var $PanagiotisGeorgiadis$elm_datepicker$Icons$Size = F2(
+	function (width, height) {
+		return {height: height, width: width};
+	});
+var $PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$Update$SelectDate = function (a) {
+	return {$: 'SelectDate', a: a};
+};
+var $PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$Update$UpdateVisualSelection = function (a) {
+	return {$: 'UpdateVisualSelection', a: a};
+};
+var $PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$View$checkIfDisabled = F2(
+	function (_v0, date) {
+		var dateLimit = _v0.a.dateLimit;
+		var isLesserThanDate = function (date_) {
+			return _Utils_eq(
+				A2($PanagiotisGeorgiadis$elm_datetime$DateTime$compareDates, date, date_),
+				$elm$core$Basics$LT);
+		};
+		var isGreaterThanDate = function (date_) {
+			return _Utils_eq(
+				A2($PanagiotisGeorgiadis$elm_datetime$DateTime$compareDates, date, date_),
+				$elm$core$Basics$GT);
+		};
+		if (dateLimit.$ === 'NoLimit') {
+			return false;
+		} else {
+			var minDate = dateLimit.a.minDate;
+			var maxDate = dateLimit.a.maxDate;
+			return isLesserThanDate(minDate) || isGreaterThanDate(maxDate);
+		}
+	});
+var $PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$View$checkIfInvalid = F2(
+	function (_v0, date) {
+		var dateRangeOffset = _v0.a.dateRangeOffset;
+		if (dateRangeOffset.$ === 'Offset') {
+			var invalidDates = dateRangeOffset.a.invalidDates;
+			return A2(
+				$elm$core$List$any,
+				function (d) {
+					return _Utils_eq(
+						A2($PanagiotisGeorgiadis$elm_datetime$DateTime$compareDates, date, d),
+						$elm$core$Basics$EQ);
+				},
+				invalidDates);
+		} else {
+			return false;
+		}
+	});
+var $elm$html$Html$Attributes$classList = function (classes) {
+	return $elm$html$Html$Attributes$class(
+		A2(
+			$elm$core$String$join,
+			' ',
+			A2(
+				$elm$core$List$map,
+				$elm$core$Tuple$first,
+				A2($elm$core$List$filter, $elm$core$Tuple$second, classes))));
+};
+var $elm$virtual_dom$VirtualDom$Normal = function (a) {
+	return {$: 'Normal', a: a};
+};
+var $elm$html$Html$Events$on = F2(
+	function (event, decoder) {
+		return A2(
+			$elm$virtual_dom$VirtualDom$on,
+			event,
+			$elm$virtual_dom$VirtualDom$Normal(decoder));
+	});
+var $elm$html$Html$Events$onClick = function (msg) {
+	return A2(
+		$elm$html$Html$Events$on,
+		'click',
+		$elm$json$Json$Decode$succeed(msg));
+};
+var $elm$html$Html$Events$onMouseOver = function (msg) {
+	return A2(
+		$elm$html$Html$Events$on,
+		'mouseover',
+		$elm$json$Json$Decode$succeed(msg));
+};
+var $elm$html$Html$Attributes$title = $elm$html$Html$Attributes$stringProperty('title');
+var $PanagiotisGeorgiadis$elm_datepicker$DatePicker$I18n$Condensed = {$: 'Condensed'};
+var $PanagiotisGeorgiadis$elm_datepicker$Utils$Time$toHumanReadableDate = F2(
+	function (i18n, dateTime) {
+		return A2(
+			$elm$core$String$join,
+			' ',
+			_List_fromArray(
+				[
+					A2(
+					i18n.weekdayToString,
+					$PanagiotisGeorgiadis$elm_datepicker$DatePicker$I18n$Condensed,
+					$PanagiotisGeorgiadis$elm_datetime$DateTime$getWeekday(dateTime)),
+					$elm$core$String$fromInt(
+					$PanagiotisGeorgiadis$elm_datetime$DateTime$getDay(dateTime)),
+					A2(
+					i18n.monthToString,
+					$PanagiotisGeorgiadis$elm_datepicker$DatePicker$I18n$Condensed,
+					$PanagiotisGeorgiadis$elm_datetime$DateTime$getMonth(dateTime)),
+					$elm$core$String$fromInt(
+					$PanagiotisGeorgiadis$elm_datetime$DateTime$getYear(dateTime))
+				]));
+	});
+var $PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$View$dateHtml = F2(
+	function (model, date) {
+		var today = model.a.today;
+		var range = model.a.range;
+		var i18n = model.a.i18n;
+		var isLesserThanDate = function (date_) {
+			return _Utils_eq(
+				A2($PanagiotisGeorgiadis$elm_datetime$DateTime$compareDates, date, date_),
+				$elm$core$Basics$LT);
+		};
+		var isInvalid = A2($PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$View$checkIfInvalid, model, date);
+		var isGreaterThanDate = function (date_) {
+			return _Utils_eq(
+				A2($PanagiotisGeorgiadis$elm_datetime$DateTime$compareDates, date, date_),
+				$elm$core$Basics$GT);
+		};
+		var isPartOfTheDateRange = function () {
+			var isDateBetween = F2(
+				function (start, end) {
+					return (isGreaterThanDate(start) && isLesserThanDate(end)) || (isLesserThanDate(start) && isGreaterThanDate(end));
+				});
+			if (range.$ === 'BothSelected') {
+				if (range.a.$ === 'Visually') {
+					var _v8 = range.a;
+					var start = _v8.a;
+					var shadowEnd = _v8.b;
+					return A2(isDateBetween, start, shadowEnd);
+				} else {
+					var _v9 = range.a;
+					var start = _v9.a;
+					var end = _v9.b;
+					return A2(isDateBetween, start, end);
+				}
+			} else {
+				return false;
+			}
+		}();
+		var isEqualToDate = function (date_) {
+			return _Utils_eq(
+				A2($PanagiotisGeorgiadis$elm_datetime$DateTime$compareDates, date, date_),
+				$elm$core$Basics$EQ);
+		};
+		var isToday = isEqualToDate(today);
+		var isDisabled = A2($PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$View$checkIfDisabled, model, date);
+		if (isDisabled || isInvalid) {
+			return A2(
+				$elm$html$Html$span,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$classList(
+						_List_fromArray(
+							[
+								_Utils_Tuple2('date', true),
+								_Utils_Tuple2('today', isToday),
+								_Utils_Tuple2('disabled', isDisabled),
+								_Utils_Tuple2('invalid', isInvalid),
+								_Utils_Tuple2('date-range', isPartOfTheDateRange)
+							])),
+						$elm$html$Html$Attributes$title(
+						A2($PanagiotisGeorgiadis$elm_datepicker$Utils$Time$toHumanReadableDate, i18n, date))
+					]),
+				_List_fromArray(
+					[
+						A2(
+						$elm$html$Html$span,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$class('date-inner')
+							]),
+						_List_fromArray(
+							[
+								$elm$html$Html$text(
+								$elm$core$String$fromInt(
+									$PanagiotisGeorgiadis$elm_datetime$DateTime$getDay(date)))
+							]))
+					]));
+		} else {
+			var isSelected = function () {
+				if (range.$ === 'StartDateSelected') {
+					var start = range.a;
+					return isEqualToDate(start);
+				} else {
+					return false;
+				}
+			}();
+			var _v0 = function () {
+				if (range.$ === 'BothSelected') {
+					if (range.a.$ === 'Visually') {
+						var _v2 = range.a;
+						var start = _v2.a;
+						var end = _v2.b;
+						var _v3 = function () {
+							var _v4 = A2($PanagiotisGeorgiadis$elm_datetime$DateTime$compareDates, start, end);
+							if (_v4.$ === 'LT') {
+								return _Utils_Tuple2(start, end);
+							} else {
+								return _Utils_Tuple2(end, start);
+							}
+						}();
+						var start_ = _v3.a;
+						var end_ = _v3.b;
+						return isEqualToDate(start_) ? _Utils_Tuple2(true, false) : (isEqualToDate(end_) ? _Utils_Tuple2(false, true) : _Utils_Tuple2(false, false));
+					} else {
+						var _v5 = range.a;
+						var start = _v5.a;
+						var end = _v5.b;
+						return _Utils_Tuple2(
+							isEqualToDate(start),
+							isEqualToDate(end));
+					}
+				} else {
+					return _Utils_Tuple2(false, false);
+				}
+			}();
+			var isStart = _v0.a;
+			var isEnd = _v0.b;
+			var dateClassList = _List_fromArray(
+				[
+					_Utils_Tuple2('date', true),
+					_Utils_Tuple2('today', isToday),
+					_Utils_Tuple2('selected', isSelected || (isStart || isEnd)),
+					_Utils_Tuple2('date-range', isPartOfTheDateRange),
+					_Utils_Tuple2('date-range-start', isStart),
+					_Utils_Tuple2('date-range-end', isEnd)
+				]);
+			return A2(
+				$elm$html$Html$span,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$classList(dateClassList),
+						$elm$html$Html$Attributes$title(
+						A2($PanagiotisGeorgiadis$elm_datepicker$Utils$Time$toHumanReadableDate, i18n, date)),
+						$elm$html$Html$Events$onClick(
+						$PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$Update$SelectDate(date)),
+						$elm$html$Html$Events$onMouseOver(
+						$PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$Update$UpdateVisualSelection(date))
+					]),
+				_List_fromArray(
+					[
+						A2(
+						$elm$html$Html$span,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$class('date-inner')
+							]),
+						_List_fromArray(
+							[
+								$elm$html$Html$text(
+								$elm$core$String$fromInt(
+									$PanagiotisGeorgiadis$elm_datetime$DateTime$getDay(date)))
+							]))
+					]));
+		}
+	});
+var $PanagiotisGeorgiadis$elm_datepicker$Common$emptyDateHtml = A2(
+	$elm$html$Html$span,
+	_List_fromArray(
+		[
+			$elm$html$Html$Attributes$class('empty-date')
+		]),
+	_List_Nil);
+var $PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$getDatesInMonth = function (_v0) {
+	var year = _v0.a.year;
+	var month = _v0.a.month;
+	var lastDayOfTheMonth = $PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$dayToInt(
+		A2($PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$lastDayOf, year, month));
+	return A2(
+		$elm$core$List$map,
+		function (day) {
+			return $PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$Date(
+				{
+					day: $PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$Day(day),
+					month: month,
+					year: year
+				});
+		},
+		A2($elm$core$List$range, 1, lastDayOfTheMonth));
+};
+var $PanagiotisGeorgiadis$elm_datetime$Calendar$getDatesInMonth = $PanagiotisGeorgiadis$elm_datetime$Calendar$Internal$getDatesInMonth;
+var $PanagiotisGeorgiadis$elm_datetime$DateTime$Internal$getDatesInMonth = function (_v0) {
+	var date = _v0.a.date;
+	var time = _v0.a.time;
+	return A2(
+		$elm$core$List$map,
+		function (date_) {
+			return $PanagiotisGeorgiadis$elm_datetime$DateTime$Internal$DateTime(
+				{date: date_, time: time});
+		},
+		$PanagiotisGeorgiadis$elm_datetime$Calendar$getDatesInMonth(date));
+};
+var $PanagiotisGeorgiadis$elm_datetime$DateTime$getDatesInMonth = $PanagiotisGeorgiadis$elm_datetime$DateTime$Internal$getDatesInMonth;
+var $PanagiotisGeorgiadis$elm_datepicker$Common$getFirstDayOfTheMonth = $PanagiotisGeorgiadis$elm_datetime$DateTime$setDay(1);
+var $PanagiotisGeorgiadis$elm_datepicker$Utils$Time$Matched = function (a) {
+	return {$: 'Matched', a: a};
+};
+var $PanagiotisGeorgiadis$elm_datepicker$Utils$Time$Searching = function (a) {
+	return {$: 'Searching', a: a};
+};
+var $PanagiotisGeorgiadis$elm_datepicker$Common$getSortedWeekdays = function (startingWeekday) {
+	switch (startingWeekday.$) {
+		case 'Sun':
+			return _List_fromArray(
+				[$elm$time$Time$Sun, $elm$time$Time$Mon, $elm$time$Time$Tue, $elm$time$Time$Wed, $elm$time$Time$Thu, $elm$time$Time$Fri, $elm$time$Time$Sat]);
+		case 'Mon':
+			return _List_fromArray(
+				[$elm$time$Time$Mon, $elm$time$Time$Tue, $elm$time$Time$Wed, $elm$time$Time$Thu, $elm$time$Time$Fri, $elm$time$Time$Sat, $elm$time$Time$Sun]);
+		case 'Tue':
+			return _List_fromArray(
+				[$elm$time$Time$Tue, $elm$time$Time$Wed, $elm$time$Time$Thu, $elm$time$Time$Fri, $elm$time$Time$Sat, $elm$time$Time$Sun, $elm$time$Time$Mon]);
+		case 'Wed':
+			return _List_fromArray(
+				[$elm$time$Time$Wed, $elm$time$Time$Thu, $elm$time$Time$Fri, $elm$time$Time$Sat, $elm$time$Time$Sun, $elm$time$Time$Mon, $elm$time$Time$Tue]);
+		case 'Thu':
+			return _List_fromArray(
+				[$elm$time$Time$Thu, $elm$time$Time$Fri, $elm$time$Time$Sat, $elm$time$Time$Sun, $elm$time$Time$Mon, $elm$time$Time$Tue, $elm$time$Time$Wed]);
+		case 'Fri':
+			return _List_fromArray(
+				[$elm$time$Time$Fri, $elm$time$Time$Sat, $elm$time$Time$Sun, $elm$time$Time$Mon, $elm$time$Time$Tue, $elm$time$Time$Wed, $elm$time$Time$Thu]);
+		default:
+			return _List_fromArray(
+				[$elm$time$Time$Sat, $elm$time$Time$Sun, $elm$time$Time$Mon, $elm$time$Time$Tue, $elm$time$Time$Wed, $elm$time$Time$Thu, $elm$time$Time$Fri]);
+	}
+};
+var $PanagiotisGeorgiadis$elm_datepicker$Utils$Time$precedingWeekdays = F2(
+	function (firstDayOfTheMonth, startingWeekday) {
+		var firstWeekdayOfTheMonth = $PanagiotisGeorgiadis$elm_datetime$DateTime$getWeekday(firstDayOfTheMonth);
+		var precedingWeekdaysMatch = A3(
+			$elm$core$List$foldl,
+			F2(
+				function (weekday, res) {
+					if (res.$ === 'Matched') {
+						var c = res.a;
+						return $PanagiotisGeorgiadis$elm_datepicker$Utils$Time$Matched(c);
+					} else {
+						var c = res.a;
+						return _Utils_eq(weekday, firstWeekdayOfTheMonth) ? $PanagiotisGeorgiadis$elm_datepicker$Utils$Time$Matched(c) : $PanagiotisGeorgiadis$elm_datepicker$Utils$Time$Searching(c + 1);
+					}
+				}),
+			$PanagiotisGeorgiadis$elm_datepicker$Utils$Time$Searching(0),
+			$PanagiotisGeorgiadis$elm_datepicker$Common$getSortedWeekdays(startingWeekday));
+		if (precedingWeekdaysMatch.$ === 'Searching') {
+			return 0;
+		} else {
+			var c = precedingWeekdaysMatch.a;
+			return c;
+		}
+	});
+var $elm$core$List$repeatHelp = F3(
+	function (result, n, value) {
+		repeatHelp:
+		while (true) {
+			if (n <= 0) {
+				return result;
+			} else {
+				var $temp$result = A2($elm$core$List$cons, value, result),
+					$temp$n = n - 1,
+					$temp$value = value;
+				result = $temp$result;
+				n = $temp$n;
+				value = $temp$value;
+				continue repeatHelp;
+			}
+		}
+	});
+var $elm$core$List$repeat = F2(
+	function (n, value) {
+		return A3($elm$core$List$repeatHelp, _List_Nil, n, value);
+	});
+var $PanagiotisGeorgiadis$elm_datepicker$Common$totalCalendarCells = 6 * 7;
+var $PanagiotisGeorgiadis$elm_datepicker$Common$weekdaysHtml = F2(
+	function (weekday, i18n) {
+		return A2(
+			$elm$html$Html$div,
+			_List_fromArray(
+				[
+					$elm$html$Html$Attributes$class('weekdays')
+				]),
+			A2(
+				$elm$core$List$map,
+				function (w) {
+					return A2(
+						$elm$html$Html$span,
+						_List_Nil,
+						_List_fromArray(
+							[
+								$elm$html$Html$text(
+								A2(i18n.weekdayToString, $PanagiotisGeorgiadis$elm_datepicker$DatePicker$I18n$Condensed, w))
+							]));
+				},
+				$PanagiotisGeorgiadis$elm_datepicker$Common$getSortedWeekdays(weekday)));
+	});
+var $PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$View$calendarView = function (model) {
+	var primaryDate = model.a.primaryDate;
+	var i18n = model.a.i18n;
+	var startingWeekday = model.a.startingWeekday;
+	var precedingWeekdaysCount = function () {
+		var _v0 = $PanagiotisGeorgiadis$elm_datepicker$Common$getFirstDayOfTheMonth(primaryDate);
+		if (_v0.$ === 'Just') {
+			var firstDayOfTheMonth = _v0.a;
+			return A2($PanagiotisGeorgiadis$elm_datepicker$Utils$Time$precedingWeekdays, firstDayOfTheMonth, startingWeekday);
+		} else {
+			return 0;
+		}
+	}();
+	var precedingDatesHtml = A2($elm$core$List$repeat, precedingWeekdaysCount, $PanagiotisGeorgiadis$elm_datepicker$Common$emptyDateHtml);
+	var monthDates = $PanagiotisGeorgiadis$elm_datetime$DateTime$getDatesInMonth(primaryDate);
+	var followingDates = ($PanagiotisGeorgiadis$elm_datepicker$Common$totalCalendarCells - precedingWeekdaysCount) - $elm$core$List$length(monthDates);
+	var followingDatesHtml = A2($elm$core$List$repeat, followingDates, $PanagiotisGeorgiadis$elm_datepicker$Common$emptyDateHtml);
+	var datesHtml = A2(
+		$elm$core$List$map,
+		$PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$View$dateHtml(model),
+		monthDates);
+	return A2(
+		$elm$html$Html$div,
+		_List_fromArray(
+			[
+				$elm$html$Html$Attributes$class('calendar')
+			]),
+		_List_fromArray(
+			[
+				A2($PanagiotisGeorgiadis$elm_datepicker$Common$weekdaysHtml, startingWeekday, i18n),
+				A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('calendar_')
+					]),
+				_Utils_ap(
+					precedingDatesHtml,
+					_Utils_ap(datesHtml, followingDatesHtml)))
+			]));
+};
+var $elm$svg$Svg$Attributes$height = _VirtualDom_attribute('height');
+var $elm$json$Json$Encode$null = _Json_encodeNull;
+var $elm$html$Html$Attributes$property = $elm$virtual_dom$VirtualDom$property;
+var $PanagiotisGeorgiadis$elm_datepicker$Utils$Html$Attributes$none = A2($elm$html$Html$Attributes$property, '', $elm$json$Json$Encode$null);
+var $elm$svg$Svg$Attributes$points = _VirtualDom_attribute('points');
+var $elm$svg$Svg$trustedNode = _VirtualDom_nodeNS('http://www.w3.org/2000/svg');
+var $elm$svg$Svg$polygon = $elm$svg$Svg$trustedNode('polygon');
+var $elm$svg$Svg$svg = $elm$svg$Svg$trustedNode('svg');
+var $elm$svg$Svg$Attributes$transform = _VirtualDom_attribute('transform');
+var $elm$svg$Svg$Attributes$viewBox = _VirtualDom_attribute('viewBox');
+var $elm$svg$Svg$Attributes$width = _VirtualDom_attribute('width');
+var $PanagiotisGeorgiadis$elm_datepicker$Icons$chevron = F2(
+	function (direction, size) {
+		return A2(
+			$elm$svg$Svg$svg,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$width(size.width),
+					$elm$svg$Svg$Attributes$height(size.height),
+					$elm$svg$Svg$Attributes$viewBox('0 0 24 24')
+				]),
+			_List_fromArray(
+				[
+					A2(
+					$elm$svg$Svg$polygon,
+					_List_fromArray(
+						[
+							$elm$svg$Svg$Attributes$points('2.82 4.59 12 13.75 21.18 4.59 24 7.41 12 19.41 0 7.41'),
+							function () {
+							switch (direction.$) {
+								case 'Up':
+									return $elm$svg$Svg$Attributes$transform('translate(12.000000, 12.000000) rotate(180.000000) translate(-12.000000, -12.000000)');
+								case 'Down':
+									return $PanagiotisGeorgiadis$elm_datepicker$Utils$Html$Attributes$none;
+								case 'Left':
+									return $elm$svg$Svg$Attributes$transform('translate(12.000000, 12.000000) rotate(90.000000) translate(-12.000000, -12.000000)');
+								default:
+									return $elm$svg$Svg$Attributes$transform('translate(12.000000, 12.000000) scale(-1, 1) rotate(90.000000) translate(-12.000000, -12.000000)');
+							}
+						}()
+						]),
+					_List_Nil)
+				]));
+	});
+var $PanagiotisGeorgiadis$elm_datepicker$Icons$Left = {$: 'Left'};
+var $PanagiotisGeorgiadis$elm_datepicker$DatePicker$I18n$Full = {$: 'Full'};
+var $PanagiotisGeorgiadis$elm_datepicker$MonthPicker$monthPickerText = F2(
+	function (i18n, date) {
+		var _v0 = _Utils_Tuple2(
+			$PanagiotisGeorgiadis$elm_datetime$DateTime$getMonth(date),
+			$PanagiotisGeorgiadis$elm_datetime$DateTime$getYear(date));
+		var month = _v0.a;
+		var year = _v0.b;
+		return A2(i18n.monthToString, $PanagiotisGeorgiadis$elm_datepicker$DatePicker$I18n$Full, month) + (' ' + $elm$core$String$fromInt(year));
+	});
+var $PanagiotisGeorgiadis$elm_datepicker$MonthPicker$todayButtonHtml = F2(
+	function (todayButtonText, msg) {
+		if (msg.$ === 'Just') {
+			var m = msg.a;
+			return A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('today-button'),
+						$elm$html$Html$Events$onClick(m)
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text(todayButtonText)
+					]));
+		} else {
+			return $elm$html$Html$text('');
+		}
+	});
+var $PanagiotisGeorgiadis$elm_datepicker$Icons$triangle = F2(
+	function (direction, size) {
+		return A2(
+			$elm$svg$Svg$svg,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$width(size.width),
+					$elm$svg$Svg$Attributes$height(size.height),
+					$elm$svg$Svg$Attributes$viewBox('0 0 24 24')
+				]),
+			_List_fromArray(
+				[
+					A2(
+					$elm$svg$Svg$polygon,
+					_List_fromArray(
+						[
+							$elm$svg$Svg$Attributes$points('0 6 12 18 24 6'),
+							function () {
+							switch (direction.$) {
+								case 'Down':
+									return $PanagiotisGeorgiadis$elm_datepicker$Utils$Html$Attributes$none;
+								case 'Up':
+									return $elm$svg$Svg$Attributes$transform('translate(12.000000, 12.000000) rotate(180.000000) translate(-12.000000, -12.000000)');
+								case 'Left':
+									return $elm$svg$Svg$Attributes$transform('translate(12.000000, 12.000000) rotate(90.000000) translate(-12.000000, -12.000000)');
+								default:
+									return $elm$svg$Svg$Attributes$transform('translate(12.000000, 12.000000) scale(-1, 1) rotate(90.000000) translate(-12.000000, -12.000000)');
+							}
+						}()
+						]),
+					_List_Nil)
+				]));
+	});
+var $PanagiotisGeorgiadis$elm_datepicker$MonthPicker$doubleMonthPickerView = function (_v0) {
+	var date = _v0.date;
+	var previousButtonHandler = _v0.previousButtonHandler;
+	var nextButtonHandler = _v0.nextButtonHandler;
+	var todayButtonHandler = _v0.todayButtonHandler;
+	var i18n = _v0.i18n;
+	var previousButtonHtml = function () {
+		if (previousButtonHandler.$ === 'Just') {
+			var action = previousButtonHandler.a;
+			return A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('action'),
+						$elm$html$Html$Events$onClick(action)
+					]),
+				_List_fromArray(
+					[
+						A2(
+						$PanagiotisGeorgiadis$elm_datepicker$Icons$triangle,
+						$PanagiotisGeorgiadis$elm_datepicker$Icons$Left,
+						A2($PanagiotisGeorgiadis$elm_datepicker$Icons$Size, '15', '15'))
+					]));
+		} else {
+			return A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('action disabled')
+					]),
+				_List_fromArray(
+					[
+						A2(
+						$PanagiotisGeorgiadis$elm_datepicker$Icons$triangle,
+						$PanagiotisGeorgiadis$elm_datepicker$Icons$Left,
+						A2($PanagiotisGeorgiadis$elm_datepicker$Icons$Size, '15', '15'))
+					]));
+		}
+	}();
+	var nextMonthDate = $PanagiotisGeorgiadis$elm_datetime$DateTime$incrementMonth(date);
+	var nextButtonHtml = function () {
+		if (nextButtonHandler.$ === 'Just') {
+			var action = nextButtonHandler.a;
+			return A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('action'),
+						$elm$html$Html$Events$onClick(action)
+					]),
+				_List_fromArray(
+					[
+						A2(
+						$PanagiotisGeorgiadis$elm_datepicker$Icons$triangle,
+						$PanagiotisGeorgiadis$elm_datepicker$Icons$Right,
+						A2($PanagiotisGeorgiadis$elm_datepicker$Icons$Size, '15', '15'))
+					]));
+		} else {
+			return A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('action disabled')
+					]),
+				_List_fromArray(
+					[
+						A2(
+						$PanagiotisGeorgiadis$elm_datepicker$Icons$triangle,
+						$PanagiotisGeorgiadis$elm_datepicker$Icons$Right,
+						A2($PanagiotisGeorgiadis$elm_datepicker$Icons$Size, '15', '15'))
+					]));
+		}
+	}();
+	return A2(
+		$elm$html$Html$div,
+		_List_fromArray(
+			[
+				$elm$html$Html$Attributes$class('double-month-picker')
+			]),
+		_List_fromArray(
+			[
+				A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('previous-month')
+					]),
+				_List_fromArray(
+					[
+						previousButtonHtml,
+						A2(
+						$elm$html$Html$span,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$class('month-name')
+							]),
+						_List_fromArray(
+							[
+								$elm$html$Html$text(
+								A2($PanagiotisGeorgiadis$elm_datepicker$MonthPicker$monthPickerText, i18n, date))
+							]))
+					])),
+				A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('next-month')
+					]),
+				_List_fromArray(
+					[
+						A2(
+						$elm$html$Html$span,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$class('month-name')
+							]),
+						_List_fromArray(
+							[
+								$elm$html$Html$text(
+								A2($PanagiotisGeorgiadis$elm_datepicker$MonthPicker$monthPickerText, i18n, nextMonthDate))
+							])),
+						nextButtonHtml
+					])),
+				A2($PanagiotisGeorgiadis$elm_datepicker$MonthPicker$todayButtonHtml, i18n.todayButtonText, todayButtonHandler)
+			]));
+};
+var $PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$Update$NextMonth = {$: 'NextMonth'};
+var $PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$View$getNextButtonAction = function (isButtonActive) {
+	return isButtonActive ? $elm$core$Maybe$Just($PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$Update$NextMonth) : $elm$core$Maybe$Nothing;
+};
+var $PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$Update$PreviousMonth = {$: 'PreviousMonth'};
+var $PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$View$getPreviousButtonAction = function (isButtonActive) {
+	return isButtonActive ? $elm$core$Maybe$Just($PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$Update$PreviousMonth) : $elm$core$Maybe$Nothing;
+};
+var $PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$Update$MoveToToday = {$: 'MoveToToday'};
+var $PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$View$getTodayButtonAction = function (isButtonActive) {
+	return isButtonActive ? $elm$core$Maybe$Just($PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$Update$MoveToToday) : $elm$core$Maybe$Nothing;
+};
+var $elm$html$Html$Events$onMouseLeave = function (msg) {
+	return A2(
+		$elm$html$Html$Events$on,
+		'mouseleave',
+		$elm$json$Json$Decode$succeed(msg));
+};
+var $PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$Update$updatePrimaryDate = F2(
+	function (dt, _v0) {
+		var model = _v0.a;
+		return $PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$Update$Model(
+			_Utils_update(
+				model,
+				{primaryDate: dt}));
+	});
+var $PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$View$doubleCalendarView = function (model) {
+	var today = model.a.today;
+	var primaryDate = model.a.primaryDate;
+	var dateLimit = model.a.dateLimit;
+	var range = model.a.range;
+	var timePickers = model.a.timePickers;
+	var i18n = model.a.i18n;
+	var switchViewButton = function () {
+		if ((range.$ === 'BothSelected') && (range.a.$ === 'Chosen')) {
+			var _v4 = range.a;
+			return A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('switch-view-button'),
+						$elm$html$Html$Events$onClick($PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$Update$ShowClockView)
+					]),
+				_List_fromArray(
+					[
+						A2(
+						$PanagiotisGeorgiadis$elm_datepicker$Icons$chevron,
+						$PanagiotisGeorgiadis$elm_datepicker$Icons$Right,
+						A2($PanagiotisGeorgiadis$elm_datepicker$Icons$Size, '20', '20'))
+					]));
+		} else {
+			return A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('switch-view-button disabled')
+					]),
+				_List_fromArray(
+					[
+						A2(
+						$PanagiotisGeorgiadis$elm_datepicker$Icons$chevron,
+						$PanagiotisGeorgiadis$elm_datepicker$Icons$Right,
+						A2($PanagiotisGeorgiadis$elm_datepicker$Icons$Size, '20', '20'))
+					]));
+		}
+	}();
+	var nextDate = $PanagiotisGeorgiadis$elm_datetime$DateTime$incrementMonth(primaryDate);
+	var nextModel = A2($PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$Update$updatePrimaryDate, nextDate, model);
+	var _v0 = function () {
+		if (dateLimit.$ === 'DateLimit') {
+			var minDate = dateLimit.a.minDate;
+			var maxDate = dateLimit.a.maxDate;
+			return _Utils_Tuple3(
+				_Utils_eq(
+					A2($PanagiotisGeorgiadis$elm_datepicker$Utils$DateTime$compareYearMonth, minDate, primaryDate),
+					$elm$core$Basics$LT),
+				_Utils_eq(
+					A2($PanagiotisGeorgiadis$elm_datepicker$Utils$DateTime$compareYearMonth, maxDate, nextDate),
+					$elm$core$Basics$GT),
+				_Utils_eq(
+					A2($PanagiotisGeorgiadis$elm_datepicker$Utils$DateTime$compareYearMonth, minDate, today),
+					$elm$core$Basics$LT) && _Utils_eq(
+					A2($PanagiotisGeorgiadis$elm_datepicker$Utils$DateTime$compareYearMonth, maxDate, today),
+					$elm$core$Basics$GT));
+		} else {
+			return _Utils_Tuple3(true, true, true);
+		}
+	}();
+	var isPreviousButtonActive = _v0.a;
+	var isNextButtonActive = _v0.b;
+	var isTodayButtonActive = _v0.c;
+	var pickerConfig = {
+		date: primaryDate,
+		i18n: i18n,
+		nextButtonHandler: $PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$View$getNextButtonAction(isNextButtonActive),
+		previousButtonHandler: $PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$View$getPreviousButtonAction(isPreviousButtonActive),
+		todayButtonHandler: $PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$View$getTodayButtonAction(isTodayButtonActive)
+	};
+	return A2(
+		$elm$html$Html$div,
+		_List_fromArray(
+			[
+				$elm$html$Html$Attributes$class('double-calendar-view no-select'),
+				$elm$html$Html$Events$onMouseLeave($PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$Update$ResetVisualSelection)
+			]),
+		_List_fromArray(
+			[
+				$PanagiotisGeorgiadis$elm_datepicker$MonthPicker$doubleMonthPickerView(pickerConfig),
+				$PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$View$calendarView(model),
+				$PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$View$calendarView(nextModel),
+				function () {
+				if (timePickers.$ === 'NoTimePickers') {
+					return $elm$html$Html$text('');
+				} else {
+					return switchViewButton;
+				}
+			}()
+			]));
+};
+var $PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$Update$ShowCalendarView = {$: 'ShowCalendarView'};
+var $PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$Update$ToggleTimeMirroring = {$: 'ToggleTimeMirroring'};
+var $elm$svg$Svg$Attributes$d = _VirtualDom_attribute('d');
+var $elm$svg$Svg$path = $elm$svg$Svg$trustedNode('path');
+var $PanagiotisGeorgiadis$elm_datepicker$Icons$blankCheckboxPath = A2(
+	$elm$svg$Svg$path,
+	_List_fromArray(
+		[
+			$elm$svg$Svg$Attributes$d('M2.66666667,0 C1.2092496,0 0,1.2092496 0,2.66666667 L0,21.3333333 C0,22.7907507 1.2092496,24 2.66666667,24 L21.3333333,24 C22.7907507,24 24,22.7907507 24,21.3333333 L24,2.66666667 C24,1.2092496 22.7907507,0 21.3333333,0 L2.66666667,0 Z M2,2 L22,2 L22,22 L2,22 L2,2 Z')
+		]),
+	_List_Nil);
+var $PanagiotisGeorgiadis$elm_datepicker$Icons$tickedCheckboxPath = A2(
+	$elm$svg$Svg$path,
+	_List_fromArray(
+		[
+			$elm$svg$Svg$Attributes$d('M21.3333333,0 L2.66666667,0 C1.19333333,0 0,1.19333333 0,2.66666667 L0,21.3333333 C0,22.8066667 1.19333333,24 2.66666667,24 L21.3333333,24 C22.8066667,24 24,22.8066667 24,21.3333333 L24,2.66666667 C24,1.19333333 22.8066667,0 21.3333333,0 Z M10.276,18.276 C9.75466667,18.7973333 8.91066667,18.7973333 8.39066667,18.276 L4,13.8853333 C3.48,13.3653333 3.48,12.52 4,12 C4.52,11.48 5.36533333,11.48 5.88533333,12 L9.33333333,15.448 L18.1146667,6.66666667 C18.6346667,6.14666667 19.48,6.14666667 20,6.66666667 C20.52,7.18666667 20.52,8.032 20,8.552 L10.276,18.276 Z')
+		]),
+	_List_Nil);
+var $PanagiotisGeorgiadis$elm_datepicker$Icons$checkbox = F2(
+	function (size, isChecked) {
+		return A2(
+			$elm$svg$Svg$svg,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$width(size.width),
+					$elm$svg$Svg$Attributes$height(size.height),
+					$elm$svg$Svg$Attributes$viewBox('0 0 24 24')
+				]),
+			_List_fromArray(
+				[
+					isChecked ? $PanagiotisGeorgiadis$elm_datepicker$Icons$tickedCheckboxPath : $PanagiotisGeorgiadis$elm_datepicker$Icons$blankCheckboxPath
+				]));
+	});
+var $PanagiotisGeorgiadis$elm_datepicker$TimePicker$Update$getPickerTypeString = function (_v0) {
+	var pickerType = _v0.a.pickerType;
+	switch (pickerType.$) {
+		case 'HH':
+			return 'hh';
+		case 'HH_MM':
+			return 'hh_mm';
+		case 'HH_MM_SS':
+			return 'hh_mm_ss';
+		default:
+			return 'hh_mm_ss_mmmm';
+	}
+};
+var $PanagiotisGeorgiadis$elm_datepicker$TimePicker$Update$toHumanReadableTime = function (_v0) {
+	var pickerType = _v0.a.pickerType;
+	var hours = _v0.a.hours;
+	var minutes = _v0.a.minutes;
+	var seconds = _v0.a.seconds;
+	var milliseconds = _v0.a.milliseconds;
+	switch (pickerType.$) {
+		case 'HH':
+			return hours;
+		case 'HH_MM':
+			return A2(
+				$elm$core$String$join,
+				':',
+				_List_fromArray(
+					[hours, minutes]));
+		case 'HH_MM_SS':
+			return A2(
+				$elm$core$String$join,
+				':',
+				_List_fromArray(
+					[hours, minutes, seconds]));
+		default:
+			return A2(
+				$elm$core$String$join,
+				'.',
+				_List_fromArray(
+					[
+						A2(
+						$elm$core$String$join,
+						':',
+						_List_fromArray(
+							[hours, minutes, seconds])),
+						milliseconds
+					]));
+	}
+};
+var $PanagiotisGeorgiadis$elm_datepicker$TimePicker$Internal$Update$Decrement = function (a) {
+	return {$: 'Decrement', a: a};
+};
+var $PanagiotisGeorgiadis$elm_datepicker$Icons$Down = {$: 'Down'};
+var $PanagiotisGeorgiadis$elm_datepicker$TimePicker$Internal$Update$Increment = function (a) {
+	return {$: 'Increment', a: a};
+};
+var $PanagiotisGeorgiadis$elm_datepicker$TimePicker$Internal$Update$InputHandler = F2(
+	function (a, b) {
+		return {$: 'InputHandler', a: a, b: b};
+	});
+var $PanagiotisGeorgiadis$elm_datepicker$Icons$Up = {$: 'Up'};
+var $PanagiotisGeorgiadis$elm_datepicker$TimePicker$Internal$Update$Update = F2(
+	function (a, b) {
+		return {$: 'Update', a: a, b: b};
+	});
+var $elm$html$Html$input = _VirtualDom_node('input');
+var $elm$html$Html$Attributes$maxlength = function (n) {
+	return A2(
+		_VirtualDom_attribute,
+		'maxlength',
+		$elm$core$String$fromInt(n));
+};
+var $elm$html$Html$Events$onBlur = function (msg) {
+	return A2(
+		$elm$html$Html$Events$on,
+		'blur',
+		$elm$json$Json$Decode$succeed(msg));
+};
+var $PanagiotisGeorgiadis$elm_datepicker$TimePicker$Internal$View$hourPicker = function (_v0) {
+	var hours = _v0.a.hours;
+	return A2(
+		$elm$html$Html$div,
+		_List_fromArray(
+			[
+				$elm$html$Html$Attributes$class('hours-picker')
+			]),
+		_List_fromArray(
+			[
+				A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('button'),
+						$elm$html$Html$Events$onClick(
+						$PanagiotisGeorgiadis$elm_datepicker$TimePicker$Internal$Update$Increment($PanagiotisGeorgiadis$elm_datepicker$TimePicker$Internal$Update$Hours))
+					]),
+				_List_fromArray(
+					[
+						A2(
+						$PanagiotisGeorgiadis$elm_datepicker$Icons$chevron,
+						$PanagiotisGeorgiadis$elm_datepicker$Icons$Up,
+						A2($PanagiotisGeorgiadis$elm_datepicker$Icons$Size, '24', '24'))
+					])),
+				A2(
+				$elm$html$Html$input,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('time-input'),
+						$elm$html$Html$Events$onInput(
+						$PanagiotisGeorgiadis$elm_datepicker$TimePicker$Internal$Update$InputHandler($PanagiotisGeorgiadis$elm_datepicker$TimePicker$Internal$Update$Hours)),
+						$elm$html$Html$Events$onBlur(
+						A2($PanagiotisGeorgiadis$elm_datepicker$TimePicker$Internal$Update$Update, $PanagiotisGeorgiadis$elm_datepicker$TimePicker$Internal$Update$Hours, hours)),
+						$elm$html$Html$Attributes$value(hours),
+						$elm$html$Html$Attributes$maxlength(2)
+					]),
+				_List_Nil),
+				A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('button'),
+						$elm$html$Html$Events$onClick(
+						$PanagiotisGeorgiadis$elm_datepicker$TimePicker$Internal$Update$Decrement($PanagiotisGeorgiadis$elm_datepicker$TimePicker$Internal$Update$Hours))
+					]),
+				_List_fromArray(
+					[
+						A2(
+						$PanagiotisGeorgiadis$elm_datepicker$Icons$chevron,
+						$PanagiotisGeorgiadis$elm_datepicker$Icons$Down,
+						A2($PanagiotisGeorgiadis$elm_datepicker$Icons$Size, '24', '24'))
+					]))
+			]));
+};
+var $PanagiotisGeorgiadis$elm_datepicker$TimePicker$Internal$View$millisSegmentSeparator = A2(
+	$elm$html$Html$span,
+	_List_fromArray(
+		[
+			$elm$html$Html$Attributes$class('time-separator no-select')
+		]),
+	_List_fromArray(
+		[
+			$elm$html$Html$text('.')
+		]));
+var $PanagiotisGeorgiadis$elm_datepicker$TimePicker$Internal$View$millisecondsPicker = function (_v0) {
+	var milliseconds = _v0.a.milliseconds;
+	return A2(
+		$elm$html$Html$div,
+		_List_fromArray(
+			[
+				$elm$html$Html$Attributes$class('milliseconds-picker')
+			]),
+		_List_fromArray(
+			[
+				A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('button'),
+						$elm$html$Html$Events$onClick(
+						$PanagiotisGeorgiadis$elm_datepicker$TimePicker$Internal$Update$Increment($PanagiotisGeorgiadis$elm_datepicker$TimePicker$Internal$Update$Milliseconds))
+					]),
+				_List_fromArray(
+					[
+						A2(
+						$PanagiotisGeorgiadis$elm_datepicker$Icons$chevron,
+						$PanagiotisGeorgiadis$elm_datepicker$Icons$Up,
+						A2($PanagiotisGeorgiadis$elm_datepicker$Icons$Size, '24', '24'))
+					])),
+				A2(
+				$elm$html$Html$input,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('time-input'),
+						$elm$html$Html$Events$onInput(
+						$PanagiotisGeorgiadis$elm_datepicker$TimePicker$Internal$Update$InputHandler($PanagiotisGeorgiadis$elm_datepicker$TimePicker$Internal$Update$Milliseconds)),
+						$elm$html$Html$Events$onBlur(
+						A2($PanagiotisGeorgiadis$elm_datepicker$TimePicker$Internal$Update$Update, $PanagiotisGeorgiadis$elm_datepicker$TimePicker$Internal$Update$Milliseconds, milliseconds)),
+						$elm$html$Html$Attributes$value(milliseconds),
+						$elm$html$Html$Attributes$maxlength(3)
+					]),
+				_List_Nil),
+				A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('button'),
+						$elm$html$Html$Events$onClick(
+						$PanagiotisGeorgiadis$elm_datepicker$TimePicker$Internal$Update$Decrement($PanagiotisGeorgiadis$elm_datepicker$TimePicker$Internal$Update$Milliseconds))
+					]),
+				_List_fromArray(
+					[
+						A2(
+						$PanagiotisGeorgiadis$elm_datepicker$Icons$chevron,
+						$PanagiotisGeorgiadis$elm_datepicker$Icons$Down,
+						A2($PanagiotisGeorgiadis$elm_datepicker$Icons$Size, '24', '24'))
+					]))
+			]));
+};
+var $PanagiotisGeorgiadis$elm_datepicker$TimePicker$Internal$View$minutePicker = function (_v0) {
+	var minutes = _v0.a.minutes;
+	return A2(
+		$elm$html$Html$div,
+		_List_fromArray(
+			[
+				$elm$html$Html$Attributes$class('minutes-picker')
+			]),
+		_List_fromArray(
+			[
+				A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('button'),
+						$elm$html$Html$Events$onClick(
+						$PanagiotisGeorgiadis$elm_datepicker$TimePicker$Internal$Update$Increment($PanagiotisGeorgiadis$elm_datepicker$TimePicker$Internal$Update$Minutes))
+					]),
+				_List_fromArray(
+					[
+						A2(
+						$PanagiotisGeorgiadis$elm_datepicker$Icons$chevron,
+						$PanagiotisGeorgiadis$elm_datepicker$Icons$Up,
+						A2($PanagiotisGeorgiadis$elm_datepicker$Icons$Size, '24', '24'))
+					])),
+				A2(
+				$elm$html$Html$input,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('time-input'),
+						$elm$html$Html$Events$onInput(
+						$PanagiotisGeorgiadis$elm_datepicker$TimePicker$Internal$Update$InputHandler($PanagiotisGeorgiadis$elm_datepicker$TimePicker$Internal$Update$Minutes)),
+						$elm$html$Html$Events$onBlur(
+						A2($PanagiotisGeorgiadis$elm_datepicker$TimePicker$Internal$Update$Update, $PanagiotisGeorgiadis$elm_datepicker$TimePicker$Internal$Update$Minutes, minutes)),
+						$elm$html$Html$Attributes$value(minutes),
+						$elm$html$Html$Attributes$maxlength(2)
+					]),
+				_List_Nil),
+				A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('button'),
+						$elm$html$Html$Events$onClick(
+						$PanagiotisGeorgiadis$elm_datepicker$TimePicker$Internal$Update$Decrement($PanagiotisGeorgiadis$elm_datepicker$TimePicker$Internal$Update$Minutes))
+					]),
+				_List_fromArray(
+					[
+						A2(
+						$PanagiotisGeorgiadis$elm_datepicker$Icons$chevron,
+						$PanagiotisGeorgiadis$elm_datepicker$Icons$Down,
+						A2($PanagiotisGeorgiadis$elm_datepicker$Icons$Size, '24', '24'))
+					]))
+			]));
+};
+var $PanagiotisGeorgiadis$elm_datepicker$TimePicker$Internal$View$secondsPicker = function (_v0) {
+	var seconds = _v0.a.seconds;
+	return A2(
+		$elm$html$Html$div,
+		_List_fromArray(
+			[
+				$elm$html$Html$Attributes$class('seconds-picker')
+			]),
+		_List_fromArray(
+			[
+				A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('button'),
+						$elm$html$Html$Events$onClick(
+						$PanagiotisGeorgiadis$elm_datepicker$TimePicker$Internal$Update$Increment($PanagiotisGeorgiadis$elm_datepicker$TimePicker$Internal$Update$Seconds))
+					]),
+				_List_fromArray(
+					[
+						A2(
+						$PanagiotisGeorgiadis$elm_datepicker$Icons$chevron,
+						$PanagiotisGeorgiadis$elm_datepicker$Icons$Up,
+						A2($PanagiotisGeorgiadis$elm_datepicker$Icons$Size, '24', '24'))
+					])),
+				A2(
+				$elm$html$Html$input,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('time-input'),
+						$elm$html$Html$Events$onInput(
+						$PanagiotisGeorgiadis$elm_datepicker$TimePicker$Internal$Update$InputHandler($PanagiotisGeorgiadis$elm_datepicker$TimePicker$Internal$Update$Seconds)),
+						$elm$html$Html$Events$onBlur(
+						A2($PanagiotisGeorgiadis$elm_datepicker$TimePicker$Internal$Update$Update, $PanagiotisGeorgiadis$elm_datepicker$TimePicker$Internal$Update$Seconds, seconds)),
+						$elm$html$Html$Attributes$value(seconds),
+						$elm$html$Html$Attributes$maxlength(2)
+					]),
+				_List_Nil),
+				A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('button'),
+						$elm$html$Html$Events$onClick(
+						$PanagiotisGeorgiadis$elm_datepicker$TimePicker$Internal$Update$Decrement($PanagiotisGeorgiadis$elm_datepicker$TimePicker$Internal$Update$Seconds))
+					]),
+				_List_fromArray(
+					[
+						A2(
+						$PanagiotisGeorgiadis$elm_datepicker$Icons$chevron,
+						$PanagiotisGeorgiadis$elm_datepicker$Icons$Down,
+						A2($PanagiotisGeorgiadis$elm_datepicker$Icons$Size, '24', '24'))
+					]))
+			]));
+};
+var $PanagiotisGeorgiadis$elm_datepicker$TimePicker$Internal$View$timeSegmentSeparator = A2(
+	$elm$html$Html$span,
+	_List_fromArray(
+		[
+			$elm$html$Html$Attributes$class('time-separator no-select')
+		]),
+	_List_fromArray(
+		[
+			$elm$html$Html$text(':')
+		]));
+var $PanagiotisGeorgiadis$elm_datepicker$TimePicker$Internal$View$view = function (model) {
+	var pickerType = model.a.pickerType;
+	switch (pickerType.$) {
+		case 'HH':
+			return A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('time-picker')
+					]),
+				_List_fromArray(
+					[
+						$PanagiotisGeorgiadis$elm_datepicker$TimePicker$Internal$View$hourPicker(model)
+					]));
+		case 'HH_MM':
+			return A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('time-picker')
+					]),
+				_List_fromArray(
+					[
+						$PanagiotisGeorgiadis$elm_datepicker$TimePicker$Internal$View$hourPicker(model),
+						$PanagiotisGeorgiadis$elm_datepicker$TimePicker$Internal$View$timeSegmentSeparator,
+						$PanagiotisGeorgiadis$elm_datepicker$TimePicker$Internal$View$minutePicker(model)
+					]));
+		case 'HH_MM_SS':
+			return A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('time-picker')
+					]),
+				_List_fromArray(
+					[
+						$PanagiotisGeorgiadis$elm_datepicker$TimePicker$Internal$View$hourPicker(model),
+						$PanagiotisGeorgiadis$elm_datepicker$TimePicker$Internal$View$timeSegmentSeparator,
+						$PanagiotisGeorgiadis$elm_datepicker$TimePicker$Internal$View$minutePicker(model),
+						$PanagiotisGeorgiadis$elm_datepicker$TimePicker$Internal$View$timeSegmentSeparator,
+						$PanagiotisGeorgiadis$elm_datepicker$TimePicker$Internal$View$secondsPicker(model)
+					]));
+		default:
+			return A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('time-picker')
+					]),
+				_List_fromArray(
+					[
+						$PanagiotisGeorgiadis$elm_datepicker$TimePicker$Internal$View$hourPicker(model),
+						$PanagiotisGeorgiadis$elm_datepicker$TimePicker$Internal$View$timeSegmentSeparator,
+						$PanagiotisGeorgiadis$elm_datepicker$TimePicker$Internal$View$minutePicker(model),
+						$PanagiotisGeorgiadis$elm_datepicker$TimePicker$Internal$View$timeSegmentSeparator,
+						$PanagiotisGeorgiadis$elm_datepicker$TimePicker$Internal$View$secondsPicker(model),
+						$PanagiotisGeorgiadis$elm_datepicker$TimePicker$Internal$View$millisSegmentSeparator,
+						$PanagiotisGeorgiadis$elm_datepicker$TimePicker$Internal$View$millisecondsPicker(model)
+					]));
+	}
+};
+var $PanagiotisGeorgiadis$elm_datepicker$TimePicker$View$view = $PanagiotisGeorgiadis$elm_datepicker$TimePicker$Internal$View$view;
+var $PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$View$doubleClockView = function (_v0) {
+	var range = _v0.a.range;
+	var timePickers = _v0.a.timePickers;
+	var viewType = _v0.a.viewType;
+	var i18n = _v0.a.i18n;
+	if (timePickers.$ === 'TimePickers') {
+		var timePickers_ = timePickers.a;
+		var startPicker = timePickers_.startPicker;
+		var endPicker = timePickers_.endPicker;
+		var mirrorTimes = timePickers_.mirrorTimes;
+		var titleHtml = function (str) {
+			return $elm$core$String$isEmpty(str) ? $elm$html$Html$text('') : A2(
+				$elm$html$Html$span,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('header')
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text(str)
+					]));
+		};
+		var pickerTypeString = function () {
+			if (viewType.$ === 'SingleCalendar') {
+				return $PanagiotisGeorgiadis$elm_datepicker$TimePicker$Update$getPickerTypeString(startPicker);
+			} else {
+				return '';
+			}
+		}();
+		var displayDateHtml = F2(
+			function (date, timePicker) {
+				if (date.$ === 'Just') {
+					var d = date.a;
+					var dateTimeStr = A2(
+						$elm$core$String$join,
+						' ',
+						_List_fromArray(
+							[
+								A2($PanagiotisGeorgiadis$elm_datepicker$Utils$Time$toHumanReadableDate, i18n, d),
+								$PanagiotisGeorgiadis$elm_datepicker$TimePicker$Update$toHumanReadableTime(timePicker)
+							]));
+					return A2(
+						$elm$html$Html$span,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$class('date')
+							]),
+						_List_fromArray(
+							[
+								$elm$html$Html$text(dateTimeStr)
+							]));
+				} else {
+					return A2(
+						$elm$html$Html$span,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$class('placeholder')
+							]),
+						_List_Nil);
+				}
+			});
+		var _v2 = function () {
+			if ((range.$ === 'BothSelected') && (range.a.$ === 'Chosen')) {
+				var _v4 = range.a;
+				var start = _v4.a;
+				var end = _v4.b;
+				return _Utils_Tuple2(
+					$elm$core$Maybe$Just(start),
+					$elm$core$Maybe$Just(end));
+			} else {
+				return _Utils_Tuple2($elm$core$Maybe$Nothing, $elm$core$Maybe$Nothing);
+			}
+		}();
+		var rangeStart = _v2.a;
+		var rangeEnd = _v2.b;
+		return A2(
+			$elm$html$Html$div,
+			_List_fromArray(
+				[
+					$elm$html$Html$Attributes$class('double-clock-view ' + pickerTypeString)
+				]),
+			_List_fromArray(
+				[
+					A2(
+					$elm$html$Html$div,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$class('time-picker-container no-select')
+						]),
+					_List_fromArray(
+						[
+							titleHtml(timePickers_.i18n.start),
+							A2(displayDateHtml, rangeStart, startPicker),
+							A2(
+							$elm$html$Html$map,
+							$PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$Update$RangeStartPickerMsg,
+							$PanagiotisGeorgiadis$elm_datepicker$TimePicker$View$view(startPicker)),
+							A2(
+							$elm$html$Html$div,
+							_List_fromArray(
+								[
+									$elm$html$Html$Attributes$class('checkbox'),
+									$elm$html$Html$Events$onClick($PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$Update$ToggleTimeMirroring)
+								]),
+							_List_fromArray(
+								[
+									A2(
+									$PanagiotisGeorgiadis$elm_datepicker$Icons$checkbox,
+									A2($PanagiotisGeorgiadis$elm_datepicker$Icons$Size, '16', '16'),
+									mirrorTimes),
+									A2(
+									$elm$html$Html$span,
+									_List_fromArray(
+										[
+											$elm$html$Html$Attributes$class('text')
+										]),
+									_List_fromArray(
+										[
+											$elm$html$Html$text(timePickers_.i18n.checkboxText)
+										]))
+								]))
+						])),
+					A2(
+					$elm$html$Html$div,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$class('time-picker-container no-select')
+						]),
+					_List_fromArray(
+						[
+							titleHtml(timePickers_.i18n.end),
+							A2(displayDateHtml, rangeEnd, endPicker),
+							A2(
+							$elm$html$Html$map,
+							$PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$Update$RangeEndPickerMsg,
+							$PanagiotisGeorgiadis$elm_datepicker$TimePicker$View$view(endPicker)),
+							A2(
+							$elm$html$Html$div,
+							_List_fromArray(
+								[
+									$elm$html$Html$Attributes$class('filler')
+								]),
+							_List_Nil)
+						])),
+					function () {
+					if (viewType.$ === 'DoubleTimePicker') {
+						return A2(
+							$elm$html$Html$div,
+							_List_fromArray(
+								[
+									$elm$html$Html$Attributes$class('switch-view-button'),
+									$elm$html$Html$Events$onClick($PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$Update$ShowCalendarView)
+								]),
+							_List_fromArray(
+								[
+									A2(
+									$PanagiotisGeorgiadis$elm_datepicker$Icons$chevron,
+									$PanagiotisGeorgiadis$elm_datepicker$Icons$Left,
+									A2($PanagiotisGeorgiadis$elm_datepicker$Icons$Size, '20', '20'))
+								]));
+					} else {
+						return $elm$html$Html$text('');
+					}
+				}()
+				]));
+	} else {
+		return $elm$html$Html$text('');
+	}
+};
+var $PanagiotisGeorgiadis$elm_datepicker$MonthPicker$singleMonthPickerView = function (_v0) {
+	var date = _v0.date;
+	var previousButtonHandler = _v0.previousButtonHandler;
+	var nextButtonHandler = _v0.nextButtonHandler;
+	var todayButtonHandler = _v0.todayButtonHandler;
+	var i18n = _v0.i18n;
+	var previousButtonHtml = function () {
+		if (previousButtonHandler.$ === 'Just') {
+			var action = previousButtonHandler.a;
+			return A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('action'),
+						$elm$html$Html$Events$onClick(action)
+					]),
+				_List_fromArray(
+					[
+						A2(
+						$PanagiotisGeorgiadis$elm_datepicker$Icons$triangle,
+						$PanagiotisGeorgiadis$elm_datepicker$Icons$Left,
+						A2($PanagiotisGeorgiadis$elm_datepicker$Icons$Size, '15', '15'))
+					]));
+		} else {
+			return A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('action disabled')
+					]),
+				_List_fromArray(
+					[
+						A2(
+						$PanagiotisGeorgiadis$elm_datepicker$Icons$triangle,
+						$PanagiotisGeorgiadis$elm_datepicker$Icons$Left,
+						A2($PanagiotisGeorgiadis$elm_datepicker$Icons$Size, '15', '15'))
+					]));
+		}
+	}();
+	var nextButtonHtml = function () {
+		if (nextButtonHandler.$ === 'Just') {
+			var action = nextButtonHandler.a;
+			return A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('action'),
+						$elm$html$Html$Events$onClick(action)
+					]),
+				_List_fromArray(
+					[
+						A2(
+						$PanagiotisGeorgiadis$elm_datepicker$Icons$triangle,
+						$PanagiotisGeorgiadis$elm_datepicker$Icons$Right,
+						A2($PanagiotisGeorgiadis$elm_datepicker$Icons$Size, '15', '15'))
+					]));
+		} else {
+			return A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('action disabled')
+					]),
+				_List_fromArray(
+					[
+						A2(
+						$PanagiotisGeorgiadis$elm_datepicker$Icons$triangle,
+						$PanagiotisGeorgiadis$elm_datepicker$Icons$Right,
+						A2($PanagiotisGeorgiadis$elm_datepicker$Icons$Size, '15', '15'))
+					]));
+		}
+	}();
+	return A2(
+		$elm$html$Html$div,
+		_List_fromArray(
+			[
+				$elm$html$Html$Attributes$class('single-month-picker')
+			]),
+		_List_fromArray(
+			[
+				previousButtonHtml,
+				A2(
+				$elm$html$Html$span,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('month-name')
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text(
+						A2($PanagiotisGeorgiadis$elm_datepicker$MonthPicker$monthPickerText, i18n, date))
+					])),
+				nextButtonHtml,
+				A2($PanagiotisGeorgiadis$elm_datepicker$MonthPicker$todayButtonHtml, i18n.todayButtonText, todayButtonHandler)
+			]));
+};
+var $PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$View$singleCalendarView = function (model) {
+	var today = model.a.today;
+	var primaryDate = model.a.primaryDate;
+	var dateLimit = model.a.dateLimit;
+	var i18n = model.a.i18n;
+	var _v0 = function () {
+		if (dateLimit.$ === 'DateLimit') {
+			var minDate = dateLimit.a.minDate;
+			var maxDate = dateLimit.a.maxDate;
+			return _Utils_Tuple3(
+				_Utils_eq(
+					A2($PanagiotisGeorgiadis$elm_datepicker$Utils$DateTime$compareYearMonth, minDate, primaryDate),
+					$elm$core$Basics$LT),
+				_Utils_eq(
+					A2($PanagiotisGeorgiadis$elm_datepicker$Utils$DateTime$compareYearMonth, maxDate, primaryDate),
+					$elm$core$Basics$GT),
+				_Utils_eq(
+					A2($PanagiotisGeorgiadis$elm_datepicker$Utils$DateTime$compareYearMonth, minDate, today),
+					$elm$core$Basics$LT) && _Utils_eq(
+					A2($PanagiotisGeorgiadis$elm_datepicker$Utils$DateTime$compareYearMonth, maxDate, today),
+					$elm$core$Basics$GT));
+		} else {
+			return _Utils_Tuple3(true, true, true);
+		}
+	}();
+	var isPreviousButtonActive = _v0.a;
+	var isNextButtonActive = _v0.b;
+	var isTodayButtonActive = _v0.c;
+	var pickerConfig = {
+		date: primaryDate,
+		i18n: i18n,
+		nextButtonHandler: $PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$View$getNextButtonAction(isNextButtonActive),
+		previousButtonHandler: $PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$View$getPreviousButtonAction(isPreviousButtonActive),
+		todayButtonHandler: $PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$View$getTodayButtonAction(isTodayButtonActive)
+	};
+	return A2(
+		$elm$html$Html$div,
+		_List_fromArray(
+			[
+				$elm$html$Html$Attributes$class('single-calendar-view no-select'),
+				$elm$html$Html$Events$onMouseLeave($PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$Update$ResetVisualSelection)
+			]),
+		_List_fromArray(
+			[
+				$PanagiotisGeorgiadis$elm_datepicker$MonthPicker$singleMonthPickerView(pickerConfig),
+				$PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$View$calendarView(model)
+			]));
+};
+var $PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$View$view = function (model) {
+	var viewType = model.a.viewType;
+	return A2(
+		$elm$html$Html$div,
+		_List_fromArray(
+			[
+				$elm$html$Html$Attributes$class('date-range-picker')
+			]),
+		function () {
+			switch (viewType.$) {
+				case 'SingleCalendar':
+					return _List_fromArray(
+						[
+							$PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$View$singleCalendarView(model),
+							$PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$View$doubleClockView(model)
+						]);
+				case 'DoubleCalendar':
+					return _List_fromArray(
+						[
+							$PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$View$doubleCalendarView(model)
+						]);
+				default:
+					return _List_fromArray(
+						[
+							$PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$View$doubleClockView(model)
+						]);
+			}
+		}());
+};
+var $PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$view = $PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$Internal$View$view;
+var $author$project$Components$Double$DateRangePicker$view = function (_v0) {
+	var picker = _v0.picker;
+	var selectedRange = _v0.selectedRange;
+	return A2(
+		$elm$html$Html$div,
+		_List_fromArray(
+			[
+				$elm$html$Html$Attributes$class('section')
+			]),
+		_List_fromArray(
+			[
+				A2(
+				$elm$html$Html$h3,
+				_List_Nil,
+				_List_fromArray(
+					[
+						$elm$html$Html$text('Double Date Range Picker')
+					])),
+				A2(
+				$elm$html$Html$map,
+				$author$project$Components$Double$DateRangePicker$PickerMsg,
+				$PanagiotisGeorgiadis$elm_datepicker$DateRangePicker$view(picker)),
+				A2($elm$html$Html$br, _List_Nil, _List_Nil),
+				function () {
+				if (selectedRange.$ === 'Just') {
+					var startDate = selectedRange.a.startDate;
+					var endDate = selectedRange.a.endDate;
+					return A2(
+						$elm$html$Html$div,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$class('footer')
+							]),
+						_List_fromArray(
+							[
+								A2(
+								$elm$html$Html$span,
+								_List_fromArray(
+									[
+										$elm$html$Html$Attributes$class('text')
+									]),
+								_List_fromArray(
+									[
+										$elm$html$Html$text('Selected Date Range: ')
+									])),
+								A2(
+								$elm$html$Html$span,
+								_List_fromArray(
+									[
+										$elm$html$Html$Attributes$class('date')
+									]),
+								_List_fromArray(
+									[
+										$elm$html$Html$text(
+										$author$project$Extra$DateTime$toString(startDate))
+									])),
+								A2(
+								$elm$html$Html$span,
+								_List_fromArray(
+									[
+										$elm$html$Html$Attributes$class('separator')
+									]),
+								_List_fromArray(
+									[
+										$elm$html$Html$text('—')
+									])),
+								A2(
+								$elm$html$Html$span,
+								_List_fromArray(
+									[
+										$elm$html$Html$Attributes$class('date')
+									]),
+								_List_fromArray(
+									[
+										$elm$html$Html$text(
+										$author$project$Extra$DateTime$toString(endDate))
+									]))
+							]));
+				} else {
+					return A2(
+						$elm$html$Html$div,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$class('footer')
+							]),
+						_List_fromArray(
+							[
+								$elm$html$Html$text('No \"selected range\" yet')
+							]));
+				}
+			}()
+			]));
+};
 var $mdgriffith$elm_ui$Internal$Model$SpacingStyle = F3(
 	function (a, b, c) {
 		return {$: 'SpacingStyle', a: a, b: b, c: c};
@@ -13796,13 +18552,13 @@ var $mdgriffith$elm_ui$Element$wrappedRow = F2(
 	});
 var $author$project$App$viewFilters = function (model) {
 	var usersFilter = function () {
-		var _v6 = model.users;
-		if (_v6.$ === 'Just') {
-			var users = _v6.a;
+		var _v7 = model.users;
+		if (_v7.$ === 'Just') {
+			var users = _v7.a;
 			var selected = function (user) {
-				var _v8 = model.filter.user;
-				if (_v8.$ === 'Just') {
-					var userF = _v8.a;
+				var _v9 = model.filter.user;
+				if (_v9.$ === 'Just') {
+					var userF = _v9.a;
 					return $elm$html$Html$Attributes$selected(
 						_Utils_eq(user, userF));
 				} else {
@@ -13811,8 +18567,8 @@ var $author$project$App$viewFilters = function (model) {
 			};
 			var options = A2(
 				$elm$core$List$map,
-				function (_v7) {
-					var u = _v7.b;
+				function (_v8) {
+					var u = _v8.b;
 					return A2(
 						$elm$html$Html$option,
 						_List_fromArray(
@@ -13855,13 +18611,13 @@ var $author$project$App$viewFilters = function (model) {
 		}
 	}();
 	var statusesFilter = function () {
-		var _v3 = model.statuses;
-		if (_v3.$ === 'Just') {
-			var statuses = _v3.a;
+		var _v4 = model.statuses;
+		if (_v4.$ === 'Just') {
+			var statuses = _v4.a;
 			var selected = function (status) {
-				var _v5 = model.filter.status;
-				if (_v5.$ === 'Just') {
-					var statusF = _v5.a;
+				var _v6 = model.filter.status;
+				if (_v6.$ === 'Just') {
+					var statusF = _v6.a;
 					return $elm$html$Html$Attributes$selected(
 						_Utils_eq(status, statusF));
 				} else {
@@ -13870,8 +18626,8 @@ var $author$project$App$viewFilters = function (model) {
 			};
 			var options0 = A2(
 				$elm$core$List$map,
-				function (_v4) {
-					var u = _v4.b;
+				function (_v5) {
+					var u = _v5.b;
 					return A2(
 						$elm$html$Html$option,
 						_List_fromArray(
@@ -13928,13 +18684,13 @@ var $author$project$App$viewFilters = function (model) {
 		}
 	}();
 	var mastersFilter = function () {
-		var _v0 = model.masters;
-		if (_v0.$ === 'Just') {
-			var masters = _v0.a;
+		var _v1 = model.masters;
+		if (_v1.$ === 'Just') {
+			var masters = _v1.a;
 			var selected = function (master) {
-				var _v2 = model.filter.master;
-				if (_v2.$ === 'Just') {
-					var masterF = _v2.a;
+				var _v3 = model.filter.master;
+				if (_v3.$ === 'Just') {
+					var masterF = _v3.a;
 					return $elm$html$Html$Attributes$selected(
 						_Utils_eq(master, masterF));
 				} else {
@@ -13943,8 +18699,8 @@ var $author$project$App$viewFilters = function (model) {
 			};
 			var options0 = A2(
 				$elm$core$List$map,
-				function (_v1) {
-					var u = _v1.b;
+				function (_v2) {
+					var u = _v2.b;
 					return A2(
 						$elm$html$Html$option,
 						_List_fromArray(
@@ -13978,7 +18734,9 @@ var $author$project$App$viewFilters = function (model) {
 				$mdgriffith$elm_ui$Element$el,
 				_List_fromArray(
 					[
-						$mdgriffith$elm_ui$Element$padding(10)
+						$mdgriffith$elm_ui$Element$padding(10),
+						$mdgriffith$elm_ui$Element$htmlAttribute(
+						$elm$html$Html$Attributes$class('picker-row'))
 					]),
 				$mdgriffith$elm_ui$Element$html(
 					A2(
@@ -14000,11 +18758,36 @@ var $author$project$App$viewFilters = function (model) {
 				$mdgriffith$elm_ui$Element$text('Фильтр мастеров не доступен'));
 		}
 	}();
+	var createdAtFilter = function () {
+		var _v0 = model.created_at_picker;
+		if (_v0.$ === 'Just') {
+			var picker = _v0.a;
+			return A2(
+				$mdgriffith$elm_ui$Element$el,
+				_List_fromArray(
+					[
+						$mdgriffith$elm_ui$Element$padding(10)
+					]),
+				$mdgriffith$elm_ui$Element$html(
+					A2(
+						$elm$html$Html$map,
+						$author$project$App$CreatedAtPickerMsg,
+						$author$project$Components$Double$DateRangePicker$view(picker))));
+		} else {
+			return A2(
+				$mdgriffith$elm_ui$Element$el,
+				_List_fromArray(
+					[
+						$mdgriffith$elm_ui$Element$padding(10)
+					]),
+				$mdgriffith$elm_ui$Element$text('Выбор даты создания заявки не инициализирован!'));
+		}
+	}();
 	return A2(
 		$mdgriffith$elm_ui$Element$wrappedRow,
 		_List_Nil,
 		_List_fromArray(
-			[usersFilter, statusesFilter, mastersFilter]));
+			[usersFilter, statusesFilter, mastersFilter, createdAtFilter]));
 };
 var $mdgriffith$elm_ui$Internal$Model$Class = F2(
 	function (a, b) {
@@ -14052,22 +18835,6 @@ var $mdgriffith$elm_ui$Element$Input$hasFocusStyle = function (attr) {
 };
 var $mdgriffith$elm_ui$Element$Input$focusDefault = function (attrs) {
 	return A2($elm$core$List$any, $mdgriffith$elm_ui$Element$Input$hasFocusStyle, attrs) ? $mdgriffith$elm_ui$Internal$Model$NoAttribute : $mdgriffith$elm_ui$Internal$Model$htmlClass('focusable');
-};
-var $elm$virtual_dom$VirtualDom$Normal = function (a) {
-	return {$: 'Normal', a: a};
-};
-var $elm$html$Html$Events$on = F2(
-	function (event, decoder) {
-		return A2(
-			$elm$virtual_dom$VirtualDom$on,
-			event,
-			$elm$virtual_dom$VirtualDom$Normal(decoder));
-	});
-var $elm$html$Html$Events$onClick = function (msg) {
-	return A2(
-		$elm$html$Html$Events$on,
-		'click',
-		$elm$json$Json$Decode$succeed(msg));
 };
 var $mdgriffith$elm_ui$Element$Events$onClick = A2($elm$core$Basics$composeL, $mdgriffith$elm_ui$Internal$Model$Attr, $elm$html$Html$Events$onClick);
 var $elm$virtual_dom$VirtualDom$MayPreventDefault = function (a) {
@@ -14258,7 +19025,6 @@ var $mdgriffith$elm_ui$Element$Font$color = function (fontColor) {
 			'color',
 			fontColor));
 };
-var $elm$time$Time$Mon = {$: 'Mon'};
 var $CoderDennis$elm_time_format$Time$Format$I18n$I_ru_ru$dayName = function (day) {
 	switch (day.$) {
 		case 'Mon':
@@ -14391,15 +19157,6 @@ var $CoderDennis$elm_time_format$Time$Format$formatRegex = A2(
 	$elm$core$Maybe$withDefault,
 	$elm$regex$Regex$never,
 	$elm$regex$Regex$fromString('%(y|Y|m|_m|-m|B|^B|b|^b|d|-d|-@d|e|@e|A|^A|a|^a|H|-H|k|I|-I|l|p|P|M|S|%|L)'));
-var $elm$core$Maybe$andThen = F2(
-	function (callback, maybeValue) {
-		if (maybeValue.$ === 'Just') {
-			var value = maybeValue.a;
-			return callback(value);
-		} else {
-			return $elm$core$Maybe$Nothing;
-		}
-	});
 var $CoderDennis$elm_time_format$Time$Format$collapse = function (m) {
 	return A2($elm$core$Maybe$andThen, $elm$core$Basics$identity, m);
 };
@@ -14481,185 +19238,7 @@ var $elm$core$String$right = F2(
 			$elm$core$String$length(string),
 			string);
 	});
-var $elm$time$Time$flooredDiv = F2(
-	function (numerator, denominator) {
-		return $elm$core$Basics$floor(numerator / denominator);
-	});
-var $elm$time$Time$posixToMillis = function (_v0) {
-	var millis = _v0.a;
-	return millis;
-};
-var $elm$time$Time$toAdjustedMinutesHelp = F3(
-	function (defaultOffset, posixMinutes, eras) {
-		toAdjustedMinutesHelp:
-		while (true) {
-			if (!eras.b) {
-				return posixMinutes + defaultOffset;
-			} else {
-				var era = eras.a;
-				var olderEras = eras.b;
-				if (_Utils_cmp(era.start, posixMinutes) < 0) {
-					return posixMinutes + era.offset;
-				} else {
-					var $temp$defaultOffset = defaultOffset,
-						$temp$posixMinutes = posixMinutes,
-						$temp$eras = olderEras;
-					defaultOffset = $temp$defaultOffset;
-					posixMinutes = $temp$posixMinutes;
-					eras = $temp$eras;
-					continue toAdjustedMinutesHelp;
-				}
-			}
-		}
-	});
-var $elm$time$Time$toAdjustedMinutes = F2(
-	function (_v0, time) {
-		var defaultOffset = _v0.a;
-		var eras = _v0.b;
-		return A3(
-			$elm$time$Time$toAdjustedMinutesHelp,
-			defaultOffset,
-			A2(
-				$elm$time$Time$flooredDiv,
-				$elm$time$Time$posixToMillis(time),
-				60000),
-			eras);
-	});
-var $elm$time$Time$toCivil = function (minutes) {
-	var rawDay = A2($elm$time$Time$flooredDiv, minutes, 60 * 24) + 719468;
-	var era = (((rawDay >= 0) ? rawDay : (rawDay - 146096)) / 146097) | 0;
-	var dayOfEra = rawDay - (era * 146097);
-	var yearOfEra = ((((dayOfEra - ((dayOfEra / 1460) | 0)) + ((dayOfEra / 36524) | 0)) - ((dayOfEra / 146096) | 0)) / 365) | 0;
-	var dayOfYear = dayOfEra - (((365 * yearOfEra) + ((yearOfEra / 4) | 0)) - ((yearOfEra / 100) | 0));
-	var mp = (((5 * dayOfYear) + 2) / 153) | 0;
-	var month = mp + ((mp < 10) ? 3 : (-9));
-	var year = yearOfEra + (era * 400);
-	return {
-		day: (dayOfYear - ((((153 * mp) + 2) / 5) | 0)) + 1,
-		month: month,
-		year: year + ((month <= 2) ? 1 : 0)
-	};
-};
-var $elm$time$Time$toDay = F2(
-	function (zone, time) {
-		return $elm$time$Time$toCivil(
-			A2($elm$time$Time$toAdjustedMinutes, zone, time)).day;
-	});
-var $elm$time$Time$toHour = F2(
-	function (zone, time) {
-		return A2(
-			$elm$core$Basics$modBy,
-			24,
-			A2(
-				$elm$time$Time$flooredDiv,
-				A2($elm$time$Time$toAdjustedMinutes, zone, time),
-				60));
-	});
-var $elm$time$Time$toMillis = F2(
-	function (_v0, time) {
-		return A2(
-			$elm$core$Basics$modBy,
-			1000,
-			$elm$time$Time$posixToMillis(time));
-	});
-var $elm$time$Time$toMinute = F2(
-	function (zone, time) {
-		return A2(
-			$elm$core$Basics$modBy,
-			60,
-			A2($elm$time$Time$toAdjustedMinutes, zone, time));
-	});
-var $elm$time$Time$Apr = {$: 'Apr'};
-var $elm$time$Time$Aug = {$: 'Aug'};
-var $elm$time$Time$Dec = {$: 'Dec'};
-var $elm$time$Time$Feb = {$: 'Feb'};
-var $elm$time$Time$Jan = {$: 'Jan'};
-var $elm$time$Time$Jul = {$: 'Jul'};
-var $elm$time$Time$Jun = {$: 'Jun'};
-var $elm$time$Time$Mar = {$: 'Mar'};
-var $elm$time$Time$May = {$: 'May'};
-var $elm$time$Time$Nov = {$: 'Nov'};
-var $elm$time$Time$Oct = {$: 'Oct'};
-var $elm$time$Time$Sep = {$: 'Sep'};
-var $elm$time$Time$toMonth = F2(
-	function (zone, time) {
-		var _v0 = $elm$time$Time$toCivil(
-			A2($elm$time$Time$toAdjustedMinutes, zone, time)).month;
-		switch (_v0) {
-			case 1:
-				return $elm$time$Time$Jan;
-			case 2:
-				return $elm$time$Time$Feb;
-			case 3:
-				return $elm$time$Time$Mar;
-			case 4:
-				return $elm$time$Time$Apr;
-			case 5:
-				return $elm$time$Time$May;
-			case 6:
-				return $elm$time$Time$Jun;
-			case 7:
-				return $elm$time$Time$Jul;
-			case 8:
-				return $elm$time$Time$Aug;
-			case 9:
-				return $elm$time$Time$Sep;
-			case 10:
-				return $elm$time$Time$Oct;
-			case 11:
-				return $elm$time$Time$Nov;
-			default:
-				return $elm$time$Time$Dec;
-		}
-	});
-var $elm$time$Time$toSecond = F2(
-	function (_v0, time) {
-		return A2(
-			$elm$core$Basics$modBy,
-			60,
-			A2(
-				$elm$time$Time$flooredDiv,
-				$elm$time$Time$posixToMillis(time),
-				1000));
-	});
 var $elm$core$String$toUpper = _String_toUpper;
-var $elm$time$Time$Fri = {$: 'Fri'};
-var $elm$time$Time$Sat = {$: 'Sat'};
-var $elm$time$Time$Sun = {$: 'Sun'};
-var $elm$time$Time$Thu = {$: 'Thu'};
-var $elm$time$Time$Tue = {$: 'Tue'};
-var $elm$time$Time$Wed = {$: 'Wed'};
-var $elm$time$Time$toWeekday = F2(
-	function (zone, time) {
-		var _v0 = A2(
-			$elm$core$Basics$modBy,
-			7,
-			A2(
-				$elm$time$Time$flooredDiv,
-				A2($elm$time$Time$toAdjustedMinutes, zone, time),
-				60 * 24));
-		switch (_v0) {
-			case 0:
-				return $elm$time$Time$Thu;
-			case 1:
-				return $elm$time$Time$Fri;
-			case 2:
-				return $elm$time$Time$Sat;
-			case 3:
-				return $elm$time$Time$Sun;
-			case 4:
-				return $elm$time$Time$Mon;
-			case 5:
-				return $elm$time$Time$Tue;
-			default:
-				return $elm$time$Time$Wed;
-		}
-	});
-var $elm$time$Time$toYear = F2(
-	function (zone, time) {
-		return $elm$time$Time$toCivil(
-			A2($elm$time$Time$toAdjustedMinutes, zone, time)).year;
-	});
 var $CoderDennis$elm_time_format$Time$Format$TwelveHourClock$AM = {$: 'AM'};
 var $CoderDennis$elm_time_format$Time$Format$TwelveHourClock$PM = {$: 'PM'};
 var $CoderDennis$elm_time_format$Time$Format$TwelveHourClock$twelveHourPeriod = F2(
@@ -14980,27 +19559,6 @@ var $mdgriffith$elm_ui$Internal$Model$Px = function (a) {
 	return {$: 'Px', a: a};
 };
 var $mdgriffith$elm_ui$Element$px = $mdgriffith$elm_ui$Internal$Model$Px;
-var $elm$core$List$repeatHelp = F3(
-	function (result, n, value) {
-		repeatHelp:
-		while (true) {
-			if (n <= 0) {
-				return result;
-			} else {
-				var $temp$result = A2($elm$core$List$cons, value, result),
-					$temp$n = n - 1,
-					$temp$value = value;
-				result = $temp$result;
-				n = $temp$n;
-				value = $temp$value;
-				continue repeatHelp;
-			}
-		}
-	});
-var $elm$core$List$repeat = F2(
-	function (n, value) {
-		return A3($elm$core$List$repeatHelp, _List_Nil, n, value);
-	});
 var $mdgriffith$elm_ui$Element$tableHelper = F2(
 	function (attrs, config) {
 		var onGrid = F3(
@@ -15158,11 +19716,6 @@ var $mdgriffith$elm_ui$Element$table = F2(
 			});
 	});
 var $mdgriffith$elm_ui$Element$Font$underline = $mdgriffith$elm_ui$Internal$Model$htmlClass($mdgriffith$elm_ui$Internal$Style$classes.underline);
-var $elm$time$Time$Zone = F2(
-	function (a, b) {
-		return {$: 'Zone', a: a, b: b};
-	});
-var $elm$time$Time$utc = A2($elm$time$Time$Zone, 0, _List_Nil);
 var $author$project$App$viewLeads = function (model) {
 	var _v0 = model.leads;
 	if (_v0.$ === 'Just') {
@@ -15618,7 +20171,12 @@ var $author$project$App$main = $elm$browser$Browser$element(
 				$author$project$App$initModel,
 				$elm$core$Platform$Cmd$batch(
 					_List_fromArray(
-						[$author$project$App$getUsers, $author$project$App$getPipelines, $author$project$App$getMasters])));
+						[
+							A2($elm$core$Task$perform, $author$project$App$InitialiseTime, $elm$time$Time$now),
+							$author$project$App$getUsers,
+							$author$project$App$getPipelines,
+							$author$project$App$getMasters
+						])));
 		},
 		subscriptions: function (_v1) {
 			return $elm$core$Platform$Sub$none;
