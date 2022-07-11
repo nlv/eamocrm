@@ -6472,7 +6472,7 @@ var $author$project$App$getUsers = $elm$http$Http$get(
 	});
 var $author$project$App$Success = {$: 'Success'};
 var $author$project$App$initModel = {
-	filter: {created_at_from: $elm$core$Maybe$Nothing, created_at_to: $elm$core$Maybe$Nothing, master: $elm$core$Maybe$Nothing, pipeline: $elm$core$Maybe$Nothing, status: $elm$core$Maybe$Nothing, user: $elm$core$Maybe$Nothing},
+	filter: {closed_date_from: $elm$core$Maybe$Nothing, closed_date_to: $elm$core$Maybe$Nothing, created_at_from: $elm$core$Maybe$Nothing, created_at_to: $elm$core$Maybe$Nothing, master: $elm$core$Maybe$Nothing, pipeline: $elm$core$Maybe$Nothing, status: $elm$core$Maybe$Nothing, user: $elm$core$Maybe$Nothing},
 	httpStatus: $author$project$App$Success,
 	leads: $elm$core$Maybe$Nothing,
 	masters: $elm$core$Maybe$Nothing,
@@ -7490,8 +7490,8 @@ var $elm$core$Maybe$withDefault = F2(
 			return _default;
 		}
 	});
-var $author$project$App$getLeads = F5(
-	function (user, status, master, created_at_from, created_at_to) {
+var $author$project$App$getLeads = F7(
+	function (user, status, master, created_at_from, created_at_to, closed_date_from, closed_date_to) {
 		var status2 = A2(
 			$elm$core$Maybe$withDefault,
 			'',
@@ -7528,10 +7528,28 @@ var $author$project$App$getLeads = F5(
 					return '&created_at_from=' + s;
 				},
 				created_at_from));
+		var closed_date_to2 = A2(
+			$elm$core$Maybe$withDefault,
+			'',
+			A2(
+				$elm$core$Maybe$map,
+				function (s) {
+					return '&closed_date_to=' + s;
+				},
+				closed_date_to));
+		var closed_date_from2 = A2(
+			$elm$core$Maybe$withDefault,
+			'',
+			A2(
+				$elm$core$Maybe$map,
+				function (s) {
+					return '&closed_date_from=' + s;
+				},
+				closed_date_from));
 		return $elm$http$Http$get(
 			{
 				expect: A2($elm$http$Http$expectJson, $author$project$App$GotLeads, $author$project$App$decodeLeads),
-				url: 'api/leads/?user=' + (user + (status2 + (master2 + (created_at_from2 + created_at_to2))))
+				url: 'api/leads/?user=' + (user + (status2 + (master2 + (created_at_from2 + (created_at_to2 + (closed_date_from2 + closed_date_to2))))))
 			});
 	});
 var $elm$core$List$head = function (list) {
@@ -7718,7 +7736,7 @@ var $author$project$App$update = F2(
 							{
 								httpStatus: $author$project$App$Loading('Получаем данные')
 							}),
-						A5($author$project$App$getLeads, user, model.filter.status, model.filter.master, model.filter.created_at_from, model.filter.created_at_to));
+						A7($author$project$App$getLeads, user, model.filter.status, model.filter.master, model.filter.created_at_from, model.filter.created_at_to, model.filter.closed_date_from, model.filter.closed_date_to));
 				} else {
 					return _Utils_Tuple2(
 						_Utils_update(
@@ -7743,7 +7761,7 @@ var $author$project$App$update = F2(
 							httpStatus: $author$project$App$Loading('Загружаем заявки...'),
 							leads: $elm$core$Maybe$Nothing
 						}),
-					A5($author$project$App$getLeads, user, model.filter.status, model.filter.status, model.filter.created_at_from, model.filter.created_at_to));
+					A7($author$project$App$getLeads, user, model.filter.status, model.filter.status, model.filter.created_at_from, model.filter.created_at_to, model.filter.closed_date_from, model.filter.closed_date_to));
 			case 'StatusSelected':
 				var status = action.a;
 				var status0 = (status === '') ? $elm$core$Maybe$Nothing : $elm$core$Maybe$Just(status);
@@ -7752,7 +7770,7 @@ var $author$project$App$update = F2(
 					var _v7 = model.filter.user;
 					if (_v7.$ === 'Just') {
 						var user = _v7.a;
-						return A5($author$project$App$getLeads, user, status0, model.filter.master, model.filter.created_at_from, model.filter.created_at_to);
+						return A7($author$project$App$getLeads, user, status0, model.filter.master, model.filter.created_at_from, model.filter.created_at_to, model.filter.closed_date_from, model.filter.closed_date_to);
 					} else {
 						return $elm$core$Platform$Cmd$none;
 					}
@@ -7776,7 +7794,7 @@ var $author$project$App$update = F2(
 					var _v8 = model.filter.user;
 					if (_v8.$ === 'Just') {
 						var user = _v8.a;
-						return A5($author$project$App$getLeads, user, model.filter.status, master0, model.filter.created_at_from, model.filter.created_at_to);
+						return A7($author$project$App$getLeads, user, model.filter.status, master0, model.filter.created_at_from, model.filter.created_at_to, model.filter.closed_date_from, model.filter.closed_date_to);
 					} else {
 						return $elm$core$Platform$Cmd$none;
 					}
@@ -7800,7 +7818,7 @@ var $author$project$App$update = F2(
 					var _v9 = model.filter.user;
 					if (_v9.$ === 'Just') {
 						var user = _v9.a;
-						return A5($author$project$App$getLeads, user, model.filter.status, model.filter.master, created_at_from0, model.filter.created_at_to);
+						return A7($author$project$App$getLeads, user, model.filter.status, model.filter.master, created_at_from0, model.filter.created_at_to, model.filter.closed_date_from, model.filter.closed_date_to);
 					} else {
 						return $elm$core$Platform$Cmd$none;
 					}
@@ -7816,7 +7834,7 @@ var $author$project$App$update = F2(
 							leads: $elm$core$Maybe$Nothing
 						}),
 					cmd);
-			default:
+			case 'CreatedAtToSelected':
 				var created_at_to = action.a;
 				var mfilter = model.filter;
 				var created_at_to0 = (created_at_to === '') ? $elm$core$Maybe$Nothing : $elm$core$Maybe$Just(created_at_to);
@@ -7824,7 +7842,7 @@ var $author$project$App$update = F2(
 					var _v10 = model.filter.user;
 					if (_v10.$ === 'Just') {
 						var user = _v10.a;
-						return A5($author$project$App$getLeads, user, model.filter.status, model.filter.master, model.filter.created_at_from, created_at_to0);
+						return A7($author$project$App$getLeads, user, model.filter.status, model.filter.master, model.filter.created_at_from, created_at_to0, model.filter.closed_date_from, model.filter.closed_date_to);
 					} else {
 						return $elm$core$Platform$Cmd$none;
 					}
@@ -7836,6 +7854,54 @@ var $author$project$App$update = F2(
 							filter: _Utils_update(
 								mfilter,
 								{created_at_to: created_at_to0}),
+							httpStatus: $author$project$App$Loading('Загружаем заявки...'),
+							leads: $elm$core$Maybe$Nothing
+						}),
+					cmd);
+			case 'ClosedDateFromSelected':
+				var closed_date_from = action.a;
+				var mfilter = model.filter;
+				var closed_date_from0 = (closed_date_from === '') ? $elm$core$Maybe$Nothing : $elm$core$Maybe$Just(closed_date_from);
+				var cmd = function () {
+					var _v11 = model.filter.user;
+					if (_v11.$ === 'Just') {
+						var user = _v11.a;
+						return A7($author$project$App$getLeads, user, model.filter.status, model.filter.master, model.filter.created_at_from, model.filter.created_at_to, closed_date_from0, model.filter.closed_date_to);
+					} else {
+						return $elm$core$Platform$Cmd$none;
+					}
+				}();
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							filter: _Utils_update(
+								mfilter,
+								{closed_date_from: closed_date_from0}),
+							httpStatus: $author$project$App$Loading('Загружаем заявки...'),
+							leads: $elm$core$Maybe$Nothing
+						}),
+					cmd);
+			default:
+				var closed_date_to = action.a;
+				var mfilter = model.filter;
+				var closed_date_to0 = (closed_date_to === '') ? $elm$core$Maybe$Nothing : $elm$core$Maybe$Just(closed_date_to);
+				var cmd = function () {
+					var _v12 = model.filter.user;
+					if (_v12.$ === 'Just') {
+						var user = _v12.a;
+						return A7($author$project$App$getLeads, user, model.filter.status, model.filter.master, model.filter.created_at_from, model.filter.created_at_to, model.filter.closed_date_from, closed_date_to0);
+					} else {
+						return $elm$core$Platform$Cmd$none;
+					}
+				}();
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							filter: _Utils_update(
+								mfilter,
+								{closed_date_to: closed_date_to0}),
 							httpStatus: $author$project$App$Loading('Загружаем заявки...'),
 							leads: $elm$core$Maybe$Nothing
 						}),
@@ -13567,6 +13633,12 @@ var $mdgriffith$elm_ui$Element$layoutWith = F3(
 	});
 var $mdgriffith$elm_ui$Element$layout = $mdgriffith$elm_ui$Element$layoutWith(
 	{options: _List_Nil});
+var $author$project$App$ClosedDateFromSelected = function (a) {
+	return {$: 'ClosedDateFromSelected', a: a};
+};
+var $author$project$App$ClosedDateToSelected = function (a) {
+	return {$: 'ClosedDateToSelected', a: a};
+};
 var $author$project$App$CreatedAtFromSelected = function (a) {
 	return {$: 'CreatedAtFromSelected', a: a};
 };
@@ -15085,11 +15157,57 @@ var $author$project$App$viewFilters = function (model) {
 					]),
 				{label: label, onChange: $author$project$App$CreatedAtFromSelected, placeholder: $elm$core$Maybe$Nothing, text: ''}));
 	}();
+	var closedDateToFilter = function () {
+		var val = A2($elm$core$Maybe$withDefault, '', model.filter.closed_date_to);
+		var label = A2(
+			$mdgriffith$elm_ui$Element$Input$labelAbove,
+			_List_Nil,
+			$mdgriffith$elm_ui$Element$text('Закрыто по'));
+		return A2(
+			$mdgriffith$elm_ui$Element$el,
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$padding(10)
+				]),
+			A2(
+				$mdgriffith$elm_ui$Element$Input$text,
+				_List_fromArray(
+					[
+						$mdgriffith$elm_ui$Element$htmlAttribute(
+						$elm$html$Html$Attributes$type_('date')),
+						$mdgriffith$elm_ui$Element$htmlAttribute(
+						$elm$html$Html$Attributes$value(val))
+					]),
+				{label: label, onChange: $author$project$App$ClosedDateToSelected, placeholder: $elm$core$Maybe$Nothing, text: ''}));
+	}();
+	var closedDateFromFilter = function () {
+		var val = A2($elm$core$Maybe$withDefault, '', model.filter.closed_date_from);
+		var label = A2(
+			$mdgriffith$elm_ui$Element$Input$labelAbove,
+			_List_Nil,
+			$mdgriffith$elm_ui$Element$text('Закрыто с'));
+		return A2(
+			$mdgriffith$elm_ui$Element$el,
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$padding(10)
+				]),
+			A2(
+				$mdgriffith$elm_ui$Element$Input$text,
+				_List_fromArray(
+					[
+						$mdgriffith$elm_ui$Element$htmlAttribute(
+						$elm$html$Html$Attributes$type_('date')),
+						$mdgriffith$elm_ui$Element$htmlAttribute(
+						$elm$html$Html$Attributes$value(val))
+					]),
+				{label: label, onChange: $author$project$App$ClosedDateFromSelected, placeholder: $elm$core$Maybe$Nothing, text: ''}));
+	}();
 	return A2(
 		$mdgriffith$elm_ui$Element$wrappedRow,
 		_List_Nil,
 		_List_fromArray(
-			[usersFilter, statusesFilter, mastersFilter, createdAtFromFilter, createdAtToFilter]));
+			[usersFilter, statusesFilter, mastersFilter, createdAtFromFilter, createdAtToFilter, closedDateFromFilter, closedDateToFilter]));
 };
 var $mdgriffith$elm_ui$Internal$Flag$borderStyle = $mdgriffith$elm_ui$Internal$Flag$flag(11);
 var $mdgriffith$elm_ui$Element$Border$solid = A2($mdgriffith$elm_ui$Internal$Model$Class, $mdgriffith$elm_ui$Internal$Flag$borderStyle, $mdgriffith$elm_ui$Internal$Style$classes.borderSolid);
